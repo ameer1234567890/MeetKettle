@@ -10,7 +10,7 @@ A meeting room booking web app
 * [better-sqlite3](href='https://www.npmjs.com/package/better-sqlite3') - Synchronous sqlite3 for Node.js.
 * [express-session](href='https://www.npmjs.com/package/express-session') - Simple session middleware for Express.
 
-#### Roadmap:
+#### Roadmap
 * Ability to specify meeting end time
 * Calendar layout of meetings
 * White-labelling
