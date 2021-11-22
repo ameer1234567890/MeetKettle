@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+
+  if !errors && !completeAlready
+    table.table.table-bordered.table-hover
+      thead
+        tr
+          th(scope='col') Field
+          th(scope='col') Value
+      tbody
+        tr
+          th(scope='row') User
+          td #{user}
+        tr
+          th(scope='row') Password
+          td ●●●●●●●●
+        tr
+          th(scope='row') Role
+          td #{role}
+        tr
+          th(scope='row') Branding
+          td MeetKettle
+
+    br
+
+  if !errors
+    br
+    a.btn.btn-success(href='/' role='button') Finish
+      i.fa.fa-check.mx-2
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

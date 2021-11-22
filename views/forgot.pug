@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  - var navPage = 'user'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+  
+  form(method='POST' action='/forgot')
+    .form-floating.mb-3
+      input#user.form-control(type='text' name='user' value=`${user}` placeholder=' ' required='required')
+      label.form-label(for='user') User
+        span.text-danger  *
+    button.btn.btn-primary(type='submit') Reset Password
+
+  br
+  
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg
+  if changes
+    ul.text-success
+      for change in changes
+        li!= change.msg

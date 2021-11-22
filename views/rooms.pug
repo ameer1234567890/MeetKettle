@@ -1,0 +1,185 @@
+extends layout
+
+block content
+  - var navPage = 'rooms'
+  a.navigate.btn.btn-primary.btn-circle-lg.float-end(href='/rooms/add' role='button')
+    i.fa.fa-plus.mx-2
+  h1 #{title}
+  p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
+
+  if !errors
+    table#table-rooms.tbl-responsive.table.table-bordered.table-hover
+      thead
+        tr
+          th(scope='col') Name
+          th(scope='col') Location
+          th(scope='col') Facilities
+          th(scope='col') Capacity
+          th(scope='col') Status
+          th(scope='col') Action
+      tbody
+        for room in rooms
+          tr(id='row' + room.id)
+            td #{room.name}
+            td #{room.location}
+            td
+              - var facilitiesArr = room.facilities.trim().split(' ');
+              for facility in facilitiesArr
+                span.badge.rounded-pill.bg-info.text-dark #{facility}
+                span &nbsp;
+            td #{room.capacity}
+            td
+              if room.oos == 0
+                | Active
+              else
+                | Inactive
+            td
+              span(data-bs-toggle='tooltip' data-bs-placement='top' title='Edit')
+                a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=room.id data-facilities=room.facilities)
+                  i.fa.fa-edit.fa-lg
+              span(data-bs-toggle='tooltip' data-bs-placement='top' title='Delete')
+                a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-delete' data-name=room.name data-id=room.id)
+                  i.fa.fa-trash.fa-lg
+    br
+
+    //- Pagination links
+    nav
+      ul.pagination.justify-content-center
+
+        //- First page link
+        if currentPage === 1
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-left
+        else
+          li.page-item
+            a.navigate.page-link(href='/rooms')
+              i.fa.fa-angle-double-left
+
+        //- Previous page link
+        - var prevPage = parseFloat(currentPage) - 1
+        if prevPage == 0
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-left
+        else
+          if prevPage == 1
+            li.page-item
+              a.navigate.page-link(href='/rooms')
+                i.fa.fa-angle-left
+          else
+            li.page-item
+              a.navigate.page-link(href='/rooms?page=' + prevPage)
+                i.fa.fa-angle-left
+
+        //- Page numbers
+        - var firstNumPage = parseFloat(currentPage) - 2
+        if firstNumPage < 1
+          - var firstNumPage = 1
+        - var lastNumPage = parseFloat(currentPage) + 2
+        if lastNumPage > numPages
+          - var lastNumPage = numPages
+        - var i = firstNumPage - 1
+        while i < lastNumPage
+          - i++
+          if i == currentPage
+            li.page-item.active
+              span.page-link #{i}
+          else
+            if i == 1
+              li.page-item
+                a.navigate.page-link(href='/rooms') #{i}
+            else
+              li.page-item
+                a.navigate.page-link(href='/rooms?page=' + i) #{i}
+
+        //- Next page link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-right
+        else
+          - var nextPage = parseFloat(currentPage) + 1
+          li.page-item
+            a.navigate.page-link(href='/rooms?page=' + nextPage)
+              i.fa.fa-angle-right
+
+        //- Last page link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-right
+        else
+          li.page-item
+            a.navigate.page-link(href='/rooms?page=' + numPages)
+              i.fa.fa-angle-double-right
+    
+    //- Modal for Edit
+    #modal-edit.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Edit
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#edit-form(method='POST' action='/rooms/edit')
+              input#id(type='hidden' name='id')
+              .form-floating.mb-3
+                input#name.form-control(type='text' name='name' value='' placeholder='Meeting Room 1' required='required')
+                label.form-label(for='name') Room Name
+                  span.text-danger  *
+              .form-floating.mb-3
+                input#location.form-control(type='text' name='location' value='' placeholder='Main Building' required='required')
+                label.form-label(for='location') Room Location
+                  span.text-danger  *
+              .mb-3
+                .me-3 Room Facilities: 
+                  for facility in facilityList
+                    .form-check.form-switch.form-check-inline.pe-3
+                      input.form-check-input(id='facility' + facility type='checkbox' name='facility' + facility)
+                      label.form-check-label(for='facility' + facility) #{facility.charAt(0).toUpperCase() + facility.slice(1)}
+              .form-floating.mb-3
+                input#capacity.form-control(type='number' name='capacity' value='' placeholder='10' required='required' min='1' max='999')
+                label.form-label(for='capacity') Room Capacity
+                  span.text-danger  *
+              .form-floating.mb-3
+                select#oos.form-select(name='oos')
+                  option(value='0') Active
+                  option(value='1') Out-of-Order
+                label.form-label(for='oos') Status
+                  span.text-danger  *
+            ul#edit-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='edit-form') Save
+              i.fa.fa-save.fa-fw.mx-2
+
+    //- Modal for Delete
+    #modal-delete.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Delete?
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#delete-form(method='POST' action='/rooms/delete')
+              input#delete-id(type='hidden' name='id')
+            p Are you sure you want to delete the room "
+              span#room-name-in-modal
+              | "?
+            ul#delete-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='delete-form') Yes
+              i.fa.fa-check.mx-2
+
+    script(src='/public/js/rooms.js')
+
+    br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  - var navPage = 'rooms'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+  
+  form(method='POST' action='/rooms/add')
+    .form-floating.mb-3
+      input#name.form-control(type='text' name='name' value=`${name}` placeholder='Meeting Room 1' required='required')
+      label.form-label(for='name') Room Name
+        span.text-danger  *
+    .form-floating.mb-3
+      input#location.form-control(type='text' name='location' value=`${location}` placeholder='Main Building' required='required')
+      label.form-label(for='location') Room Location
+        span.text-danger  *
+    .mb-3
+      span.me-3 Room Facilities: 
+      for facility in facilityList
+        .form-check.form-switch.form-check-inline.pe-3
+          input.form-check-input(id='facility' + facility type='checkbox' name='facility' + facility checked=(facilitiesStatus[facility]))
+          label.form-check-label(for='facility' + facility) #{facility.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+    .form-floating.mb-3
+      input#capacity.form-control(type='number' name='capacity' value=`${capacity}` placeholder='10' required='required' min='1' max='999')
+      label.form-label(for='capacity') Room Capacity
+        span.text-danger  *
+    button.navigate.btn.btn-primary(type='submit') Add
+      i.fa.fa-plus-circle.mx-2
+
+  br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

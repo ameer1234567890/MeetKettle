@@ -1,0 +1,48 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+
+  if !errors
+    table.table.table-bordered.table-hover
+      thead
+        tr
+          th(scope='col') Field
+          th(scope='col') Value
+      tbody
+        tr
+          th(scope='row') Date and Time
+          - var datetime = new Date(datetime).toLocaleString('en-GB')
+          td #{datetime}
+        tr
+          th(scope='row') Description
+          td #{description}
+        tr
+          th(scope='row') Meeting Room
+          for mroom in roomList
+            if mroom.id == room
+              td #{mroom.name}
+        tr
+          - var remarks = remarks.replaceAll('\r\n', '<br>').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/')
+          th(scope='row') Remarks
+          td!=`${remarks}`
+        tr
+          th(scope='row') Meeting Service
+          td #{service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+        tr
+          th(scope='row') Meeting Link
+          td #{link}
+
+    br
+
+  if !errors
+    br
+    a.btn.btn-success(href='/meetings' role='button') Finish
+      i.fa.fa-check.mx-2
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

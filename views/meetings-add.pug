@@ -1,0 +1,54 @@
+extends layout
+
+block content
+  - var navPage = 'meetings'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+  
+  form(method='POST' action='/meetings/add')
+    .form-floating.mb-3
+      input#datetime.form-control(type='datetime-local' name='datetime' value=`${datetime}` required='required')
+      label.form-label(for='datetime') Date and Time
+        span.text-danger  *
+    .form-floating.mb-3
+      input#description.form-control(type='text' name='description' value=`${description}` placeholder='' required='required')
+      label.form-label(for='description') Meeting Description
+        span.text-danger  *
+    .form-floating.mb-3
+      select#room.form-select(name='room' required='required')
+        option(disabled selected label=' ')
+        for mroom in roomList
+          if mroom.id == room
+            option(value=`${mroom.id}` selected='selected') #{mroom.name}
+          else
+            option(value=`${mroom.id}`) #{mroom.name}
+      label.form-label(for='room') Meeting Room
+        span.text-danger  *
+    .form-floating.mb-3
+      - var remarks = remarks.replaceAll('&amp;', '&').replaceAll('&#x2F;', '/')
+      textarea#remarks.form-control(name='remarks' placeholder='' style="height: 7rem") #{remarks}
+      label.form-label(for='remarks') Remarks
+    .form-floating.mb-3
+      select#service.form-select(name='service' required='required')
+        option(disabled selected label=' ')
+        for mservice in serviceList
+          if mservice == service
+            option(value=`${mservice}` selected='selected') #{mservice.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+          else
+            option(value=`${mservice}`) #{mservice.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+      label.form-label(for='service') Meeting Service
+        span.text-danger  *
+    .form-floating.mb-3
+      input#link.form-control(type='url' name='link' value=`${link}` placeholder='')
+      label.form-label(for='link') Meeting Link
+    button.navigate.btn.btn-primary(type='submit') Add
+      i.fa.fa-plus-circle.mx-2
+
+  br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg
+
+  script(src='/public/js/share.js')

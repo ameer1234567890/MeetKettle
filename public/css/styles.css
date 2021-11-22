@@ -1,0 +1,229 @@
+#toploader {
+  height: 0.5rem;
+}
+
+.navlogo {
+  vertical-align: bottom;
+}
+
+#nav-admin-dropdown {
+  list-style-type: none;
+}
+
+footer {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+footer p {
+  margin-bottom: .25rem;
+}
+
+.kiosk-color {
+  padding-bottom: 25rem;
+  border-radius: 0.4rem;
+}
+
+.bg-available {
+  background-color: #4caf50;
+}
+
+.bg-unavailable {
+  background-color: #e53935;
+}
+
+.kiosk-reserve-button {
+  margin-top: 16.5rem;
+}
+
+.btn-white {
+  background-color: #fff;
+  border-color: #e7eaf3;
+}
+
+.radius-15 {
+  border-radius: 0.5rem;
+}
+
+.rounded-circle {
+  height: 6.875rem;
+  width: 6.875rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1rem;
+}
+
+.action-buttons a {
+  font-size: 1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  line-height: 2.25rem;
+  background: #ffffff;
+  border: 0.063rem solid #eeecec;
+  box-shadow: 0 0.188rem 0.375rem rgba(0,0,0,0.16), 0 0.188rem 0.375rem rgba(0,0,0,0.23);
+  text-align: center;
+  border-radius: 50%;
+  color: #2b2a2a;
+}
+
+.action-buttons a:hover {
+  background: #a7bce4;
+  box-shadow: 0 0.588rem 0.875rem rgba(0,0,0,0.16), 0 0.188rem 0.375rem rgba(0,0,0,0.23);
+}
+
+.card-bg-color-one {
+  background-color: #007ac1;
+}
+
+.card-bg-color-two {
+  background-color: #5f4339;
+}
+
+.card-bg-color-three {
+  background-color: #4b636e;
+}
+
+.card-bg-color-four {
+  background-color: #bb4d00;
+}
+
+.card-bg-color-five {
+  background-color: #790e8b;
+}
+
+.card-bg-color-six {
+  background-color: #6c6f00;
+}
+
+.card-bg-color-seven {
+  background-color: #005662;
+}
+
+.card-bg-color-eight {
+  background-color: #8e0000;
+}
+
+.card {
+  box-shadow: 0 0.188rem 0.375rem rgba(0,0,0,0.16), 0 0.188rem 0.375rem rgba(0,0,0,0.23);
+}
+
+.btn-circle {
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0.375rem 0;
+  font-size: 0.75rem;
+  line-height: 1.428571429;
+  border-radius: 0.938rem;
+}
+
+.btn-circle-lg {
+  width: 3.125rem;
+  height: 3.125rem;
+  padding: 0.75rem 0.463rem;
+  font-size: 1.125rem;
+  line-height: 1.33;
+  border-radius: 1.563rem;
+}
+
+.btn-circle-xl {
+  width: 4.375rem;
+  height: 4.375rem;
+  padding: 0.625rem 1rem;
+  font-size: 1.5rem;
+  line-height: 1.95;
+  border-radius: 2.188rem;
+}
+
+.fade-transition {
+  transition: all 1s ease-in-out;
+}
+
+.list-group-item-input {
+  padding: 0;
+}
+
+.list-group-item-input > form > div > input.form-control,
+.list-group-item-input > form > div > button.btn {
+  height: 2.5rem;
+}
+
+.kiosk-select-room {
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 768px) {
+  td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 5rem;
+  }
+
+  .table th:nth-of-type(6) {
+    width: 7rem;
+  }
+
+  .table th:nth-of-type(n+4),
+  .table td:nth-of-type(n+4) {
+      text-align: center;
+  }
+}
+
+
+@media only screen and (max-width: 768px) {
+
+  /* Force table to not be like tables anymore */
+  table.tbl-responsive, .tbl-responsive thead, .tbl-responsive tbody, .tbl-responsive th, .tbl-responsive td, .tbl-responsive tr {
+    display: block;
+  }
+
+  /* Hide table headers (but not display: none;, for accessibility) */
+  .tbl-responsive thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .tbl-responsive tr { border: 0.1rem solid rgb(222, 226, 230); }
+
+  .tbl-responsive.table td { /* .table class for overriding bootstrap default styles (specifically padding-left)  */
+    /* Behave  like a "row" */
+    border: none;
+    border-bottom: 0.1rem solid rgb(222, 226, 230);
+    position: relative;
+    padding-left: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tbl-responsive td:before {
+    /* Now like a table header */
+    position: absolute;
+    /* left value mimics padding */
+    left: 0.5rem;
+    width: 45%;
+    padding-right: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Label the data */
+    #table-rooms td:nth-of-type(1):before { content: "Name"; }
+    #table-rooms td:nth-of-type(2):before { content: "Location"; }
+    #table-rooms td:nth-of-type(3):before { content: "Facilities"; }
+    #table-rooms td:nth-of-type(4):before { content: "Capacity"; }
+    #table-rooms td:nth-of-type(5):before { content: "Status"; }
+    #table-rooms td:nth-of-type(6):before { content: "Action"; }
+
+    #table-meetings td:nth-of-type(1):before { content: "Date and Time"; }
+    #table-meetings td:nth-of-type(2):before { content: "Description"; }
+    #table-meetings td:nth-of-type(3):before { content: "Meeting Room"; }
+    #table-meetings td:nth-of-type(4):before { content: "Meeting Service"; }
+    #table-meetings td:nth-of-type(5):before { content: "Action"; }
+
+    #table-users td:nth-of-type(1):before { content: "User ID"; }
+    #table-users td:nth-of-type(2):before { content: "Role"; }
+    #table-users td:nth-of-type(3):before { content: "Status"; }
+    #table-users td:nth-of-type(4):before { content: "Comment"; }
+    #table-users td:nth-of-type(5):before { content: "Action"; }
+}

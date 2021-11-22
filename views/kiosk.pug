@@ -1,0 +1,71 @@
+extends layout
+
+block content
+  - var navPage = 'kiosk'
+  h1 #{title}
+  p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
+
+  if !errors
+    ul#room-list.list-group
+      for room in rooms
+        li.kiosk-select-room.list-group-item.d-flex.justify-content-between.align-items-start.list-group-item-action(data-id=`${room.id}`)
+          .ms-2.me-auto
+            .fw-bold #{room.name}
+            |       #{room.location}
+          - var facilitiesArr = room.facilities.trim().split(' ');
+          for facility in facilitiesArr
+            span.badge.bg-primary.rounded-pill #{facility}
+            span.pe-1
+    br
+
+    //- Pagination links
+    nav
+      //- Previous link
+      ul.pagination.justify-content-center
+        - var prevPage = parseFloat(currentPage) - 1
+        if prevPage == 0
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-left
+        else
+          if prevPage == 1
+            li.page-item
+              a.page-link(href='/rooms')
+                i.fa.fa-angle-double-left
+          else
+            li.page-item
+              a.page-link(href='/rooms?page=' + prevPage)
+                i.fa.fa-angle-double-left
+
+        //- Page numbers
+        - var i = 0;
+        while i < numPages
+          - i++
+          if i == currentPage
+            li.page-item.active
+              span.page-link #{i}
+          else
+            if i == 1
+              li.page-item
+                a.page-link(href='/rooms') #{i}
+            else
+              li.page-item
+                a.page-link(href='/rooms?page=' + i) #{i}
+
+        //- Next link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-right
+        else
+          - var nextPage = parseFloat(currentPage) + 1
+          li.page-item
+            a.page-link(href='/rooms?page=' + nextPage)
+              i.fa.fa-angle-double-right
+
+  script(src='/public/js/kiosk.js')
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

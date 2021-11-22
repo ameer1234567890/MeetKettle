@@ -1,0 +1,109 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
+
+  if !errors
+    ul.font-monospace
+      for log in logs
+        - var datetime = new Date(log.datetime).toLocaleString('en-GB')
+        li [#{datetime}] 
+          code #{log.user}
+          |  #{actions[log.event]} 
+          code
+            if log.userId
+              | #{log.userId}
+            else if log.meetingId
+              for meeting in meetingList
+                if meeting.id === log.meetingId
+                  | #{meeting.description} [#{log.meetingId.slice(0,8)}]
+            else if log.roomId
+              for room in roomList
+                if room.id === log.roomId
+                  | #{room.name} [#{log.roomId.slice(0,8)}]
+          if (log.userId || log.meetingId || log.roomId) && log.data
+            |  to 
+            code #{log.data}
+          else if log.data
+            code #{log.data}
+
+  br
+
+  //- Pagination links
+  nav
+    ul.pagination.justify-content-center
+
+      //- First page link
+      if currentPage === 1
+        li.page-item.disabled
+          span.page-link
+            i.fa.fa-angle-double-left
+      else
+        li.page-item
+          a.page-link(href='/admin/userlog')
+            i.fa.fa-angle-double-left
+
+      //- Previous page link
+      - var prevPage = parseFloat(currentPage) - 1
+      if prevPage == 0
+        li.page-item.disabled
+          span.page-link
+            i.fa.fa-angle-left
+      else
+        if prevPage == 1
+          li.page-item
+            a.page-link(href='/admin/userlog')
+              i.fa.fa-angle-left
+        else
+          li.page-item
+            a.page-link(href='/admin/userlog?page=' + prevPage)
+              i.fa.fa-angle-left
+
+      //- Page numbers
+      - var firstNumPage = parseFloat(currentPage) - 2
+      if firstNumPage < 1
+        - var firstNumPage = 1
+      - var lastNumPage = parseFloat(currentPage) + 2
+      if lastNumPage > numPages
+        - var lastNumPage = numPages
+      - var i = firstNumPage - 1
+      while i < lastNumPage
+        - i++
+        if i == currentPage
+          li.page-item.active
+            span.page-link #{i}
+        else
+          if i == 1
+            li.page-item
+              a.page-link(href='/admin/userlog') #{i}
+          else
+            li.page-item
+              a.page-link(href='/admin/userlog?page=' + i) #{i}
+
+      //- Next page link
+      if currentPage >= numPages
+        li.page-item.disabled
+          span.page-link
+            i.fa.fa-angle-right
+      else
+        - var nextPage = parseFloat(currentPage) + 1
+        li.page-item
+          a.page-link(href='/admin/userlog?page=' + nextPage)
+            i.fa.fa-angle-right
+
+      //- Last page link
+      if currentPage >= numPages
+        li.page-item.disabled
+          span.page-link
+            i.fa.fa-angle-double-right
+      else
+        li.page-item
+          a.page-link(href='/admin/userlog?page=' + numPages)
+            i.fa.fa-angle-double-right
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

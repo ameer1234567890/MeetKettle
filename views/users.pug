@@ -1,0 +1,221 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  a.navigate.btn.btn-primary.btn-circle-lg.float-end(href='/admin/users/add' role='button')
+    i.fa.fa-plus.mx-2
+  h1 #{title}
+  p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
+
+  if !errors
+    table#table-users.tbl-responsive.table.table-bordered.table-hover
+      thead
+        tr
+          th(scope='col') User ID
+          th(scope='col') Role
+          th(scope='col') Status
+          th(scope='col') Comment
+          th(scope='col') Action
+      tbody
+        for user in users
+          tr(id='row' + user.id)
+            td #{user.id}
+            td #{user.role}
+            if user.deleted
+              td.bg-secondary.text-white Inactive
+            else
+              td Active
+            if user.resetrequested
+              td.bg-danger.text-white User has requested to reset password 
+            else
+              td None
+            td
+              span(data-bs-toggle='tooltip' data-bs-placement='top' title='Reset Password')
+                a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-reset' data-id=user.id)
+                  i.fa.fa-key.fa-lg
+              span(data-bs-toggle='tooltip' data-bs-placement='top' title='Edit Role')
+                a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=user.id)
+                  i.fa.fa-edit.fa-lg
+              if user.deleted
+                span.action-activate-deactivate(data-bs-toggle='tooltip' data-bs-placement='top' title='Activate')
+                  a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-activate' data-id=user.id)
+                    i.fa.fa-unlock.fa-lg
+              else
+                span.action-activate-deactivate(data-bs-toggle='tooltip' data-bs-placement='top' title='Deactivate')
+                  a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-deactivate' data-id=user.id)
+                    i.fa.fa-lock.fa-lg
+    br
+
+    //- Pagination links
+    nav
+      ul.pagination.justify-content-center
+
+        //- First page link
+        if currentPage === 1
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-left
+        else
+          li.page-item
+            a.navigate.page-link(href='/admin/users')
+              i.fa.fa-angle-double-left
+
+        //- Previous page link
+        - var prevPage = parseFloat(currentPage) - 1
+        if prevPage == 0
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-left
+        else
+          if prevPage == 1
+            li.page-item
+              a.navigate.page-link(href='/admin/users')
+                i.fa.fa-angle-left
+          else
+            li.page-item
+              a.navigate.page-link(href='/admin/users?page=' + prevPage)
+                i.fa.fa-angle-left
+
+        //- Page numbers
+        - var firstNumPage = parseFloat(currentPage) - 2
+        if firstNumPage < 1
+          - var firstNumPage = 1
+        - var lastNumPage = parseFloat(currentPage) + 2
+        if lastNumPage > numPages
+          - var lastNumPage = numPages
+        - var i = firstNumPage - 1
+        while i < lastNumPage
+          - i++
+          if i == currentPage
+            li.page-item.active
+              span.page-link #{i}
+          else
+            if i == 1
+              li.page-item
+                a.navigate.page-link(href='/admin/users') #{i}
+            else
+              li.page-item
+                a.navigate.page-link(href='/admin/users?page=' + i) #{i}
+
+        //- Next page link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-right
+        else
+          - var nextPage = parseFloat(currentPage) + 1
+          li.page-item
+            a.navigate.page-link(href='/admin/users?page=' + nextPage)
+              i.fa.fa-angle-right
+
+        //- Last page link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-right
+        else
+          li.page-item
+            a.navigate.page-link(href='/admin/users?page=' + numPages)
+              i.fa.fa-angle-double-right
+    
+    //- Modal for Reset Password
+    #modal-reset.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Reset Password for: 
+              span#user-name-in-reset-modal
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            p.text-muted Note: Resetting user password would sign out all sessions opened by the specific user!
+            form#reset-form(method='POST' action='/admin/users/reset')
+              input#reset-id(type='hidden' name='user')
+              .form-floating.mb-3
+                input#password.form-control(type='password' name='password' placeholder=' ' required='required')
+                label.form-label(for='password') Password
+                  span.text-danger  *
+              .form-floating.mb-3
+                input#password2.form-control(type='password' name='password2' placeholder=' ' required='required')
+                label.form-label(for='password') Confirm Password
+                  span.text-danger  *
+            ul#reset-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='reset-form') Save
+              i.fa.fa-save.fa-fw.mx-2
+
+    //- Modal for Change Role
+    #modal-edit.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Change User Role: 
+              span#user-name-in-change-modal
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            p.text-muted Note: Changing user role would sign out all sessions opened by the specific user!
+            form#edit-form(method='POST' action='/admin/users/edit')
+              input#edit-id(type='hidden' name='user')
+              .form-floating.mb-3
+                select#role.form-select(name='role')
+                  for role in roleList
+                    option(value=`${role}`) #{role}
+                label.form-label(for='role') Role
+                  span.text-danger  *
+            ul#edit-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='edit-form') Save
+              i.fa.fa-save.fa-fw.mx-2
+
+    //- Modal for Deactivate
+    #modal-deactivate.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Deactivate?
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#deactivate-form(method='POST' action='/admin/users/deactivate')
+              input#deactivate-user(type='hidden' name='user')
+            p Are you sure you want to deactivate the user "
+              span#user-name-in-deactivate-modal
+              | "?
+            p.text-muted Note: Deactivating a user would sign out all sessions opened by the specific user!
+            ul#deactivate-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='deactivate-form') Yes
+              i.fa.fa-check.mx-2
+
+    //- Modal for Activate
+    #modal-activate.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Activate?
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#activate-form(method='POST' action='/admin/users/activate')
+              input#activate-user(type='hidden' name='user')
+            p Are you sure you want to activate the user "
+              span#user-name-in-activate-modal
+              | "?
+            ul#activate-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='activate-form') Yes
+              i.fa.fa-check.mx-2
+
+    script(src='/public/js/users.js')
+
+    br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

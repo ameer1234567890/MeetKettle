@@ -1,0 +1,249 @@
+extends layout
+
+block content
+  - var navPage = 'home'
+  a.navigate.btn.btn-primary.float-end.ms-5(href='/meetings/add' role='button' alt='Add Meeting')
+    i.fa.fa-plus.mx-2
+  if errors
+    h1 #{title}
+    p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
+  br
+  br
+  br
+  
+  if !errors
+    .container
+      .row.row-cols-1.row-cols-lg-2.row-cols-xl-3
+        for meeting in meetings
+          .col.mb-4
+            .card.radius-15(data-color-id=meeting.id.charAt(0))
+              .card-body.text-center
+                .p-3.radius-15
+                  .rounded-circle.shadow.p-1.bg-white
+                    img(src='/public/images/' + meeting.service + '.svg' width='80' height='100' alt=`${meeting.service}`)
+                  h5.mb-0.mt-3.text-white.pb-4 #{meeting.description}
+                  - var timeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', }
+                  - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions)
+                  i.fa.fa-calendar.text-white
+                  span.mb-3.text-white.ps-2(title=`${datetime}` data-bs-toggle='tooltip' data-bs-placement='top' data-timestamp=meeting.datetime) #{datetime}
+                  p
+                  i.fa.fa-building.text-white
+                  for mroom in roomList
+                    if mroom.id == meeting.roomid
+                      span.mb-3.text-white.ps-2 #{mroom.name}
+                  p
+                  p.meeting-link
+                    if (meeting.link)
+                      i.fa.fa-link.text-white
+                      a.mb-3.text-white.ps-2(href=`${meeting.link}` target='_blank') Join Meeting
+                  .list-inline.action-buttons.mt-5.mb-2
+                    a.list-inline-item.border-0(href='#' alt='View Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                      i.fa.fa-eye
+                    - var meetingRoom
+                    for mroom in roomList
+                      if mroom.id == meeting.roomid
+                        - meetingRoom = mroom.name
+                    a.list-inline-item.border-0.share-button(href='#' alt='Share Meeting Details' rel='noopener' data-id=meeting.id data-room=meetingRoom data-description=meeting.description data-datetime=new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions) data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                      i.fa.fa-share-alt
+                    - var dStart = new Date(meeting.datetime * 1000)
+                    - var dEnd = new Date((meeting.datetime + 3600) * 1000)
+                    - var datetime = dStart.getFullYear().toString() + ('0' + (dStart.getMonth() + 1)).slice(-2) + ('0' + dStart.getDate()).slice(-2) + 'T' + ('0' + dStart.getHours()).slice(-2) + ('0' + dStart.getMinutes()).slice(-2) + ('0' + dStart.getSeconds()).slice(-2) + dStart.toString().match(/\((.+)\)/)[1] + '%2F' + dEnd.getFullYear().toString() + ('0' + (dEnd.getMonth() + 1)).slice(-2) + ('0' + dEnd.getDate()).slice(-2) + 'T' + ('0' + dEnd.getHours()).slice(-2) + ('0' + dEnd.getMinutes()).slice(-2) + ('0' + dEnd.getSeconds()).slice(-2) + dEnd.toString().match(/\((.+)\)/)[1]
+                    a.list-inline-item.border-0(href=`https://www.google.com/calendar/render?action=TEMPLATE&text=${meeting.description}&details=${meeting.remarks.replaceAll('\n', '%0A')}&location=${meetingRoom}&dates=${datetime}` alt='Add to Google Calendar' rel='noopener' target='_blank')
+                      i.fa.fa-calendar
+                    a.list-inline-item.border-0(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                      i.fa.fa-edit
+                    a.list-inline-item.border-0(href='#' alt='Delete Meeting' data-bs-toggle='modal' data-bs-target='#modal-delete' data-description=meeting.description data-id=meeting.id)
+                      i.fa.fa-trash
+
+    br
+
+    //- Pagination links
+    nav
+      ul.pagination.justify-content-center
+
+        //- First page link
+        if currentPage === 1
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-left
+        else
+          li.page-item
+            a.navigate.page-link(href='/')
+              i.fa.fa-angle-double-left
+
+        //- Previous page link
+        - var prevPage = parseFloat(currentPage) - 1
+        if prevPage == 0
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-left
+        else
+          if prevPage == 1
+            li.page-item
+              a.navigate.page-link(href='/')
+                i.fa.fa-angle-left
+          else
+            li.page-item
+              a.navigate.page-link(href='/?page=' + prevPage)
+                i.fa.fa-angle-left
+
+        //- Page numbers
+        - var firstNumPage = parseFloat(currentPage) - 2
+        if firstNumPage < 1
+          - var firstNumPage = 1
+        - var lastNumPage = parseFloat(currentPage) + 2
+        if lastNumPage > numPages
+          - var lastNumPage = numPages
+        - var i = firstNumPage - 1
+        while i < lastNumPage
+          - i++
+          if i == currentPage
+            li.page-item.active
+              span.page-link #{i}
+          else
+            if i == 1
+              li.page-item
+                a.navigate.page-link(href='/') #{i}
+            else
+              li.page-item
+                a.navigate.page-link(href='/?page=' + i) #{i}
+
+        //- Next page link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-right
+        else
+          - var nextPage = parseFloat(currentPage) + 1
+          li.page-item
+            a.navigate.page-link(href='/?page=' + nextPage)
+              i.fa.fa-angle-right
+
+        //- Last page link
+        if currentPage >= numPages
+          li.page-item.disabled
+            span.page-link
+              i.fa.fa-angle-double-right
+        else
+          li.page-item
+            a.navigate.page-link(href='/?page=' + numPages)
+              i.fa.fa-angle-double-right
+    
+    //- Modal for View
+    #modal-view.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Edit
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            table.table.table-bordered.table-hover
+              thead
+                tr
+                  th(scope='col') Field
+                  th(scope='col') Value
+              tbody
+                tr
+                  th(scope='row') Date and Time
+                  td
+                tr
+                  th(scope='row') Description
+                  td
+                tr
+                  th(scope='row') Meeting Room
+                  td
+                tr
+                  th(scope='row') Meeting Service
+                  td
+                tr
+                  th(scope='row') Meeting Link
+                  td
+                tr
+                  th(scope='row') Remarks
+                  td
+            ul#view-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+              i.fa.fa-times.mx-2
+
+    //- Modal for Edit
+    #modal-edit.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Edit
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#edit-form(method='POST' action='/meetings/edit')
+              input#id(type='hidden' name='id')
+              .form-floating.mb-3
+                input#datetime.form-control(type='datetime-local' name='datetime' required='required')
+                label.form-label(for='datetime') Date and Time
+                  span.text-danger  *
+              .form-floating.mb-3
+                input#description.form-control(type='text' name='description' placeholder='' required='required')
+                label.form-label(for='description') Description
+                  span.text-danger  *
+              .form-floating.mb-3
+                select#room.form-select(name='room' required='required')
+                  option(disabled selected label=' ')
+                  for mroom in roomList
+                    if mroom.id == room
+                      option(value=`${mroom.id}` selected='selected') #{mroom.name}
+                    else
+                      option(value=`${mroom.id}`) #{mroom.name}
+                label.form-label(for='room') Meeting Room
+                  span.text-danger  *
+              .form-floating.mb-3
+                textarea#remarks.form-control(name='remarks' placeholder='' style="height: 7rem")
+                label.form-label(for='remarks') Remarks
+              .form-floating.mb-3
+                select#service.form-select(name='service' required='required')
+                  option(disabled selected label=' ')
+                  for mservice in serviceList
+                    if mservice == service
+                      option(value=`${mservice}` selected='selected') #{mservice.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+                    else
+                      option(value=`${mservice}`) #{mservice.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+                label.form-label(for='service') Meeting Service
+                  span.text-danger  *
+              .form-floating.mb-3
+                input#link.form-control(type='url' name='link' value='' placeholder='')
+                label.form-label(for='link') Meeting Link
+            ul#edit-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='edit-form') Save
+              i.fa.fa-save.fa-fw.mx-2
+
+    //- Modal for Delete
+    #modal-delete.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Delete?
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#delete-form(method='POST' action='/rooms/delete')
+              input#delete-id(type='hidden' name='id')
+            p Are you sure you want to delete the meeting "
+              span#meeting-desc-in-modal
+              | "?
+            ul#delete-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='delete-form') Yes
+              i.fa.fa-check.mx-2
+
+    script.
+      let roomList = JSON.parse('!{JSON.stringify(roomList)}');
+    script(src='/public/js/home.js')
+
+    br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

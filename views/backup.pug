@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  i.fa.fa-quote-left.text-muted
+  span.blockquote  #{quote} 
+  i.fa.fa-quote-right.text-muted
+  em.text-muted.ps-4 — #{author}
+
+  .pb-5
+
+  button#dbbackup.btn.btn-primary Run Backup
+    i.fa.fa-database.fa-fw.ms-2
+  
+  #result.pt-5
+
+  script(src='/public/js/backup.js')

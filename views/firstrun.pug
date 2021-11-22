@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+  
+  form(method='POST' action='/firstrun')
+    .form-floating.mb-3
+      input#user.form-control(type='text' name='user' value=`${user}` placeholder='admin' required='required')
+      label.form-label(for='user') User
+        span.text-danger  *
+    .form-floating.mb-3
+      input#password.form-control(type='password' name='password' placeholder=' ' required='required')
+      label.form-label(for='password') Password
+        span.text-danger  *
+    button.btn.btn-primary(type='submit') Next
+      i.fa.fa-chevron-right.mx-2
+  
+  br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

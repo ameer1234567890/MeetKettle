@@ -1,0 +1,46 @@
+extends layout
+
+block content
+  - var navPage = 'about'
+  h1 About
+
+  br
+
+  h2.h5 Designed and developed by Ameer Dawood
+  p MeetKettle is opensource and lisenced under MIT license. MeetKettle's source code can be viewed at 
+    a(href='https://github.com/ameer1234567890/MeetKettle') github.com/ameer1234567890/MeetKettle
+
+  br
+
+  h2.h5 The Stack
+  ul
+    li
+      a(href='https://nodejs.dev/') Node.js
+      |  - A free, open-sourced, cross-platform JavaScript run-time environment that lets developers write command line tools and server-side scripts outside of a browser.
+    li
+      a(href='https://expressjs.com/') Express
+      |  - Fast, unopinionated, minimalist web framework for Node.js.
+    li
+      a(href='https://pugjs.org/') pug
+      |  - A high-performance template engine heavily influenced by Haml and implemented with JavaScript for Node.js and browsers.
+    li
+      a(href='https://express-validator.github.io/') Express Validator
+      |  - A set of express.js middlewares that wraps validator.js validator and sanitizer functions.
+    li
+      a(href='https://www.npmjs.com/package/sqlite3') sqlite3
+      |  - Asynchronous, non-blocking SQLite3 bindings for Node.js.
+    li
+      a(href='https://www.npmjs.com/package/sqlite-sync') sqlite-sync
+      |  - Synchronous sqlite for Node.js.
+    li
+      a(href='https://www.npmjs.com/package/express-session') express-session
+      |  - Node module to sqlite sync and async.
+
+  br
+
+  h2.h5 Roadmap:
+  ul
+    li Ability to specify meeting end time
+    li Calendar layout of meetings
+    li White-labelling
+    li Meeting room occupancy API

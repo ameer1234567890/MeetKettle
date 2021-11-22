@@ -1,0 +1,122 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  p #{message}
+
+  .card
+    .card-body
+      h5.card-title
+        i.fa.fa-cog.fa-fw.pe-2.text-muted
+        | SessionSecret 
+        small.text-muted.font-monospace (Unconfigurable)
+      .text-muted.pb-3 This is the secret token used for session storage. Resetting the SessionSecret would reset all user sessions.
+      .card-text
+        form#set-sc-form
+          input#sessionsecret.form-control(type='text' value=`${sessionSecret}` placeholder=' ' disabled)
+
+  br
+
+  .card
+    .card-body
+      h5.card-title
+        i.fa.fa-cog.fa-fw.pe-2.text-muted
+        | Records Per Page
+      .text-muted.pb-3 This is the number of database records shown on room and meeting pages, as well as the home dashboard
+      .card-text
+        form#set-rpp-form
+          .input-group
+            input.form-control(type='number' name='rpp' value=`${recordsPerPage}` placeholder=' ')
+            button.btn.btn-primary(type=submit) Save
+              i.fa.fa-save.fa-fw.ms-2
+
+      ul#rpp-errors.text-danger
+
+  br
+
+  .card
+    .card-body
+      h5.card-title
+        i.fa.fa-cog.fa-fw.pe-2.text-muted
+        | Room Facilities
+      .text-muted.pb-3 These are the meeting room facilities available when adding a new meeting room
+      .card-text
+        #facility-list.list-group
+          - var facilitiesArr = facilityList.toString().trim().split(',');
+          for facility in facilitiesArr
+            .list-group-item.list-group-item-action #{facility.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+              button.float-end.btn-close(data-bs-toggle='modal' data-bs-target='#modal-facility-delete' data-facility=facility)
+          .list-group-item.list-group-item-input
+            form#add-facility-form(method='POST' action='/admin/facilities/add')
+              .input-group
+                input.form-control.border-0(type='text' name='facility' placeholder=' ')
+                button.btn.btn-primary(type='submit')
+                  i.fa.fa-plus.fa-fw
+      
+      ul#facilities-errors.text-danger
+
+  br
+
+  .card
+    .card-body
+      h5.card-title
+        i.fa.fa-cog.fa-fw.pe-2.text-muted
+        | Meeting Services
+      .text-muted.pb-3 These are the meeting services available when adding a new meeting
+      .card-text
+        #service-list.list-group
+          - var servicesArr = serviceList.toString().trim().split(',');
+          for service in servicesArr
+            .list-group-item.list-group-item-action #{service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+              button.float-end.btn-close(data-bs-toggle='modal' data-bs-target='#modal-service-delete' data-service=service)
+          .list-group-item.list-group-item-input
+            form#add-service-form(method='POST' action='/admin/services/add')
+              .input-group
+                input.form-control.border-0(type='text' name='service' placeholder=' ')
+                button.btn.btn-primary(type='submit')
+                  i.fa.fa-plus.fa-fw
+      
+      ul#services-errors.text-danger
+
+  //- Modal for Facility Delete
+  #modal-facility-delete.modal.fade(tabindex='-1')
+    .modal-dialog.modal-dialog-centered
+      .modal-content
+        .modal-header
+          h5.modal-title Delete?
+          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+        .modal-body
+          form#delete-facility-form(method='POST' action='/admin/facilities/delete')
+            input#delete-facility(type='hidden' name='facility')
+          p Are you sure you want to delete the facility "
+            span#facility-in-modal
+            | "?
+          ul#delete-facility-errors.text-danger
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+            i.fa.fa-times.mx-2
+          button.btn.btn-primary(type='submit' form='delete-facility-form') Yes
+            i.fa.fa-check.mx-2
+
+  //- Modal for Service Delete
+  #modal-service-delete.modal.fade(tabindex='-1')
+    .modal-dialog.modal-dialog-centered
+      .modal-content
+        .modal-header
+          h5.modal-title Delete?
+          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+        .modal-body
+          form#delete-service-form(method='POST' action='/admin/services/delete')
+            input#delete-service(type='hidden' name='service')
+          p Are you sure you want to delete the service "
+            span#service-in-modal
+            | "?
+          ul#delete-service-errors.text-danger
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+            i.fa.fa-times.mx-2
+          button.btn.btn-primary(type='submit' form='delete-service-form') Yes
+            i.fa.fa-check.mx-2
+
+    script(src='/public/js/config.js')

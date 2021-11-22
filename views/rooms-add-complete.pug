@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  - var navPage = 'rooms'
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+
+  if !errors
+    table.table.table-bordered.table-hover
+      thead
+        tr
+          th(scope='col') Field
+          th(scope='col') Value
+      tbody
+        tr
+          th(scope='row') Room Name
+          td #{name}
+        tr
+          th(scope='row') Location
+          td #{location}
+        tr
+          th(scope='row') Facilities
+          td #{facilities}
+        tr
+          th(scope='row') Capacity
+          td #{capacity}
+
+    br
+
+  if !errors
+    br
+    a.btn.btn-success(href='/rooms' role='button') Finish
+      i.fa.fa-check.mx-2
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

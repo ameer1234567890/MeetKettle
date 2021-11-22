@@ -1,0 +1,70 @@
+aside.col-12.col-sm-3.p-0.bg-dark.flex-shrink-1
+  nav#navbar1.navbar.navbar-expand-sm.navbar-dark.bg-dark.align-items-start.flex-sm-column.flex-row
+    .container-fluid
+      .navbar-brand
+        img.navlogo.px-1(src='/public/favicon.svg' height='32' width='32' alt='M')
+        |  MeetKettle
+      button.navbar-toggler(data-bs-toggle='collapse' data-bs-target='.sidebar' aria-label='Toggle menu')
+        span.navbar-toggler-icon
+    .container-fluid
+      .collapse.navbar-collapse.sidebar
+        ul.flex-column.navbar-nav.w-100.justify-content-between
+          li#nav-home.nav-item
+            a.navigate.nav-link.pl-0(href='/')
+              i.fa.fa-home.fa-fw
+              span  Home
+          li#nav-meetings.nav-item
+            a.navigate.nav-link.pl-0(href='/meetings')
+              i.fa.fa-users.fa-fw
+              span  Meetings
+          li#nav-rooms.nav-item
+            a.navigate.nav-link.pl-0(href='/rooms')
+              i.fa.fa-list.fa-fw
+              span  Rooms
+          li#nav-user.nav-item
+            a.navigate.nav-link.pl-0(href='/user')
+              i.fa.fa-address-card-o.fa-fw
+              span  User
+          //- li#nav-kiosk.nav-item
+          //-   a.nav-link.pl-0(href='/kiosk')
+          //-     i.fa.fa-desktop.fa-fw
+          //-     span  Kiosk
+          li#nav-admin.nav-item
+            a.nav-link.pl-0.dropdown-toggle(href='#nav-admin-dropdown' data-bs-toggle='collapse')
+              i.fa.fa-cogs.fa-fw
+              span  Admin
+            ul#nav-admin-dropdown.collapse
+              li.nav-item
+                a.navigate.nav-link(href='/admin/config')
+                  i.fa.fa-gear.fa-fw
+                  span  Configuration
+              li.nav-item
+                a.navigate.nav-link(href='/admin/users')
+                  i.fa.fa-user.fa-fw
+                  span  List Users
+              li.nav-item
+                a.navigate.nav-link(href='/admin/users/add')
+                  i.fa.fa-user-plus.fa-fw
+                  span  Add User
+              li.nav-item
+                a.navigate.nav-link(href='/admin/userlog')
+                  i.fa.fa-server.fa-fw
+                  span  User Log
+              li.nav-item
+                a.navigate.nav-link(href='/admin/backup')
+                  i.fa.fa-database.fa-fw
+                  span  Backup &amp; Export
+          if (!authUser)
+            li#nav-login.nav-item
+              a.navigate.nav-link.pl-0(href='/login')
+                i.fa.fa-sign-in.fa-fw
+                span  Login
+          if (authUser)
+            li#nav-logout.nav-item
+              a.navigate.nav-link.pl-0(href='/logout')
+                i.fa.fa-sign-out.fa-fw
+                span  Logout (#{authUser})
+          li#nav-about.nav-item
+            a.navigate.nav-link.pl-0(href='/about')
+              i.fa.fa-info-circle.fa-fw
+              span  About

@@ -1,0 +1,41 @@
+extends layout
+
+block content
+  - var navPage = 'user'
+  h1 #{title}
+  p #{message} 
+    kbd #{authUser}
+
+  .card
+    .card-body
+      h5.card-title.pb-3 Change Password
+      .card-text
+        form(method='POST' action='/user')
+          .form-floating.mb-3
+            input#password.form-control(type='password' name='password' placeholder=' ' required='required')
+            label.form-label(for='password') Password
+              span.text-danger  *
+          .form-floating.mb-3
+            input#password2.form-control(type='password' name='password2' placeholder=' ' required='required')
+            label.form-label(for='password2') Confirm Password
+              span.text-danger  *
+          button.btn.btn-primary.btn-labeled(type='submit') Change
+            i.fa.fa-key.mx-2
+      if changes
+        ul.text-success
+          for change in changes
+            li!= change.msg
+      if errors
+        ul.text-danger
+          for error in errors
+            li!= error.msg
+
+  br
+
+  .card
+    .card-body
+      h5.card-title.pb-3 User Role
+      .card-text
+        .form-floating.mb-3
+          input#role.form-control(type='text' name='role' value=`${role}` placeholder=' ' disabled)
+          label.form-label(for='role') User Role

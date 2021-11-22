@@ -1,0 +1,39 @@
+{
+  "name": "meetkettle",
+  "description": "A meeting room booking web app",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=development node index.js",
+    "dev": "cross-env NODE_ENV=development node index.js",
+    "prod": "cross-env NODE_ENV=production node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ameer1234567890/MeetKettle.git"
+  },
+  "author": "Ameer Dawood",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ameer1234567890/MeetKettle/issues"
+  },
+  "homepage": "https://github.com/ameer1234567890/MeetKettle#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "connect-sqlite3": "^0.9.12",
+    "cookie-parser": "^1.4.5",
+    "cross-env": "^7.0.3",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "express-validator": "^6.13.0",
+    "node-cron": "^3.0.0",
+    "pug": "^3.0.2",
+    "sqlite-sync": "^0.3.9",
+    "sqlite3": "^5.0.2"
+  },
+  "nodemonConfig": {
+    "ignore": ["public/js/*.js"]
+  }
+}

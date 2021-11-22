@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1 #{title}
+  p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+  
+  if !authUser
+    a.btn.btn-primary(href='/login') Login
+      i.fa.fa-chevron-right.mx-2

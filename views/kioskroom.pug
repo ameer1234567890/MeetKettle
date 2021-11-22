@@ -1,0 +1,77 @@
+doctype html
+html(lang='en-US')
+  head
+    title MeetKettle
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='apple-touch-icon' sizes='180x180' href='/public/apple-touch-icon.png')
+    link(rel='icon' type='image/png' sizes='32x32' href='/public/favicon-32x32.png')
+    link(rel='icon' type='image/png' sizes='16x16' href='/public/favicon-16x16.png')
+    link(rel='manifest' href='/public/site.webmanifest')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet", href="/public/css/styles.css")
+
+  body.kiosk-body
+
+  if !errors
+    ul.nav.nav-tabs
+      li.nav-item
+        button#home-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#home' type='button') 08:00
+      li.nav-item
+        button#profile-tab.nav-link(data-bs-toggle='tab' data-bs-target='#profile' type='button') 08:30
+      li.nav-item
+        button#contact-tab.nav-link(data-bs-toggle='tab' data-bs-target='#contact' type='button') 09:00
+    .tab-content
+      #home.tab-pane.fade.show.active
+        .row
+          .col-md-2
+            .kiosk-color.bg-available.mt-5.mx-5
+          .col-md-10.mt-5.mb-5
+              h5 #{roomName} 
+                smallsmall.text-muted.font-monospace (#{roomLocation})
+              h2.fs-1.fw-normal.pt-2 Available
+              button.kiosk-reserve-button.btn.btn-outline-dark.px-5 Reserve
+      #profile.tab-pane.fade
+        .row
+          .col-md-2
+            .kiosk-color.bg-unavailable.mt-5.mx-5
+          .col-md-10.mt-5.mb-5
+              h5 #{roomName} 
+                smallsmall.text-muted.font-monospace (#{roomLocation})
+              h2.fs-1.fw-normal.pt-2 Unavailable
+      #contact.tab-pane.fade
+        .row
+          .col-md-2
+            .kiosk-color.bg-available.mt-5.mx-5
+          .col-md-10.mt-5.mb-5
+              h5 #{roomName} 
+                smallsmall.text-muted.font-monospace (#{roomLocation})
+              h2.fs-1.fw-normal.pt-2 Available
+              button.kiosk-reserve-button.btn.btn-outline-dark.px-5 Reserve
+
+
+  //- script(src='/public/js/kioskroom.js')
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
+  script.
+    document.addEventListener("DOMContentLoaded", function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+      getWakeLock();
+    });
+    async function getWakeLock() {
+      let wakeLock = null;
+      try {
+        //- wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock is active!');
+      } catch (err) {
+        console.log(`${err.name}, ${err.message}`);
+      }
+    }
