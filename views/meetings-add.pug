@@ -11,6 +11,16 @@ block content
       label.form-label(for='datetime') Date and Time
         span.text-danger  *
     .form-floating.mb-3
+      select#duration.form-select(name='duration' value=`${duration}` required='required')
+        option(value='15') 15 minutes
+        option(value='30' selected='selected') 30 minutes
+        option(value='45') 45 minutes
+        option(value='60') 1 hour
+        option(value='90') 1 hour 30 minutes
+        option(value='120') 2 hours
+      label.form-label(for='duration') Duration
+        span.text-danger  *
+    .form-floating.mb-3
       input#description.form-control(type='text' name='description' value=`${description}` placeholder='' required='required')
       label.form-label(for='description') Meeting Description
         span.text-danger  *

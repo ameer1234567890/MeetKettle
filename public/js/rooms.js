@@ -1,14 +1,3 @@
-/* jshint esversion: 6 */
-/* jshint browser: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-/* global URLSearchParams */
-/* global bootstrap */
-
 // Edit Modal
 let editButton;
 let editModal = document.getElementById('modal-edit');

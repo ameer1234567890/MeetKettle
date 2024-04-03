@@ -37,20 +37,13 @@ block content
                       i.fa.fa-link.text-white
                       a.mb-3.text-white.ps-2(href=`${meeting.link}` target='_blank') Join Meeting
                   .list-inline.action-buttons.mt-5.mb-2
-                    a.list-inline-item.border-0(href='#' alt='View Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                    a.list-inline-item.border-0(href='#' alt='View Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
                       i.fa.fa-eye
                     - var meetingRoom
                     for mroom in roomList
                       if mroom.id == meeting.roomid
                         - meetingRoom = mroom.name
-                    a.list-inline-item.border-0.share-button(href='#' alt='Share Meeting Details' rel='noopener' data-id=meeting.id data-room=meetingRoom data-description=meeting.description data-datetime=new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions) data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
-                      i.fa.fa-share-alt
-                    - var dStart = new Date(meeting.datetime * 1000)
-                    - var dEnd = new Date((meeting.datetime + 3600) * 1000)
-                    - var datetime = dStart.getFullYear().toString() + ('0' + (dStart.getMonth() + 1)).slice(-2) + ('0' + dStart.getDate()).slice(-2) + 'T' + ('0' + dStart.getHours()).slice(-2) + ('0' + dStart.getMinutes()).slice(-2) + ('0' + dStart.getSeconds()).slice(-2) + dStart.toString().match(/\((.+)\)/)[1] + '%2F' + dEnd.getFullYear().toString() + ('0' + (dEnd.getMonth() + 1)).slice(-2) + ('0' + dEnd.getDate()).slice(-2) + 'T' + ('0' + dEnd.getHours()).slice(-2) + ('0' + dEnd.getMinutes()).slice(-2) + ('0' + dEnd.getSeconds()).slice(-2) + dEnd.toString().match(/\((.+)\)/)[1]
-                    a.list-inline-item.border-0(href=`https://www.google.com/calendar/render?action=TEMPLATE&text=${meeting.description}&details=${meeting.remarks.replaceAll('\n', '%0A')}&location=${meetingRoom}&dates=${datetime}` alt='Add to Google Calendar' rel='noopener' target='_blank')
-                      i.fa.fa-calendar
-                    a.list-inline-item.border-0(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                    a.list-inline-item.border-0(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration/60 data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
                       i.fa.fa-edit
                     a.list-inline-item.border-0(href='#' alt='Delete Meeting' data-bs-toggle='modal' data-bs-target='#modal-delete' data-description=meeting.description data-id=meeting.id)
                       i.fa.fa-trash
@@ -147,6 +140,9 @@ block content
                   th(scope='row') Date and Time
                   td
                 tr
+                  th(scope='row') Duration
+                  td
+                tr
                   th(scope='row') Description
                   td
                 tr
@@ -179,6 +175,16 @@ block content
               .form-floating.mb-3
                 input#datetime.form-control(type='datetime-local' name='datetime' required='required')
                 label.form-label(for='datetime') Date and Time
+                  span.text-danger  *
+              .form-floating.mb-3
+                select#duration.form-select(name='duration' required='required')
+                  option(value='15') 15 minutes
+                  option(value='30' selected='selected') 30 minutes
+                  option(value='45') 45 minutes
+                  option(value='60') 1 hour
+                  option(value='90') 1 hour 30 minutes
+                  option(value='120') 2 hours
+                label.form-label(for='duration') Duration
                   span.text-danger  *
               .form-floating.mb-3
                 input#description.form-control(type='text' name='description' placeholder='' required='required')

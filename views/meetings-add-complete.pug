@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  - var navPage = 'admin'
+  - var navPage = 'meetings'
   h1 #{title}
   p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
 
@@ -16,6 +16,10 @@ block content
           th(scope='row') Date and Time
           - var datetime = new Date(datetime).toLocaleString('en-GB')
           td #{datetime}
+        tr
+          th(scope='row') Duration
+          - var duration; if (duration < 60) { duration = duration + ' minutes'; } else { duration = duration/60 + ' hour(s)'; }
+          td #{duration}
         tr
           th(scope='row') Description
           td #{description}

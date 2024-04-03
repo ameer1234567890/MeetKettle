@@ -1,15 +1,3 @@
-/* jshint esversion: 6 */
-/* jshint browser: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-/* global URLSearchParams */
-/* global bootstrap */
-/* global roomList */
-
 // Edit modal
 let editButton;
 let editModal = document.getElementById('modal-edit');
@@ -32,7 +20,8 @@ editModal.addEventListener('show.bs.modal', function (event) {
     meetingDateTime = parseFloat(meetingDateTime) - (timezoneOffset * 60);
   }
   editModal.querySelector('#datetime').value = new Date((meetingDateTime) * 1000).toISOString().slice(0, -8);
-  editModal.querySelector('#description').value = editRow.childNodes[1].innerText;
+  editModal.querySelector('#duration').value = editButton.getAttribute('data-duration');
+  editModal.querySelector('#description').value = editButton.getAttribute('data-description');
   editModal.querySelector('#room').value = editButton.getAttribute('data-room');
   editModal.querySelector('#remarks').value = editButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
   editModal.querySelector('#service').value = editButton.getAttribute('data-service');
@@ -65,14 +54,18 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         let timeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', };
         updatedRow.childNodes[0].innerText = new Date(data.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
         editButton.setAttribute('data-datetime', data.datetime);
-        updatedRow.childNodes[1].innerText = data.description;
+        let duration; if (data.duration < 60) { duration = data.duration + ' minutes'; } else { duration = data.duration/60 + ' hour(s)'; }
+        updatedRow.childNodes[1].innerText = duration;
+        editButton.setAttribute('data-duration', data.duration);
+        updatedRow.childNodes[2].innerText = data.description;
+        editButton.setAttribute('data-description', data.description);
         for (let i = 0; i < roomList.length; i++) {
           if (roomList[i].id === data.room) {
-            updatedRow.childNodes[2].innerText = roomList[i].name;
+            updatedRow.childNodes[3].innerText = roomList[i].name;
           }
         }
         editButton.setAttribute('data-room', data.room);
-        updatedRow.childNodes[3].innerHTML = '<img class="align-top me-2" src="/public/images/' + data.service + '.svg" width="25">' + data.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
+        updatedRow.childNodes[4].innerHTML = '<img class="align-top me-2" src="/public/images/' + data.service + '.svg" width="25">' + data.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
         editButton.setAttribute('data-service', data.service);
         editButton.setAttribute('data-remarks', data.remarks);
         editButton.setAttribute('data-link', data.link);

@@ -27,3 +27,5 @@
 29/10/2021, Facility add, delete
 30/10/2021, Kiosk page skeleton
 05/11/2021, no-perm page and its relatives
+03/04/2024, Removed jshint, fixed kiosk page links, skeleton kioskroom page
+04/04/2024, Added duration, fixed edit modal bugs in home and meeting list pages

@@ -18,6 +18,7 @@ block content
       thead
         tr
           th(scope='col') Date and Time
+          th(scope='col') Duration
           th(scope='col') Description
           th(scope='col') Meeting Room
           th(scope='col') Meeting Service
@@ -28,6 +29,8 @@ block content
             - var timeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', }
             - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions)
             td #{datetime}
+            - var duration; if (meeting.duration/60 < 60) { duration = meeting.duration/60 + ' minutes'; } else { duration = meeting.duration/60/60 + ' hour(s)'; }
+            td #{duration}
             td #{meeting.description}
             for mroom in roomList
               if mroom.id == meeting.roomid
@@ -37,7 +40,7 @@ block content
               | #{meeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
             td
               span(data-bs-toggle='tooltip' data-bs-placement='top' title='Edit')
-                a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration/60 data-description=meeting.description data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
                   i.fa.fa-edit.fa-lg
               span(data-bs-toggle='tooltip' data-bs-placement='top' title='Delete')
                 a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-delete' data-description=meeting.description data-id=meeting.id)
@@ -129,6 +132,16 @@ block content
               .form-floating.mb-3
                 input#datetime.form-control(type='datetime-local' name='datetime' required='required')
                 label.form-label(for='datetime') Date and Time
+                  span.text-danger  *
+              .form-floating.mb-3
+                select#duration.form-select(name='duration' required='required')
+                  option(value='15') 15 minutes
+                  option(value='30' selected='selected') 30 minutes
+                  option(value='45') 45 minutes
+                  option(value='60') 1 hour
+                  option(value='90') 1 hour 30 minutes
+                  option(value='120') 2 hours
+                label.form-label(for='duration') Duration
                   span.text-danger  *
               .form-floating.mb-3
                 input#description.form-control(type='text' name='description' placeholder='' required='required')

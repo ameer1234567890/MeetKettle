@@ -6,9 +6,9 @@ block content
   p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
 
   if !errors
-    ul#room-list.list-group
+    #room-list.list-group
       for room in rooms
-        li.kiosk-select-room.list-group-item.d-flex.justify-content-between.align-items-start.list-group-item-action(data-id=`${room.id}`)
+        a.kiosk-select-room.list-group-item.d-flex.justify-content-between.align-items-start.list-group-item-action(data-id=`${room.id}`)
           .ms-2.me-auto
             .fw-bold #{room.name}
             |       #{room.location}

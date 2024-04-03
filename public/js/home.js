@@ -1,22 +1,11 @@
-/* jshint esversion: 6 */
-/* jshint browser: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-/* global URLSearchParams */
-/* global bootstrap */
-/* global roomList */
-
-
 // View modal
 let viewButton;
 let viewModal = document.getElementById('modal-view');
 viewModal.addEventListener('show.bs.modal', function (event) {
   viewButton = event.relatedTarget;
   let viewCard = viewButton.parentElement.parentElement.parentElement;
+  let duration = viewButton.getAttribute('data-duration')/60;
+  if (duration < 60) { duration = duration + ' minutes'; } else { duration = duration/60 + ' hour(s)'; }
   let meetingRoom = viewButton.getAttribute('data-room');
   let timezoneOffset = new Date().getTimezoneOffset().toString();
   let offsetSign;
@@ -30,11 +19,12 @@ viewModal.addEventListener('show.bs.modal', function (event) {
     }
   }
   viewModal.querySelector('tr:nth-child(1) > td').innerText = new Date((viewButton.getAttribute('data-datetime')) * 1000).toLocaleString('en-GB');
-  viewModal.querySelector('tr:nth-child(2) > td').innerText = viewCard.querySelector('h5').innerText;
-  viewModal.querySelector('tr:nth-child(3) > td').innerText = meetingRoom;
-  viewModal.querySelector('tr:nth-child(4) > td').innerText = viewButton.getAttribute('data-service').split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
-  viewModal.querySelector('tr:nth-child(5) > td').innerHTML = '<a href="' + viewButton.getAttribute('data-link') + '" rel="noopener" target="_blank">' + viewButton.getAttribute('data-link') + '</a>';
-  viewModal.querySelector('tr:nth-child(6) > td').innerText = viewButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
+  viewModal.querySelector('tr:nth-child(2) > td').innerText = duration;
+  viewModal.querySelector('tr:nth-child(3) > td').innerText = viewCard.querySelector('h5').innerText;
+  viewModal.querySelector('tr:nth-child(4) > td').innerText = meetingRoom;
+  viewModal.querySelector('tr:nth-child(5) > td').innerText = viewButton.getAttribute('data-service').split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
+  viewModal.querySelector('tr:nth-child(6) > td').innerHTML = '<a href="' + viewButton.getAttribute('data-link') + '" rel="noopener" target="_blank">' + viewButton.getAttribute('data-link') + '</a>';
+  viewModal.querySelector('tr:nth-child(7) > td').innerText = viewButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
 });
 
 
@@ -75,6 +65,7 @@ editModal.addEventListener('show.bs.modal', function (event) {
   }
   meetingDateTime = new Date((meetingDateTime) * 1000).toISOString().slice(0, -8);
   editModal.querySelector('#datetime').value = meetingDateTime;
+  editModal.querySelector('#duration').value = editButton.getAttribute('data-duration');
   editModal.querySelector('#description').value = editCard.querySelector('h5').innerText;
   editModal.querySelector('#room').value = editButton.getAttribute('data-room');
   editModal.querySelector('#remarks').value = editButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
@@ -106,24 +97,30 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         submitButton.classList.add('btn-success');
         let updatedCard = editButton.parentElement.parentElement.parentElement;
         let viewButton = editButton.previousSibling;
-        editButton.setAttribute('data-datetime', data.datetime);
-        viewButton.setAttribute('data-datetime', data.datetime);
-        updatedCard.querySelector('h5').innerText = data.description;
+        let deleteButton = editButton.nextSibling;
         updatedCard.querySelector(':nth-child(4)').innerText = getRelativeTime(+new Date(data.datetime * 1000));
         let timeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', };
         updatedCard.querySelector(':nth-child(4)').setAttribute('data-bs-original-title', new Date(data.datetime * 1000).toLocaleString('en-GB', timeFormatOptions));
+        viewButton.setAttribute('data-datetime', data.datetime);
+        editButton.setAttribute('data-datetime', data.datetime);
+        viewButton.setAttribute('data-duration', data.duration*60);
+        editButton.setAttribute('data-duration', data.duration);
+        updatedCard.querySelector('h5').innerText = data.description;
+        viewButton.setAttribute('data-description', data.description);
+        editButton.setAttribute('data-description', data.description);
+        deleteButton.setAttribute('data-description', data.description);
         for (let i = 0; i < roomList.length; i++) {
           if (roomList[i].id === data.room) {
             updatedCard.querySelector(':nth-child(7)').innerText = roomList[i].name;
           }
         }
-        editButton.setAttribute('data-room', data.room);
         viewButton.setAttribute('data-room', data.room);
+        editButton.setAttribute('data-room', data.room);
         updatedCard.querySelector('img').src = '/public/images/' + data.service + '.svg';
-        editButton.setAttribute('data-service', data.service);
         viewButton.setAttribute('data-service', data.service);
-        editButton.setAttribute('data-remarks', data.remarks);
+        editButton.setAttribute('data-service', data.service);
         viewButton.setAttribute('data-remarks', data.remarks);
+        editButton.setAttribute('data-remarks', data.remarks);
         let meetingLinkEl = updatedCard.querySelector('.meeting-link > a');
         if (meetingLinkEl) {
           if (data.link) {
@@ -132,7 +129,7 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
             updatedCard.querySelector('.meeting-link > a').remove();
             updatedCard.querySelector('.meeting-link > i').remove();
           }
-        } else {
+        } else if (!meetingLinkEl && data.link) {
             let newLinkIEl = document.createElement('i');
             newLinkIEl.classList.add('fa', 'fa-link', 'text-white');
             updatedCard.querySelector('.meeting-link').appendChild(newLinkIEl);
@@ -143,8 +140,8 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
             newLinkAEl.classList.add('mb-3', 'text-white', 'ps-2');
             updatedCard.querySelector('.meeting-link').appendChild(newLinkAEl);
           }
-        editButton.setAttribute('data-link', data.link);
         viewButton.setAttribute('data-link', data.link);
+        editButton.setAttribute('data-link', data.link);
         setTimeout(function() {
           let modal = bootstrap.Modal.getInstance(editModal);
           modal.hide();

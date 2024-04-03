@@ -11,7 +11,6 @@ A meeting room booking web app
 * [express-session](href='https://www.npmjs.com/package/express-session') - Simple session middleware for Express.
 
 #### Roadmap
-* Ability to specify meeting end time
 * Calendar layout of meetings
 * White-labelling
 * Meeting room occupancy API

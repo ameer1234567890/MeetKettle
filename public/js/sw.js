@@ -1,16 +1,4 @@
-/* jshint esversion: 8 */
-/* jshint browser: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-/* global self */
-/* global caches */
-
-
-const OFFLINE_VERSION = 1; // jshint ignore: line
+const OFFLINE_VERSION = 1;
 const CACHE_NAME = 'offline';
 const OFFLINE_URL = '/offline';
 const SW_URL = '/sw.js';

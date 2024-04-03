@@ -1,12 +1,3 @@
-/* jshint esversion: 6 */
-/* jshint node: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-
 const fs = require('fs');
 const crypto = require('crypto');
 const cron = require('node-cron');
@@ -375,6 +366,7 @@ app.get('/',
           meeting = {
             'id':rows[i].id,
             'datetime':rows[i].datetime,
+            'duration':rows[i].duration,
             'description':rows[i].description,
             'roomid':rows[i].roomid,
             'remarks':rows[i].remarks,
@@ -513,7 +505,8 @@ app.get('/kioskroom',
         return console.error(err.message);
       }
     });
-    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\'', (err, rows) => {
+    const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' LIMIT 10', (err, rows) => {
       if (err) {
         return console.error(err.message);
       }
@@ -529,6 +522,7 @@ app.get('/kioskroom',
         };
         meetingList.push(meeting);
       }
+      console.log(meetingList);
     });
     db.close((err) => {
       if (err) {
@@ -656,7 +650,7 @@ app.post('/firstrun',
             return console.error(err.message);
           }
         });
-        db.run('CREATE TABLE meetings(id TEXT, datetime INT, description TEXT, roomid TEXT, remarks TEXT, meetinglink TEXT, meetingservice TEXT, deleted INT)', (err) => {
+        db.run('CREATE TABLE meetings(id TEXT, datetime INT, duration INT, description TEXT, roomid TEXT, remarks TEXT, meetinglink TEXT, meetingservice TEXT, deleted INT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
             return console.error(err.message);
@@ -2314,6 +2308,7 @@ app.get('/meetings',
           meeting = {
             'id':rows[i].id,
             'datetime':rows[i].datetime,
+            'duration':rows[i].duration,
             'description':rows[i].description,
             'roomid':rows[i].roomid,
             'remarks':rows[i].remarks,
@@ -2375,6 +2370,7 @@ app.get('/meetings/add', (req, res) => {
       title: 'Add a new Meeting',
       message: 'Please enter meeting details to proceed',
       datetime: '',
+      duration: '',
       description: '',
       room: '',
       remarks: '',
@@ -2395,6 +2391,9 @@ app.post('/meetings/add',
   body('datetime')
     .notEmpty()
     .withMessage('Date and time is invalid'),
+    body('duration')
+    .notEmpty()
+    .withMessage('Duration must not be empty'),
   body('description')
     .notEmpty()
     .withMessage('Description must not be empty'),
@@ -2448,6 +2447,7 @@ app.post('/meetings/add',
           message: 'Below errors occured',
           errors: errors.array(),
           datetime: req.body.datetime,
+          duration: req.body.duration,
           description: req.body.description,
           room: req.body.room,
           remarks: req.body.remarks,
@@ -2462,6 +2462,7 @@ app.post('/meetings/add',
         let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
         let datetime = timeStamp;
         let description = req.body.description;
+        let duration = req.body.duration * 60;
         let room = req.body.room;
         let remarks = req.body.remarks;
         let link = req.body.link;
@@ -2471,7 +2472,7 @@ app.post('/meetings/add',
             return console.error(err.message);
           }
         });
-        db.run('INSERT INTO meetings(id, datetime, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?)', [id, datetime, description, room, remarks, link, service,], (err) => {
+        db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
             return console.error(err.message);
@@ -2484,6 +2485,7 @@ app.post('/meetings/add',
               title: 'Success',
               message: 'Meeting has been added as follows.',
               datetime: req.body.datetime,
+              duration: req.body.duration,
               description: req.body.description,
               room: req.body.room,
               remarks: req.body.remarks,
@@ -2500,6 +2502,7 @@ app.post('/meetings/add',
               message: 'Errors occured. Please refer below.',
               errors: errors.array(),
               datetime: req.body.datetime,
+              duration: req.body.duration,
               description: req.body.description,
               room: req.body.room,
               remarks: req.body.remarks,
@@ -2526,6 +2529,9 @@ app.post('/meetings/edit',
   body('datetime')
     .notEmpty()
     .withMessage('Date and time is invalid'),
+  body('duration')
+    .notEmpty()
+    .withMessage('Duration must not be empty'),
   body('description')
     .notEmpty()
     .withMessage('Description must not be empty'),
@@ -2580,6 +2586,7 @@ app.post('/meetings/edit',
         let errorList = [];
         let id = req.body.id;
         let datetime = timeStamp;
+        let duration = req.body.duration * 60;
         let description = req.body.description;
         let room = req.body.room;
         let remarks = req.body.remarks;
@@ -2590,7 +2597,7 @@ app.post('/meetings/edit',
             return console.error(err.message);
           }
         });
-        db.run('UPDATE meetings SET datetime=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, description, room, remarks, link, service,], (err) => {
+        db.run('UPDATE meetings SET datetime=?, duration=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, duration, description, room, remarks, link, service,], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
             return console.error(err.message);
@@ -2601,6 +2608,7 @@ app.post('/meetings/edit',
             const payload = {
               status: 'success',
               datetime: timeStamp,
+              duration: req.body.duration,
               description: req.body.description,
               room: req.body.room,
               remarks: req.body.remarks,

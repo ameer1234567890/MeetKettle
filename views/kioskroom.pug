@@ -14,42 +14,26 @@ html(lang='en-US')
   body.kiosk-body
 
   if !errors
-    ul.nav.nav-tabs
-      li.nav-item
-        button#home-tab.nav-link.active(data-bs-toggle='tab' data-bs-target='#home' type='button') 08:00
-      li.nav-item
-        button#profile-tab.nav-link(data-bs-toggle='tab' data-bs-target='#profile' type='button') 08:30
-      li.nav-item
-        button#contact-tab.nav-link(data-bs-toggle='tab' data-bs-target='#contact' type='button') 09:00
-    .tab-content
-      #home.tab-pane.fade.show.active
-        .row
-          .col-md-2
-            .kiosk-color.bg-available.mt-5.mx-5
-          .col-md-10.mt-5.mb-5
-              h5 #{roomName} 
-                smallsmall.text-muted.font-monospace (#{roomLocation})
-              h2.fs-1.fw-normal.pt-2 Available
-              button.kiosk-reserve-button.btn.btn-outline-dark.px-5 Reserve
-      #profile.tab-pane.fade
-        .row
-          .col-md-2
-            .kiosk-color.bg-unavailable.mt-5.mx-5
-          .col-md-10.mt-5.mb-5
-              h5 #{roomName} 
-                smallsmall.text-muted.font-monospace (#{roomLocation})
-              h2.fs-1.fw-normal.pt-2 Unavailable
-      #contact.tab-pane.fade
-        .row
-          .col-md-2
-            .kiosk-color.bg-available.mt-5.mx-5
-          .col-md-10.mt-5.mb-5
-              h5 #{roomName} 
-                smallsmall.text-muted.font-monospace (#{roomLocation})
-              h2.fs-1.fw-normal.pt-2 Available
-              button.kiosk-reserve-button.btn.btn-outline-dark.px-5 Reserve
-
-
+        .row.g-0.full-height
+          .col-md-3
+            .row.h-100.g-0
+              .bg-unavailable.m-0.full-height
+          .col-md-9.full-height
+            .row.g-0.mx-4.full-height
+              h2.fw-normal.my-4 #{roomName.toUpperCase()}
+                span#clock.float-end.fs-4 00:00:00
+              .d-md-block
+                button.btn.btn-primary BOOK NEW MEETING
+                  i.fa.fa-plus.mx-2
+              h1.kiosk-status.text-center.text-danger.pt-5 BUSY
+              #until.text-center.text-dark.fw-bold.fs-4 UNTIL 11:00 AM
+              //- #meetingCurrent.text-center.text-dark.fs-5 Special briefing with Government Officials | 10:30 AM - 11:00 AM | Online
+              #meetingCurrent.text-center.text-dark.fs-5 #{description} | #{datetime} - 11:00 AM | #{service}
+              #meetingNext
+                span.bottom-align-text.text-primary.fs-5.fw-bold NEXT MEETING: 
+                  span.fw-normal 12:00 PM ON 05th FEBRUARY 2024 | Meeting with President | Face-to-Face
+  script.
+    let roomList = JSON.parse('!{JSON.stringify(meetingList)}');
   //- script(src='/public/js/kioskroom.js')
 
   if errors
@@ -65,6 +49,7 @@ html(lang='en-US')
         return new bootstrap.Tooltip(tooltipTriggerEl);
       });
       getWakeLock();
+      startTime();
     });
     async function getWakeLock() {
       let wakeLock = null;
@@ -74,4 +59,18 @@ html(lang='en-US')
       } catch (err) {
         console.log(`${err.name}, ${err.message}`);
       }
+    }
+    function startTime() {
+      const today = new Date();
+      let h = today.getHours();
+      let m = today.getMinutes();
+      let s = today.getSeconds();
+      m = checkTime(m);
+      s = checkTime(s);
+      document.getElementById('clock').innerHTML =  h + ":" + m + ":" + s;
+      setTimeout(startTime, 1000);
+    }
+    function checkTime(i) {
+      if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+      return i;
     }

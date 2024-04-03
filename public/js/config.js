@@ -1,15 +1,3 @@
-/* jshint esversion: 6 */
-/* jshint browser: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-/* global URLSearchParams */
-/* global bootstrap */
-
-
 // Set recordsPerPage form
 document.querySelector('#set-rpp-form').addEventListener('submit', function(event) {
   let errorsElement = document.querySelector('#rpp-errors');

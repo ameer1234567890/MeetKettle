@@ -19,10 +19,11 @@ footer p {
   margin-bottom: .25rem;
 }
 
-.kiosk-color {
-  padding-bottom: 25rem;
-  border-radius: 0.4rem;
-}
+/* Start of Kiosk specific styles */
+
+html,body { height: 100%; margin: 0; padding: 0; }
+
+.full-height { height: 100% }
 
 .bg-available {
   background-color: #4caf50;
@@ -32,9 +33,19 @@ footer p {
   background-color: #e53935;
 }
 
-.kiosk-reserve-button {
-  margin-top: 16.5rem;
+.kiosk-status {
+  font-size: 8rem;
 }
+
+#meetingNext {
+  height: 10rem;
+  display: flex;
+}
+
+.bottom-align-text {
+  align-self: flex-end;
+}
+/* End of Kiosk specific styles */
 
 .btn-white {
   background-color: #fff;

@@ -1,13 +1,3 @@
-/* jshint esversion: 6 */
-/* jshint browser: true */
-/* jshint curly: true */
-/* jshint trailingcomma: true */
-/* jshint unused: true */
-/* jshint undef: true */
-/* jshint varstmt: true */
-/* jshint eqeqeq: true */
-
-
 // Set recordsPerPage form
 document.querySelector('#dbbackup').addEventListener('click', function(event) {
   let resultElement = document.querySelector('#result');
