@@ -1,3 +1,4 @@
+/* Common styles */
 #toploader {
   height: 0.5rem;
 }
@@ -19,8 +20,7 @@ footer p {
   margin-bottom: .25rem;
 }
 
-/* Start of Kiosk specific styles */
-
+/* Kiosk specific styles */
 html,body { height: 100%; margin: 0; padding: 0; }
 
 .full-height { height: 100% }
@@ -45,86 +45,38 @@ html,body { height: 100%; margin: 0; padding: 0; }
 .bottom-align-text {
   align-self: flex-end;
 }
-/* End of Kiosk specific styles */
 
-.btn-white {
-  background-color: #fff;
-  border-color: #e7eaf3;
-}
-
-.radius-15 {
-  border-radius: 0.5rem;
-}
-
-.rounded-circle {
-  height: 6.875rem;
-  width: 6.875rem;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 1rem;
-}
-
-.action-buttons a {
-  font-size: 1rem;
-  width: 2.25rem;
-  height: 2.25rem;
-  line-height: 2.25rem;
-  background: #ffffff;
-  border: 0.063rem solid #eeecec;
-  box-shadow: 0 0.188rem 0.375rem rgba(0,0,0,0.16), 0 0.188rem 0.375rem rgba(0,0,0,0.23);
-  text-align: center;
-  border-radius: 50%;
-  color: #2b2a2a;
-}
-
-.action-buttons a:hover {
-  background: #a7bce4;
-  box-shadow: 0 0.588rem 0.875rem rgba(0,0,0,0.16), 0 0.188rem 0.375rem rgba(0,0,0,0.23);
-}
-
+/* Home page specific styles */
 .card-bg-color-one {
-  background-color: #007ac1;
+  background-color: #99dde7;
 }
 
 .card-bg-color-two {
-  background-color: #5f4339;
+  background-color: #2ec7c0;
 }
 
 .card-bg-color-three {
-  background-color: #4b636e;
+  background-color: #87dfe9;
 }
 
 .card-bg-color-four {
-  background-color: #bb4d00;
+  background-color: #b2e5ed;
 }
 
 .card-bg-color-five {
-  background-color: #790e8b;
+  background-color: #00abc5;
 }
 
 .card-bg-color-six {
-  background-color: #6c6f00;
+  background-color: #99dde7;
 }
 
 .card-bg-color-seven {
-  background-color: #005662;
+  background-color: #2ec7c0;
 }
 
 .card-bg-color-eight {
-  background-color: #8e0000;
-}
-
-.card {
-  box-shadow: 0 0.188rem 0.375rem rgba(0,0,0,0.16), 0 0.188rem 0.375rem rgba(0,0,0,0.23);
-}
-
-.btn-circle {
-  width: 1.875rem;
-  height: 1.875rem;
-  padding: 0.375rem 0;
-  font-size: 0.75rem;
-  line-height: 1.428571429;
-  border-radius: 0.938rem;
+  background-color: #87dfe9;
 }
 
 .btn-circle-lg {
@@ -136,32 +88,17 @@ html,body { height: 100%; margin: 0; padding: 0; }
   border-radius: 1.563rem;
 }
 
-.btn-circle-xl {
-  width: 4.375rem;
-  height: 4.375rem;
-  padding: 0.625rem 1rem;
-  font-size: 1.5rem;
-  line-height: 1.95;
-  border-radius: 2.188rem;
-}
-
+/* Edit modal specific styles */
 .fade-transition {
   transition: all 1s ease-in-out;
 }
 
+/* Config page specific styles */
 .list-group-item-input {
   padding: 0;
 }
 
-.list-group-item-input > form > div > input.form-control,
-.list-group-item-input > form > div > button.btn {
-  height: 2.5rem;
-}
-
-.kiosk-select-room {
-  cursor: pointer;
-}
-
+/* Meeting table specific styles */
 @media only screen and (min-width: 768px) {
   td {
     overflow: hidden;

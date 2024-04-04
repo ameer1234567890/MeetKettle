@@ -515,6 +515,7 @@ app.get('/kioskroom',
         meeting = {
           'id':rows[i].id,
           'datetime':rows[i].datetime,
+          'duration':rows[i].duration,
           'description':rows[i].description,
           'remarks':rows[i].remarks,
           'link':rows[i].meetinglink,
@@ -522,7 +523,6 @@ app.get('/kioskroom',
         };
         meetingList.push(meeting);
       }
-      console.log(meetingList);
     });
     db.close((err) => {
       if (err) {
