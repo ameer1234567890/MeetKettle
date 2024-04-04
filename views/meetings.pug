@@ -26,8 +26,8 @@ block content
       tbody
         for meeting in meetings
           tr(id='row' + meeting.id)
-            - var timeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', }
-            - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions)
+            - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+            - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
             td #{datetime}
             - var duration; if (meeting.duration/60 < 60) { duration = meeting.duration/60 + ' minutes'; } else { duration = meeting.duration/60/60 + ' hour(s)'; }
             td #{duration}

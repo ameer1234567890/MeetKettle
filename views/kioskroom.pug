@@ -14,63 +14,61 @@ html(lang='en-US')
   body.kiosk-body
 
   if !errors
-        .row.g-0.full-height
-          .col-md-3
-            .row.h-100.g-0
-              .bg-unavailable.m-0.full-height
-          .col-md-9.full-height
-            .row.g-0.mx-4.full-height
-              h2.fw-normal.my-4 #{roomName.toUpperCase()}
-                span#clock.float-end.fs-4 00:00:00
-              .d-md-block
-                button.btn.btn-primary BOOK NEW MEETING
-                  i.fa.fa-plus.mx-2
-              h1.kiosk-status.text-center.text-danger.pt-5 BUSY
-              #until.text-center.text-dark.fw-bold.fs-4 UNTIL 11:00 AM
-              //- #meetingCurrent.text-center.text-dark.fs-5 Special briefing with Government Officials | 10:30 AM - 11:00 AM | Online
-              #meetingCurrent.text-center.text-dark.fs-5 #{description} | #{datetime} - 11:00 AM | #{service}
-              #meetingNext
-                span.bottom-align-text.text-primary.fs-5.fw-bold NEXT MEETING: 
-                  span.fw-normal 12:00 PM ON 05th FEBRUARY 2024 | Meeting with President | Face-to-Face
-  script.
-    let roomList = JSON.parse('!{JSON.stringify(meetingList)}');
-  //- script(src='/public/js/kioskroom.js')
+    - var currentTime = new Date();
+    - var currentMeeting
+    - var nextMeeting
+    - var availability = true
+    - var i = 0
+    - nextMeeting = meetings[0]
+    for meeting in meetings
+      - var meetingStart = new Date(meeting.datetime * 1000)
+      - var meetingEnd = new Date(meeting.datetime * 1000 + meeting.duration * 1000)
+      if (meetingStart <= currentTime && meetingEnd >= currentTime)
+        - availability = false
+        - currentMeeting = meeting
+        - nextMeeting = meetings[i+1]
+        if (nextMeeting > meetings.length)
+          - nextMeeting = null
+      - i++
+    .row.g-0.full-height
+      .col-md-3
+        .row.h-100.g-0
+          if (availability == false)
+            .bg-unavailable.m-0.full-height
+          else
+            .bg-available.m-0.full-height
+      .col-md-9.full-height
+        .row.g-0.mx-4.full-height
+          h2.fw-normal.my-4 #{roomName.toUpperCase()}
+            span#clock.float-end.fs-4 00:00:00
+          .d-md-block
+            button.btn.btn-primary BOOK NEW MEETING
+              i.fa.fa-plus.mx-2
+          if (availability == false)
+            h1.kiosk-status.text-center.text-danger.pt-5 BUSY
+            - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
+            - var startTime = new Date(currentMeeting.datetime * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+            - var endTime = new Date(currentMeeting.datetime * 1000 + currentMeeting.duration * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+            #until.text-center.text-dark.fw-bold.fs-4 UNTIL #{endTime}
+            #meetingCurrent.text-center.text-dark.fs-5 #{currentMeeting.description} | #{startTime} | #{currentMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+          else
+            h1.kiosk-status.text-center.text-success.pt-5 FREE
+            #until.text-center.text-dark.fw-bold.fs-4 &nbsp;
+            #meetingCurrent.text-center.text-dark.fs-5 &nbsp;
+          #meetingNext
+            if (nextMeeting)
+              - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+              - var datetime = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
+              span.btn.btn-secondary.bottom-align-text.fw-bold NEXT MEETING: 
+                span.fw-normal #{datetime} | #{nextMeeting.description} | #{nextMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+            else
+              span.btn.btn-secondary.disabled.bottom-align-text.fw-bold NEXT MEETING: 
+                span.fw-normal None
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
+  script(src='/public/js/kioskroom.js')
 
   if errors
     ul.text-danger
       for error in errors
         li!= error.msg
-
-  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
-  script.
-    document.addEventListener("DOMContentLoaded", function() {
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
-      getWakeLock();
-      startTime();
-    });
-    async function getWakeLock() {
-      let wakeLock = null;
-      try {
-        //- wakeLock = await navigator.wakeLock.request('screen');
-        console.log('Wake Lock is active!');
-      } catch (err) {
-        console.log(`${err.name}, ${err.message}`);
-      }
-    }
-    function startTime() {
-      const today = new Date();
-      let h = today.getHours();
-      let m = today.getMinutes();
-      let s = today.getSeconds();
-      m = checkTime(m);
-      s = checkTime(s);
-      document.getElementById('clock').innerHTML =  h + ":" + m + ":" + s;
-      setTimeout(startTime, 1000);
-    }
-    function checkTime(i) {
-      if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
-      return i;
-    }

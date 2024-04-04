@@ -506,7 +506,7 @@ app.get('/kioskroom',
       }
     });
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
-    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' LIMIT 10', (err, rows) => {
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' ORDER BY datetime ASC LIMIT 10', (err, rows) => {
       if (err) {
         return console.error(err.message);
       }

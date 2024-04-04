@@ -51,8 +51,8 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
         let updatedRow = editButton.parentElement.parentElement.parentElement;
-        let timeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', };
-        updatedRow.childNodes[0].innerText = new Date(data.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
+        let timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, };
+        updatedRow.childNodes[0].innerText = new Date(data.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase();
         editButton.setAttribute('data-datetime', data.datetime);
         let duration; if (data.duration < 60) { duration = data.duration + ' minutes'; } else { duration = data.duration/60 + ' hour(s)'; }
         updatedRow.childNodes[1].innerText = duration;
