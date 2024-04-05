@@ -29,6 +29,9 @@ html(lang='en-US')
         - nextMeeting = meetings[i+1]
         if (nextMeeting > meetings.length)
           - nextMeeting = null
+      - var nextMeetingStart = new Date(nextMeeting.datetime * 1000)
+      if (nextMeetingStart < currentTime)
+        - nextMeeting = meetings[i+1]
       - i++
     .row.g-0.full-height
       .col-md-3
@@ -40,7 +43,9 @@ html(lang='en-US')
       .col-md-9.full-height
         .row.g-0.mx-4.full-height
           h2.fw-normal.my-4 #{roomName.toUpperCase()}
-            span#clock.float-end.fs-4 00:00:00
+            - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
+            - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+            span#clock.float-end.fs-4 #{timeNow}
           .d-md-block
             button.btn.btn-primary BOOK NEW MEETING
               i.fa.fa-plus.mx-2
@@ -59,11 +64,55 @@ html(lang='en-US')
             if (nextMeeting)
               - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
               - var datetime = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
-              span.btn.btn-secondary.bottom-align-text.fw-bold NEXT MEETING: 
+              a.btn.btn-secondary.bottom-align-text.fw-bold(href='#' alt='Next Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view') NEXT MEETING: 
                 span.fw-normal #{datetime} | #{nextMeeting.description} | #{nextMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
             else
-              span.btn.btn-secondary.disabled.bottom-align-text.fw-bold NEXT MEETING: 
+              a.btn.btn-secondary.disabled.bottom-align-text.fw-bold NEXT MEETING: 
                 span.fw-normal None
+    //- Modal for View
+    if (nextMeeting)
+      #modal-view.modal.fade(tabindex='-1')
+        .modal-dialog.modal-dialog-centered
+          .modal-content
+            .modal-header
+              h5.modal-title Edit
+              button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+            .modal-body
+              table.table.table-bordered.table-hover
+                thead
+                  tr
+                    th(scope='col') Field
+                    th(scope='col') Value
+                tbody
+                  tr
+                    - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+                    - var datetime = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
+                    th(scope='row') Date and Time
+                    td #{datetime}
+                  tr
+                    - nextMeeting.duration = nextMeeting.duration/60
+                    - var duration; if (nextMeeting.duration < 60) { duration = nextMeeting.duration + ' minutes'; } else { duration = nextMeeting.duration/60 + ' hour(s)'; }
+                    th(scope='row') Duration
+                    td #{duration}
+                  tr
+                    th(scope='row') Description
+                    td #{nextMeeting.description}
+                  tr
+                    th(scope='row') Meeting Room
+                    td #{roomName}
+                  tr
+                    th(scope='row') Meeting Service
+                    td #{nextMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+                  tr
+                    th(scope='row') Meeting Link
+                    td #{nextMeeting.link}
+                  tr
+                    th(scope='row') Remarks
+                    td #{nextMeeting.remarks}
+              ul#view-errors.text-danger
+            .modal-footer
+              button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+                i.fa.fa-times.mx-2
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
   script(src='/public/js/kioskroom.js')

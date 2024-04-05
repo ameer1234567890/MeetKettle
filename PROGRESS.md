@@ -29,3 +29,4 @@
 05/11/2021, no-perm page and its relatives
 03/04/2024, Removed jshint, fixed kiosk page links, skeleton kioskroom page
 04/04/2024, Added duration, fixed edit modal bugs in home and meeting list pages, restyled home page, more work on kiosk, date formats in 12 hour format
+05/04/2021, More work on kiosk
