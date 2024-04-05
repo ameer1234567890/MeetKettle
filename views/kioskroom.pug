@@ -29,9 +29,10 @@ html(lang='en-US')
         - nextMeeting = meetings[i+1]
         if (nextMeeting > meetings.length)
           - nextMeeting = null
-      - var nextMeetingStart = new Date(nextMeeting.datetime * 1000)
-      if (nextMeetingStart < currentTime)
-        - nextMeeting = meetings[i+1]
+      if (nextMeeting)
+        - var nextMeetingStart = new Date(nextMeeting.datetime * 1000)
+        if (nextMeetingStart < currentTime)
+          - nextMeeting = meetings[i+1]
       - i++
     .row.g-0.full-height
       .col-md-3
@@ -47,7 +48,7 @@ html(lang='en-US')
             - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             span#clock.float-end.fs-4 #{timeNow}
           .d-md-block
-            button.btn.btn-primary BOOK NEW MEETING
+            a#book-button.btn.btn-primary(href='kioskaddmeeting') BOOK NEW MEETING #{roomId}
               i.fa.fa-plus.mx-2
           if (availability == false)
             h1.kiosk-status.text-center.text-danger.pt-5 BUSY

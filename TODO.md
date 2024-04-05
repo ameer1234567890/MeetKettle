@@ -16,7 +16,8 @@
 - [x] POST /rooms/delete                Delete room (AJAX)
 - [ ] GET  /room?id=123                 List of meetings in the room
 - [x] GET  /kiosk                       Select kiosk room
-- [ ] GET  /kioskroom                   View current/next/last meeting in kiosk mode
+- [x] GET  /kioskroom                   View current/next/last meeting in kiosk mode
+- [ ] GET  /kioskaddmeeting             Add a new meeting in kiosk mode
 - [x] GET  /meetings                    List meetings
 - [x] GET  /add                         Add a meeting form
 - [x] POST /add                         Write meeting to db

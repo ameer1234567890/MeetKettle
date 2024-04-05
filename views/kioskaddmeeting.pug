@@ -1,0 +1,45 @@
+doctype html
+html(lang='en-US')
+  head
+    title MeetKettle
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='apple-touch-icon' sizes='180x180' href='/public/apple-touch-icon.png')
+    link(rel='icon' type='image/png' sizes='32x32' href='/public/favicon-32x32.png')
+    link(rel='icon' type='image/png' sizes='16x16' href='/public/favicon-16x16.png')
+    link(rel='manifest' href='/public/site.webmanifest')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet", href="/public/css/styles.css")
+
+  body.kiosk-body
+
+  if !errors
+    .row.g-0.full-height
+      .col-md-3
+        .row.h-100.g-0
+          .bg-unavailable.m-0.full-height
+      .col-md-9.full-height
+        .row.g-0.mx-4.full-height
+          h2.fw-normal.my-4 #{roomName.toUpperCase()}
+            - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
+            - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+            span#clock.float-end.fs-4 #{timeNow}
+          .d-md-block
+            h1.pt-5 Book New Meeting
+              #meeting-times
+                input#option1.btn-check(type='radio' name='options' autocomplete='off')
+                label.btn.btn-outline-primary.rounded-0.border-end-0(for='option1') 08:00 AM
+                input#option2.btn-check(type='radio' name='options' autocomplete='off')
+                label.btn.btn-outline-primary.rounded-0.border-end-0(for='option2') 08:15 AM
+                input#option3.btn-check(type='radio' name='options' autocomplete='off')
+                label.btn.btn-outline-primary.rounded-0.border-end-0(for='option3') 08:30 AM
+                input#option4.btn-check(type='radio' name='options' autocomplete='off')
+                label.btn.btn-outline-primary.rounded-0(for='option4') 08:45 AM
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
+  script(src='/public/js/kioskaddmeeting.js')
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg

@@ -560,6 +560,51 @@ app.get('/kioskroom',
 );
 
 
+app.get('/kioskaddmeeting',
+  query('room')
+    .notEmpty()
+    .withMessage('No room specified'),
+  (req, res) => {
+    if (!checkPermissions('permView', req, res)) { return false; }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const payload = {
+        authUser: req.session.userId,
+        errors: errors.array(),
+      };
+      return res.render('kioskaddmeeting', payload);
+    }
+    let roomId = req.query.room;
+    let roomName;
+    let roomLocation;
+    let db = new sqlite3.Database(dbFile, (err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+    });
+    db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      roomName = row.name;
+      roomLocation = row.location;
+    });
+    db.close((err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      const payload = {
+        authUser: req.session.userId,
+        room: roomId,
+        roomName: roomName,
+        roomLocation: roomLocation,
+      };
+      res.render('kioskaddmeeting', payload);
+    });
+}
+);
+
+
 app.get('/firstrun', (req, res) => {
   if (firstrunComplete()) {
     res.render('firstrun-complete', {
