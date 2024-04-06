@@ -1,0 +1,62 @@
+doctype html
+html(lang='en-US')
+  head
+    title MeetKettle
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='apple-touch-icon' sizes='180x180' href='/public/apple-touch-icon.png')
+    link(rel='icon' type='image/png' sizes='32x32' href='/public/favicon-32x32.png')
+    link(rel='icon' type='image/png' sizes='16x16' href='/public/favicon-16x16.png')
+    link(rel='manifest' href='/public/site.webmanifest')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet", href="/public/css/styles.css")
+
+  body.kiosk-body
+
+  .row.g-0.full-height
+    .col-md-3
+      .row.h-100.g-0
+        .bg-primary.m-0.full-height
+    .col-md-9.full-height
+      .row.g-0.mx-4
+        h2.fw-normal.my-4 #{roomName.toUpperCase()}
+          - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
+          - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+          span#clock.float-end.fs-4 #{timeNow}
+        .d-flex.align-items-start.flex-column
+          h1 #{title}
+          p(class={"text-danger": !errors ? undefined : "text-danger"}) #{message}
+
+          if !errors
+            table.table.table-bordered.table-hover
+              thead
+                tr
+                  th(scope='col') Field
+                  th(scope='col') Value
+              tbody
+                tr
+                  th(scope='row') Date and Time
+                  - var datetime = new Date(datetime).toLocaleString('en-GB')
+                  td #{datetime}
+                tr
+                  th(scope='row') Duration
+                  - var duration; if (duration < 60) { duration = duration + ' minutes'; } else { duration = duration/60 + ' hour(s)'; }
+                  td #{duration}
+                tr
+                  th(scope='row') Description
+                  td #{description}
+
+            br
+
+          if !errors
+            br
+            a.btn.btn-success(href='/kiosk/room?room=' + room role='button') Finish
+              i.fa.fa-check.mx-2
+
+          if errors
+            ul.text-danger
+              for error in errors
+                li!= error.msg
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
+  script(src='/public/js/kiosk-meeting-add-complete.js')

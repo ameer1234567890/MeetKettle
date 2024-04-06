@@ -13,70 +13,73 @@ html(lang='en-US')
 
   body.kiosk-body
 
-  if !errors
-    .row.g-0.full-height
-      .col-md-3
-        .row.h-100.g-0
-          .bg-primary.m-0.full-height
-      .col-md-9.full-height
-        .row.g-0.mx-4.full-height
-          h2.fw-normal.my-4 #{roomName.toUpperCase()}
-            - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
-            - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
-            span#clock.float-end.fs-4 #{timeNow}
-          .d-md-block
-            form#addMeetingForm(method='POST' action='/kioskaddmeeting')
-              h1 Book New Meeting
-              input(type='hidden' name='datetime' value='')
-              input(type='hidden' name='room' value=room)
-              input(type='hidden' name='remarks' value='')
-              input(type='hidden' name='service' value='face_to_face')
-              input(type='hidden' name='link' value='')
-              br
-              #meeting-times Meeting Time:
-              .input-group
-                - var round = 1000 * 60 * 15
-                - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
-                - var timeOneRaw = Math.floor(new Date().getTime() / round) * round
-                - var time
-                - var optionName
-                each i in [0, 1, 2, 3, 4, 5]
-                  - time = new Date(timeOneRaw + 900000 * i).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
-                  - optionName = 'option' + i
+  .row.g-0.full-height
+    .col-md-3
+      .row.h-100.g-0
+        .bg-primary.m-0.full-height
+    .col-md-9.full-height
+      .row.g-0.mx-4
+        h2.fw-normal.my-4 #{roomName.toUpperCase()}
+          - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
+          - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+          span#clock.float-end.fs-4 #{timeNow}
+        .d-flex.align-items-start.flex-column
+          form#addMeetingForm(method='POST' action='/kiosk/meetingadd')
+            h1 Book New Meeting
+            input(type='hidden' name='datetime' value='' id='datetime')
+            input(type='hidden' name='room' value=room)
+            input(type='hidden' name='remarks' value='')
+            input(type='hidden' name='service' value='face_to_face')
+            input(type='hidden' name='link' value='')
+            p
+            #meeting-times Meeting Time:
+            .input-group
+              - var round = 1000 * 60 * 15
+              - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
+              - var timeOneRaw = Math.floor(new Date().getTime() / round) * round
+              - var time
+              - var optionName
+              - var datetimeShort = new Date(datetime).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+              each i in [0, 1, 2, 3, 4, 5]
+                - time = new Date(timeOneRaw + 900000 * i).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+                - optionName = 'option' + i
+                if (datetimeShort == time)
+                  input.btn-check(type='radio' name='time' value=time id=optionName required='required' checked)
+                else
                   input.btn-check(type='radio' name='time' value=time id=optionName required='required')
-                  label.btn.btn-outline-primary.rounded-0(for=optionName) #{time}
-                input#timeCustom.form-control.border-primary(type='time' name='time')
-              br
-              br
-              #meeting-durations Meeting Duration:
-              .input-group
-                - var optionName
-                - var humanDuration
-                each i in [15, 30, 45, 60, 90, 120]
-                  - optionName = 'option' + i
-                  if (i < 60)
-                    - humanDuration = i + ' minutes'
-                  else if (i == 60)
-                    - humanDuration = i/60 + ' hour'
-                  else
-                    - humanDuration = i/60 + ' hours'
+                label.btn.btn-outline-primary.rounded-0(for=optionName) #{time}
+              input#timeCustom.form-control.border-primary(type='time' name='time')
+            p
+            #meeting-durations Meeting Duration:
+            .input-group
+              - var optionName
+              - var humanDuration
+              each i in [15, 30, 45, 60, 90, 120]
+                - optionName = 'option' + i
+                if (i < 60)
+                  - humanDuration = i + ' minutes'
+                else if (i == 60)
+                  - humanDuration = i/60 + ' hour'
+                else
+                  - humanDuration = i/60 + ' hours'
+                if (duration == i)
+                  input.btn-check(type='radio' name='duration' value=i id=optionName required='required' checked)
+                else
                   input.btn-check(type='radio' name='duration' value=i id=optionName required='required')
-                  label.btn.btn-outline-primary.rounded-0(for=optionName) #{humanDuration}
-              br
-              br
-              #meeting-description Meeting Description:
-              .input-group
-                input.form-control.border-primary(type='text' name='description' placeholder='Enter description here...' required='required')
-              br
-              br
-              .input-group
-                button.btn.btn-primary(type='submit') Add
-                  i.fa.fa-plus-circle.mx-2
+                label.btn.btn-outline-primary.rounded-0(for=optionName) #{humanDuration}
+            p
+            #meeting-description Meeting Description:
+            .input-group
+              input.form-control.border-primary(type='text' name='description' value=description placeholder='Enter description here...' required='required')
+            p
+            .input-group
+              button.btn.btn-primary(type='submit') Add
+                i.fa.fa-plus-circle.mx-2
+          br
+          if errors
+            ul.text-danger
+              for error in errors
+                li!= error.msg
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
   script(src='/public/js/kiosk-meeting-add.js')
-
-  if errors
-    ul.text-danger
-      for error in errors
-        li!= error.msg

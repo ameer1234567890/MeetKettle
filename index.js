@@ -609,10 +609,7 @@ app.post('/kiosk/meetingadd',
   body('datetime')
     .notEmpty()
     .withMessage('Date and time must not be empty'),
-  body('datetime')
-    .notEmpty()
-    .withMessage('Date and time is invalid'),
-    body('duration')
+  body('duration')
     .notEmpty()
     .withMessage('Duration must not be empty'),
   body('description')
@@ -643,6 +640,7 @@ app.post('/kiosk/meetingadd',
         return console.error(err.message);
       }
     });
+    let roomId = req.body.room;
     let roomList = [];
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
       if (err) {
@@ -671,7 +669,7 @@ app.post('/kiosk/meetingadd',
           serviceList: serviceList,
           roomList: roomList,
         };
-        return res.render('kisok-meeting-add', payload);
+        return res.render('kiosk-meeting-add', payload);
       } else {
         let errorList = [];
         let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
@@ -695,7 +693,7 @@ app.post('/kiosk/meetingadd',
         });
         db.close((err) => {
           if (errorList.length === 0) {
-            res.render('meetings-add-complete', {
+            res.render('kiosk-meeting-add-complete', {
               authUser: req.session.userId,
               title: 'Success',
               message: 'Meeting has been added as follows.',
@@ -711,7 +709,7 @@ app.post('/kiosk/meetingadd',
             });
             addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
           } else {
-            res.render('meetings-add', {
+            res.render('kiosk-meeting-add', {
               authUser: req.session.userId,
               title: 'Error',
               message: 'Errors occured. Please refer below.',
@@ -2565,10 +2563,7 @@ app.post('/meetings/add',
   body('datetime')
     .notEmpty()
     .withMessage('Date and time must not be empty'),
-  body('datetime')
-    .notEmpty()
-    .withMessage('Date and time is invalid'),
-    body('duration')
+  body('duration')
     .notEmpty()
     .withMessage('Duration must not be empty'),
   body('description')
@@ -2703,9 +2698,6 @@ app.post('/meetings/edit',
   body('datetime')
     .notEmpty()
     .withMessage('Date and time must not be empty'),
-  body('datetime')
-    .notEmpty()
-    .withMessage('Date and time is invalid'),
   body('duration')
     .notEmpty()
     .withMessage('Duration must not be empty'),
