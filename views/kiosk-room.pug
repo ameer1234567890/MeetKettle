@@ -48,7 +48,7 @@ html(lang='en-US')
             - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             span#clock.float-end.fs-4 #{timeNow}
           .d-md-block
-            a#book-button.btn.btn-primary(href='kioskaddmeeting') BOOK NEW MEETING #{roomId}
+            a#book-button.btn.btn-primary(href='/kiosk/meetingadd') BOOK NEW MEETING #{roomId}
               i.fa.fa-plus.mx-2
           if (availability == false)
             h1.kiosk-status.text-center.text-danger.pt-5 BUSY
@@ -116,7 +116,7 @@ html(lang='en-US')
                 i.fa.fa-times.mx-2
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
-  script(src='/public/js/kioskroom.js')
+  script(src='/public/js/kiosk-room.js')
 
   if errors
     ul.text-danger

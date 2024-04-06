@@ -484,7 +484,7 @@ app.get('/kiosk',
 );
 
 
-app.get('/kioskroom',
+app.get('/kiosk/room',
   query('room')
     .notEmpty()
     .withMessage('No room specified'),
@@ -496,7 +496,7 @@ app.get('/kioskroom',
         authUser: req.session.userId,
         errors: errors.array(),
       };
-      return res.render('kioskroom', payload);
+      return res.render('kiosk-room', payload);
     }
     let roomId = req.query.room;
     let meetingList = [];
@@ -553,14 +553,14 @@ app.get('/kioskroom',
           roomName: roomName,
           roomLocation: roomLocation,
         };
-        res.render('kioskroom', payload);
+        res.render('kiosk-room', payload);
       });
     });
   }
 );
 
 
-app.get('/kioskaddmeeting',
+app.get('/kiosk/meetingadd',
   query('room')
     .notEmpty()
     .withMessage('No room specified'),
@@ -572,7 +572,7 @@ app.get('/kioskaddmeeting',
         authUser: req.session.userId,
         errors: errors.array(),
       };
-      return res.render('kioskaddmeeting', payload);
+      return res.render('kiosk-meeting-add', payload);
     }
     let roomId = req.query.room;
     let roomName;
@@ -599,9 +599,141 @@ app.get('/kioskaddmeeting',
         roomName: roomName,
         roomLocation: roomLocation,
       };
-      res.render('kioskaddmeeting', payload);
+      res.render('kiosk-meeting-add', payload);
     });
 }
+);
+
+
+app.post('/kiosk/meetingadd',
+  body('datetime')
+    .notEmpty()
+    .withMessage('Date and time must not be empty'),
+  body('datetime')
+    .notEmpty()
+    .withMessage('Date and time is invalid'),
+    body('duration')
+    .notEmpty()
+    .withMessage('Duration must not be empty'),
+  body('description')
+    .notEmpty()
+    .withMessage('Description must not be empty'),
+  body('description')
+    .matches(/^[a-z0-9_:;,#@ \.\?\$\(\)\[\]\{\}\+\-\*\|]+$/i)
+    .withMessage('Description contains invalid characters'),
+  body('room')
+    .notEmpty()
+    .withMessage('Room must not be empty'),
+  body('remarks')
+    .escape(),
+  body('remarks')
+    .optional({ checkFalsy: true, }).matches(/^[a-z0-9_/:;,#@& \.\?\$\(\)\[\]\{\}\+\-\*\|\n\r]+$/i)
+    .withMessage('Remarks contain invalid characters'),
+  body('service')
+    .escape(),
+  body('link')
+    .optional({ checkFalsy: true, }).isURL({ protocols: ['http','https',], require_protocol: true, validate_length: false, })
+    .withMessage('Invalid meeting link'),
+  (req, res) => {
+    if (!checkPermissions('permEdit', req, res)) { return false; }
+    const errors = validationResult(req);
+    const timeStamp = new Date(req.body.datetime).getTime() / 1000;
+    let db = new sqlite3.Database(dbFile, (err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+    });
+    let roomList = [];
+    db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      roomName = row.name;
+      roomLocation = row.location;
+    });
+    db.close((err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      if (!errors.isEmpty()) {
+        const payload = {
+          authUser: req.session.userId,
+          title: 'Add a new Meetings',
+          message: 'Below errors occured',
+          errors: errors.array(),
+          datetime: req.body.datetime,
+          duration: req.body.duration,
+          description: req.body.description,
+          room: req.body.room,
+          remarks: req.body.remarks,
+          link: req.body.link,
+          service: req.body.service,
+          serviceList: serviceList,
+          roomList: roomList,
+        };
+        return res.render('kisok-meeting-add', payload);
+      } else {
+        let errorList = [];
+        let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
+        let datetime = timeStamp;
+        let description = req.body.description;
+        let duration = req.body.duration * 60;
+        let room = req.body.room;
+        let remarks = req.body.remarks;
+        let link = req.body.link;
+        let service = req.body.service;
+        let db = new sqlite3.Database(dbFile, (err) => {
+          if (err) {
+            return console.error(err.message);
+          }
+        });
+        db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
+          if (err) {
+            errorList.push({ code: err.errno, msg: err.message, });
+            return console.error(err.message);
+          }
+        });
+        db.close((err) => {
+          if (errorList.length === 0) {
+            res.render('meetings-add-complete', {
+              authUser: req.session.userId,
+              title: 'Success',
+              message: 'Meeting has been added as follows.',
+              datetime: req.body.datetime,
+              duration: req.body.duration,
+              description: req.body.description,
+              room: req.body.room,
+              remarks: req.body.remarks,
+              link: req.body.link,
+              service: req.body.service,
+              serviceList: serviceList,
+              roomList: roomList,
+            });
+            addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
+          } else {
+            res.render('meetings-add', {
+              authUser: req.session.userId,
+              title: 'Error',
+              message: 'Errors occured. Please refer below.',
+              errors: errors.array(),
+              datetime: req.body.datetime,
+              duration: req.body.duration,
+              description: req.body.description,
+              room: req.body.room,
+              remarks: req.body.remarks,
+              link: req.body.link,
+              service: req.body.service,
+              serviceList: serviceList,
+              roomList: roomList,
+            });
+          }
+          if (err) {
+            return console.error(err.message);
+          }
+        });
+      }
+    });
+  }
 );
 
 
