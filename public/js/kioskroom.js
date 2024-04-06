@@ -16,7 +16,7 @@ async function getWakeLock() {
 function updateTime() {
   if (new Date().getSeconds() == 1) window.location.reload();
   const timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, };
-  const now = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+  const now = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase();
   document.getElementById('clock').innerHTML =  now;
   setTimeout(updateTime, 1000);
 }

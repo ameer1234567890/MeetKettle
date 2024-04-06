@@ -33,6 +33,10 @@ html,body { height: 100%; margin: 0; padding: 0; }
   background-color: #e53935;
 }
 
+.bg-primary {
+  background-color: #0d6efd;
+}
+
 .kiosk-status {
   font-size: 8rem;
 }
