@@ -87,15 +87,6 @@ html,body { height: 100%; margin: 0; padding: 0; }
   background-color: #87dfe9;
 }
 
-.btn-circle-lg {
-  width: 3.125rem;
-  height: 3.125rem;
-  padding: 0.75rem 0.463rem;
-  font-size: 1.125rem;
-  line-height: 1.33;
-  border-radius: 1.563rem;
-}
-
 /* Edit modal specific styles */
 .fade-transition {
   transition: all 1s ease-in-out;

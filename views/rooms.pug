@@ -2,7 +2,7 @@ extends layout
 
 block content
   - var navPage = 'rooms'
-  a.navigate.btn.btn-primary.btn-circle-lg.float-end(href='/rooms/add' role='button')
+  a.navigate.btn.btn-primary.float-end(href='/rooms/add' role='button')
     i.fa.fa-plus.mx-2
   h1 #{title}
   p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
