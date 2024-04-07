@@ -48,7 +48,7 @@ html(lang='en-US')
             - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             span#clock.float-end.fs-4 #{timeNow}
           .d-md-block
-            a#book-button.btn.btn-primary(href='/kiosk/meetingadd') BOOK NEW MEETING #{roomId}
+            a#book-button.btn.btn-primary(href='/kiosk/meetingadd') RESERVE NEW MEETING #{roomId}
               i.fa.fa-plus.mx-2
           if (availability == false)
             h1.kiosk-status.text-center.text-danger.pt-5 BUSY
@@ -106,7 +106,8 @@ html(lang='en-US')
                     td #{nextMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
                   tr
                     th(scope='row') Meeting Link
-                    td #{nextMeeting.link}
+                    td
+                      a(href=nextMeeting.link) #{nextMeeting.link}
                   tr
                     th(scope='row') Remarks
                     td #{nextMeeting.remarks}

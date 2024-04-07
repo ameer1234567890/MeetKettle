@@ -1,47 +1,5 @@
-### Pages
-- [x] GET  /                            Home page (lists Meeting rooms with ongoing meeting / next meeting)
-- [x] GET  /firstrun                    Setup page
-- [x] POST /firstrun                    Save setup to db
-- [x] GET  /user                        User page (for password change)
-- [x] POST /user                        Write password change to db
-- [x] GET  /login                       Login page
-- [x] POST /login                       Check and authenticate user
-- [x] GET  /logout                      Logout user
-- [x] GET  /forgot                      Forgot password form
-- [x] POST /forgot                      Forgot password write to db
-- [x] GET  /rooms                       List meeting rooms (linking to individual room containing list of meetings in the room)
-- [x] GET  /rooms/add                   Add room
-- [x] POST /rooms/add                   Write room toom to db
-- [x] POST /rooms/edit                  Edit room (AJAX)
-- [x] POST /rooms/delete                Delete room (AJAX)
-- [ ] GET  /room?id=123                 List of meetings in the room
-- [x] GET  /kiosk                       Select kiosk room
-- [x] GET  /kioskroom                   View current/next/last meeting in kiosk mode
-- [ ] GET  /kioskaddmeeting             Add a new meeting in kiosk mode
-- [x] GET  /meetings                    List meetings
-- [x] GET  /add                         Add a meeting form
-- [x] POST /add                         Write meeting to db
-- [x] POST /edit                        Write edited meeting details to db
-- [x] POST /delete                      Delete meeting
-- [x] GET  /admin/config                Set config values
-- [x] POST /admin/facilities/add        Add new facilities (AJAX)
-- [x] POST /admin/facilities/delete     Delete facilities (AJAX)
-- [x] POST /admin/services/add          Add new services (AJAX)
-- [x] POST /admin/services/delete       Delete services (AJAX)
-- [x] POST /admin/pp/set                Set recordsPerPage field in db (AJAX)
-- [x] GET  /admin/users                 List of users
-- [x] POST /admin/users/edit            Edit user role (AJAX)
-- [x] POST /admin/users/reset           Reset user password (AJAX)
-- [x] POST /admin/users/deactivate      Activate user (AJAX)
-- [x] POST /admin/users/activate        Deactivate user (AJAX)
-- [x] GET  /admin/users/add             Add user form
-- [x] POST /admin/users/add             Write user to db
-- [x] GET  /about                       About page
-
-
-### Tables
-- [x] users       Users with roles
-- [x] rooms       Meeting rooms with functionalities
-- [x] meetings    Meeting details
-- [x] userlog     User activity log
-- [x] config      Configuration (sessionSecret, recordsPerPage, branding, facilityList, serviceList)
+- Card for next meeting in kiosk
+- Extend current meeting
+- End current meeting
+- List of meetings for today (tomorrow?)
+- Meeting statistics page
