@@ -16,38 +16,38 @@ block content
       .row.row-cols-1.row-cols-lg-2.row-cols-xl-3
         for meeting in meetings
           .col.mb-4
-            .card.rounded.shadow(data-color-id=meeting.id.charAt(0))
-              .card-body.text-center
-                .p-3
-                  .p-1
-                    img(src='/public/images/' + meeting.service + '.svg' width='80' height='100' alt=`${meeting.service}`)
-                  h5.mb-0.mt-3.pb-4 #{meeting.description}
-                  - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
-                  - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
-                  i.fa.fa-calendar
-                  span.mb-3.ps-2(title=`${datetime}` data-bs-toggle='tooltip' data-bs-placement='top' data-timestamp=meeting.datetime) #{datetime}
-                  p
-                  i.fa.fa-building
+            .card.shadow.mb-3
+              .row.g-0
+                .col-md-3
+                  img.align-content-start.pt-3.ps-3(src='/public/images/' + meeting.service + '.svg' width='60' alt=`${meeting.service}`)
+                .col-md-9
+                  .card-body
+                    h5.card-title #{meeting.description}
+                    - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+                    - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
+                    p.card-text
+                      span(title=`${datetime}` data-bs-toggle='tooltip' data-bs-placement='top' data-timestamp=meeting.datetime) #{datetime}
+                    p.card-text
+                      i.text-muted.fa.fa-compass.pe-2
+                      span
+                        for mroom in roomList
+                          if mroom.id == meeting.roomid
+                            span.text-muted.mb-3.ps-0 #{mroom.name}
+              .row.g-0
+                .input-group
+                  a.card-button-view.btn.btn-secondary(href='#' alt='View Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                    i.fa.fa-eye.pe-1
+                    span View
+                  - var meetingRoom
                   for mroom in roomList
                     if mroom.id == meeting.roomid
-                      span.mb-3.ps-2 #{mroom.name}
-                  p
-                  p.meeting-link
-                    if (meeting.link)
-                      i.fa.fa-link
-                      a.mb-3.ps-2(href=`${meeting.link}` target='_blank') Join Meeting
-                  .list-inline.mt-5.mb-2
-                    a.list-inline-item.btn.btn-primary.border-0.px(href='#' alt='View Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
-                      i.fa.fa-eye
-                    - var meetingRoom
-                    for mroom in roomList
-                      if mroom.id == meeting.roomid
-                        - meetingRoom = mroom.name
-                    a.list-inline-item.btn.btn-primary.border-0(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration/60 data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
-                      i.fa.fa-edit
-                    a.list-inline-item.btn.btn-primary.border-0(href='#' alt='Delete Meeting' data-bs-toggle='modal' data-bs-target='#modal-delete' data-description=meeting.description data-id=meeting.id)
-                      i.fa.fa-trash
-
+                      - meetingRoom = mroom.name
+                  a.card-button-edit.btn.btn-secondary(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration/60 data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                    i.fa.fa-edit.pe-1
+                    span Edit
+                  a.card-button-delete.btn.btn-secondary(href='#' alt='Delete Meeting' data-bs-toggle='modal' data-bs-target='#modal-delete' data-description=meeting.description data-id=meeting.id)
+                    i.fa.fa-trash.pe-1
+                    span Delete
     br
 
     //- Pagination links

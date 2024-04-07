@@ -85,9 +85,9 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         let updatedCard = editButton.parentElement.parentElement.parentElement;
         let viewButton = editButton.previousSibling;
         let deleteButton = editButton.nextSibling;
-        updatedCard.querySelector(':nth-child(4)').innerText = getRelativeTime(+new Date(data.datetime * 1000));
+        updatedCard.querySelector('span:nth-child(1)').innerText = getRelativeTime(+new Date(data.datetime * 1000));
         let timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, };
-        updatedCard.querySelector(':nth-child(4)').setAttribute('data-bs-original-title', new Date(data.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase());
+        updatedCard.querySelector('span:nth-child(1)').setAttribute('data-bs-original-title', new Date(data.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase());
         viewButton.setAttribute('data-datetime', data.datetime);
         editButton.setAttribute('data-datetime', data.datetime);
         viewButton.setAttribute('data-duration', data.duration*60);
@@ -98,7 +98,7 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         deleteButton.setAttribute('data-description', data.description);
         for (let i = 0; i < roomList.length; i++) {
           if (roomList[i].id === data.room) {
-            updatedCard.querySelector(':nth-child(7)').innerText = roomList[i].name;
+            updatedCard.querySelector('span:nth-child(2)').innerText = roomList[i].name;
           }
         }
         viewButton.setAttribute('data-room', data.room);
@@ -108,25 +108,6 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         editButton.setAttribute('data-service', data.service);
         viewButton.setAttribute('data-remarks', data.remarks);
         editButton.setAttribute('data-remarks', data.remarks);
-        let meetingLinkEl = updatedCard.querySelector('.meeting-link > a');
-        if (meetingLinkEl) {
-          if (data.link) {
-            updatedCard.querySelector('.meeting-link > a').setAttribute('href', data.link);
-          } else {
-            updatedCard.querySelector('.meeting-link > a').remove();
-            updatedCard.querySelector('.meeting-link > i').remove();
-          }
-        } else if (!meetingLinkEl && data.link) {
-            let newLinkIEl = document.createElement('i');
-            newLinkIEl.classList.add('fa', 'fa-link', 'text-white');
-            updatedCard.querySelector('.meeting-link').appendChild(newLinkIEl);
-            let newLinkAEl = document.createElement('a');
-            newLinkAEl.appendChild(document.createTextNode('Join Meeting'));
-            newLinkAEl.setAttribute('href', data.link);
-            newLinkAEl.setAttribute('target', '_blank');
-            newLinkAEl.classList.add('mb-3', 'text-white', 'ps-2');
-            updatedCard.querySelector('.meeting-link').appendChild(newLinkAEl);
-          }
         viewButton.setAttribute('data-link', data.link);
         editButton.setAttribute('data-link', data.link);
         setTimeout(function() {
@@ -263,33 +244,15 @@ let getRelativeTime = (d1, d2 = new Date()) => {
 };
 
 
-// Card backgrounds
-let cardColors = {
-  0: 'card-bg-color-one',
-  1: 'card-bg-color-two',
-  2: 'card-bg-color-three',
-  3: 'card-bg-color-four',
-  4: 'card-bg-color-five',
-  5: 'card-bg-color-six',
-  6: 'card-bg-color-seven',
-  7: 'card-bg-color-eight',
-  8: 'card-bg-color-one',
-  9: 'card-bg-color-two',
-  a: 'card-bg-color-three',
-  b: 'card-bg-color-four',
-  c: 'card-bg-color-five',
-  d: 'card-bg-color-six',
-  e: 'card-bg-color-seven',
-  f: 'card-bg-color-eight',
-};
 let cards = document.querySelectorAll('.card');
-let colorId;
 let datetimeElement;
 let timeStamp;
 for (let i = 0; i < cards.length; i++) {
-  colorId = document.querySelectorAll('.card')[i].getAttribute('data-color-id');
-  document.querySelectorAll('.card')[i].classList.add(cardColors[colorId]);
-  datetimeElement = document.querySelectorAll('.card')[i].querySelector("span:nth-child(4)");
+  datetimeElement = document.querySelectorAll('.card')[i].querySelector("span:nth-child(1)");
   timeStamp = datetimeElement.getAttribute('data-timestamp');
   datetimeElement.innerText = getRelativeTime(+new Date(timeStamp * 1000));
 }
+
+
+// Change background color for home page only (hack)
+document.body.style.background = '#ebeff2';

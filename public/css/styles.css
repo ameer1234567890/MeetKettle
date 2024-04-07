@@ -55,36 +55,24 @@ html,body { height: 100%; margin: 0; padding: 0; }
 }
 
 /* Home page specific styles */
-.card-bg-color-one {
-  background-color: #99dde7;
+.card {
+  border-radius: 0.6rem;
 }
 
-.card-bg-color-two {
-  background-color: #2ec7c0;
+.card-button-view {
+  width: 33%;
+  border-radius: 0.6rem;
+  border-top-left-radius: 0;
 }
 
-.card-bg-color-three {
-  background-color: #87dfe9;
+.card-button-edit {
+  width: 33%;
 }
 
-.card-bg-color-four {
-  background-color: #b2e5ed;
-}
-
-.card-bg-color-five {
-  background-color: #00abc5;
-}
-
-.card-bg-color-six {
-  background-color: #99dde7;
-}
-
-.card-bg-color-seven {
-  background-color: #2ec7c0;
-}
-
-.card-bg-color-eight {
-  background-color: #87dfe9;
+.card-button-delete {
+  width: calc(34% + 0.1234rem);
+  border-radius: 0.6rem;
+  border-top-right-radius: 0;
 }
 
 /* Edit modal specific styles */

@@ -32,3 +32,4 @@
 05/04/2024, More work on kiosk, added kioskaddmeeting page
 06/04/2024, More work on kioskaddmeeting page, some refactoring
 07/04/2024, Fixed booking of overlapping meetings, square add buttons
+08/04/2024, Home page revamped
