@@ -72,9 +72,11 @@ html(lang='en-US')
             .input-group
               input.form-control.border-primary(type='text' name='description' value=description placeholder='Enter description here...' required='required')
             p
-            .input-group
+            p
               button.btn.btn-primary(type='submit') Add
                 i.fa.fa-plus-circle.mx-2
+              a.btn.btn-secondary.float-end(href='/kiosk/room?room=' + room role='button') Cancel
+                i.fa.fa-times.mx-2
           br
           if errors
             ul.text-danger
