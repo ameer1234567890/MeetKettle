@@ -634,13 +634,16 @@ app.post('/kiosk/meetingadd',
   (req, res) => {
     if (!checkPermissions('permEdit', req, res)) { return false; }
     const errors = validationResult(req);
+    const roomId = req.body.room;
+    const duration = req.body.duration;
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
+    const meetingStart = timeStamp;
+    const meetingEnd = timeStamp + (parseInt(duration) * 60);
     let db = new sqlite3.Database(dbFile, (err) => {
       if (err) {
         return console.error(err.message);
       }
     });
-    let roomId = req.body.room;
     let roomList = [];
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
       if (err) {
@@ -649,16 +652,42 @@ app.post('/kiosk/meetingadd',
       roomName = row.name;
       roomLocation = row.location;
     });
-    db.close((err) => {
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', (err, rows) => {
+      let overlapMeeting;
       if (err) {
         return console.error(err.message);
+      } else {
+        let storedMeetingStart;
+        let storedMeetingEnd;
+        for (let i=0; i<Object.keys(rows).length; i++) {
+          storedMeetingStart = rows[i].datetime;
+          storedMeetingEnd = rows[i].datetime + rows[i].duration;
+          // Excellent logic from: https://stackoverflow.com/a/31328290
+          if (storedMeetingStart < meetingEnd && meetingStart < storedMeetingEnd) {
+            overlapMeeting = rows[i];
+            break;
+          }
+        }
       }
-      if (!errors.isEmpty()) {
-        const payload = {
+      if (overlapMeeting) {
+        let errorList = [];
+        const timeFormatOptions = { year:'numeric', month:'2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+        const overlapDescription = overlapMeeting.description;
+        const overlapDateTime = new Date(overlapMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
+        let overlapDuration;
+        if (overlapMeeting.duration/60 < 60) {
+          overlapDuration = overlapMeeting.duration/60 + ' minutes';
+        } else if (overlapMeeting.duration/60 == 60) {
+          overlapDuration = overlapMeeting.duration/60/60 + ' hour';
+        } else {
+          overlapDuration = overlapMeeting.duration/60/60 + ' hours';
+        }
+        errorList.push({ msg: 'Overlapping meeting: ' + overlapDescription + ' at ' + overlapDateTime + ' for ' + overlapDuration, });
+        res.render('kiosk-meeting-add', {
           authUser: req.session.userId,
-          title: 'Add a new Meetings',
-          message: 'Below errors occured',
-          errors: errors.array(),
+          title: 'Error',
+          message: 'Errors occured. Please refer below.',
+          errors: errorList,
           datetime: req.body.datetime,
           duration: req.body.duration,
           description: req.body.description,
@@ -668,51 +697,17 @@ app.post('/kiosk/meetingadd',
           service: req.body.service,
           serviceList: serviceList,
           roomList: roomList,
-        };
-        return res.render('kiosk-meeting-add', payload);
+        });
       } else {
-        let errorList = [];
-        let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
-        let datetime = timeStamp;
-        let description = req.body.description;
-        let duration = req.body.duration * 60;
-        let room = req.body.room;
-        let remarks = req.body.remarks;
-        let link = req.body.link;
-        let service = req.body.service;
-        let db = new sqlite3.Database(dbFile, (err) => {
-          if (err) {
-            return console.error(err.message);
-          }
-        });
-        db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
-          if (err) {
-            errorList.push({ code: err.errno, msg: err.message, });
-            return console.error(err.message);
-          }
-        });
         db.close((err) => {
-          if (errorList.length === 0) {
-            res.render('kiosk-meeting-add-complete', {
+          if (err) {
+            return console.error(err.message);
+          }
+          if (!errors.isEmpty()) {
+            const payload = {
               authUser: req.session.userId,
-              title: 'Success',
-              message: 'Meeting has been added as follows.',
-              datetime: req.body.datetime,
-              duration: req.body.duration,
-              description: req.body.description,
-              room: req.body.room,
-              remarks: req.body.remarks,
-              link: req.body.link,
-              service: req.body.service,
-              serviceList: serviceList,
-              roomList: roomList,
-            });
-            addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
-          } else {
-            res.render('kiosk-meeting-add', {
-              authUser: req.session.userId,
-              title: 'Error',
-              message: 'Errors occured. Please refer below.',
+              title: 'Add a new Meetings',
+              message: 'Below errors occured',
               errors: errors.array(),
               datetime: req.body.datetime,
               duration: req.body.duration,
@@ -723,10 +718,67 @@ app.post('/kiosk/meetingadd',
               service: req.body.service,
               serviceList: serviceList,
               roomList: roomList,
+            };
+            return res.render('kiosk-meeting-add', payload);
+          } else {
+            let errorList = [];
+            let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
+            let datetime = timeStamp;
+            let description = req.body.description;
+            let duration = req.body.duration * 60;
+            let room = req.body.room;
+            let remarks = req.body.remarks;
+            let link = req.body.link;
+            let service = req.body.service;
+            let db = new sqlite3.Database(dbFile, (err) => {
+              if (err) {
+                return console.error(err.message);
+              }
             });
-          }
-          if (err) {
-            return console.error(err.message);
+            db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
+              if (err) {
+                errorList.push({ code: err.errno, msg: err.message, });
+                return console.error(err.message);
+              }
+            });
+            db.close((err) => {
+              if (errorList.length === 0) {
+                res.render('kiosk-meeting-add-complete', {
+                  authUser: req.session.userId,
+                  title: 'Success',
+                  message: 'Meeting has been added as follows.',
+                  datetime: req.body.datetime,
+                  duration: req.body.duration,
+                  description: req.body.description,
+                  room: req.body.room,
+                  remarks: req.body.remarks,
+                  link: req.body.link,
+                  service: req.body.service,
+                  serviceList: serviceList,
+                  roomList: roomList,
+                });
+                addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
+              } else {
+                res.render('kiosk-meeting-add', {
+                  authUser: req.session.userId,
+                  title: 'Error',
+                  message: 'Errors occured. Please refer below.',
+                  errors: errors.array(),
+                  datetime: req.body.datetime,
+                  duration: req.body.duration,
+                  description: req.body.description,
+                  room: req.body.room,
+                  remarks: req.body.remarks,
+                  link: req.body.link,
+                  service: req.body.service,
+                  serviceList: serviceList,
+                  roomList: roomList,
+                });
+              }
+              if (err) {
+                return console.error(err.message);
+              }
+            });
           }
         });
       }
@@ -2588,7 +2640,11 @@ app.post('/meetings/add',
   (req, res) => {
     if (!checkPermissions('permEdit', req, res)) { return false; }
     const errors = validationResult(req);
+    const roomId = req.body.room;
+    const duration = req.body.duration;
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
+    const meetingStart = timeStamp;
+    const meetingEnd = timeStamp + (parseInt(duration) * 60);
     let db = new sqlite3.Database(dbFile, (err) => {
       if (err) {
         return console.error(err.message);
@@ -2608,16 +2664,42 @@ app.post('/meetings/add',
         roomList.push(room);
       }
     });
-    db.close((err) => {
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', (err, rows) => {
+      let overlapMeeting;
       if (err) {
         return console.error(err.message);
+      } else {
+        let storedMeetingStart;
+        let storedMeetingEnd;
+        for (let i=0; i<Object.keys(rows).length; i++) {
+          storedMeetingStart = rows[i].datetime;
+          storedMeetingEnd = rows[i].datetime + rows[i].duration;
+          // Excellent logic from: https://stackoverflow.com/a/31328290
+          if (storedMeetingStart < meetingEnd && meetingStart < storedMeetingEnd) {
+            overlapMeeting = rows[i];
+            break;
+          }
+        }
       }
-      if (!errors.isEmpty()) {
-        const payload = {
+      if (overlapMeeting) {
+        let errorList = [];
+        const timeFormatOptions = { year:'numeric', month:'2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+        const overlapDescription = overlapMeeting.description;
+        const overlapDateTime = new Date(overlapMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
+        let overlapDuration;
+        if (overlapMeeting.duration/60 < 60) {
+          overlapDuration = overlapMeeting.duration/60 + ' minutes';
+        } else if (overlapMeeting.duration/60 == 60) {
+          overlapDuration = overlapMeeting.duration/60/60 + ' hour';
+        } else {
+          overlapDuration = overlapMeeting.duration/60/60 + ' hours';
+        }
+        errorList.push({ msg: 'Overlapping meeting: ' + overlapDescription + ' at ' + overlapDateTime + ' for ' + overlapDuration, });
+        res.render('meetings-add', {
           authUser: req.session.userId,
-          title: 'Add a new Meetings',
-          message: 'Below errors occured',
-          errors: errors.array(),
+          title: 'Error',
+          message: 'Errors occured. Please refer below.',
+          errors: errorList,
           datetime: req.body.datetime,
           duration: req.body.duration,
           description: req.body.description,
@@ -2627,51 +2709,17 @@ app.post('/meetings/add',
           service: req.body.service,
           serviceList: serviceList,
           roomList: roomList,
-        };
-        return res.render('meetings-add', payload);
+        });
       } else {
-        let errorList = [];
-        let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
-        let datetime = timeStamp;
-        let description = req.body.description;
-        let duration = req.body.duration * 60;
-        let room = req.body.room;
-        let remarks = req.body.remarks;
-        let link = req.body.link;
-        let service = req.body.service;
-        let db = new sqlite3.Database(dbFile, (err) => {
-          if (err) {
-            return console.error(err.message);
-          }
-        });
-        db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
-          if (err) {
-            errorList.push({ code: err.errno, msg: err.message, });
-            return console.error(err.message);
-          }
-        });
         db.close((err) => {
-          if (errorList.length === 0) {
-            res.render('meetings-add-complete', {
+          if (err) {
+            return console.error(err.message);
+          }
+          if (!errors.isEmpty()) {
+            const payload = {
               authUser: req.session.userId,
-              title: 'Success',
-              message: 'Meeting has been added as follows.',
-              datetime: req.body.datetime,
-              duration: req.body.duration,
-              description: req.body.description,
-              room: req.body.room,
-              remarks: req.body.remarks,
-              link: req.body.link,
-              service: req.body.service,
-              serviceList: serviceList,
-              roomList: roomList,
-            });
-            addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
-          } else {
-            res.render('meetings-add', {
-              authUser: req.session.userId,
-              title: 'Error',
-              message: 'Errors occured. Please refer below.',
+              title: 'Add a new Meetings',
+              message: 'Below errors occured',
               errors: errors.array(),
               datetime: req.body.datetime,
               duration: req.body.duration,
@@ -2682,10 +2730,67 @@ app.post('/meetings/add',
               service: req.body.service,
               serviceList: serviceList,
               roomList: roomList,
+            };
+            return res.render('meetings-add', payload);
+          } else {
+            let errorList = [];
+            let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
+            let datetime = timeStamp;
+            let description = req.body.description;
+            let duration = req.body.duration * 60;
+            let room = req.body.room;
+            let remarks = req.body.remarks;
+            let link = req.body.link;
+            let service = req.body.service;
+            let db = new sqlite3.Database(dbFile, (err) => {
+              if (err) {
+                return console.error(err.message);
+              }
             });
-          }
-          if (err) {
-            return console.error(err.message);
+            db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
+              if (err) {
+                errorList.push({ code: err.errno, msg: err.message, });
+                return console.error(err.message);
+              }
+            });
+            db.close((err) => {
+              if (errorList.length === 0) {
+                res.render('meetings-add-complete', {
+                  authUser: req.session.userId,
+                  title: 'Success',
+                  message: 'Meeting has been added as follows.',
+                  datetime: req.body.datetime,
+                  duration: req.body.duration,
+                  description: req.body.description,
+                  room: req.body.room,
+                  remarks: req.body.remarks,
+                  link: req.body.link,
+                  service: req.body.service,
+                  serviceList: serviceList,
+                  roomList: roomList,
+                });
+                addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
+              } else {
+                res.render('meetings-add', {
+                  authUser: req.session.userId,
+                  title: 'Error',
+                  message: 'Errors occured. Please refer below.',
+                  errors: errors.array(),
+                  datetime: req.body.datetime,
+                  duration: req.body.duration,
+                  description: req.body.description,
+                  room: req.body.room,
+                  remarks: req.body.remarks,
+                  link: req.body.link,
+                  service: req.body.service,
+                  serviceList: serviceList,
+                  roomList: roomList,
+                });
+              }
+              if (err) {
+                return console.error(err.message);
+              }
+            });
           }
         });
       }
@@ -2721,7 +2826,12 @@ app.post('/meetings/edit',
   (req, res) => {
     if (!checkPermissionsJson('permEdit', req, res)) { return false; }
     const errors = validationResult(req);
+    const roomId = req.body.room;
+    const duration = req.body.duration;
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
+    const meetingStart = timeStamp;
+    const meetingEnd = timeStamp + (parseInt(duration) * 60);
+    const MeetingId = req.body.id;
     let db = new sqlite3.Database(dbFile, (err) => {
       if (err) {
         return console.error(err.message);
@@ -2741,62 +2851,105 @@ app.post('/meetings/edit',
         roomList.push(room);
       }
     });
-    db.close((err) => {
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', (err, rows) => {
+      let overlapMeeting;
       if (err) {
         return console.error(err.message);
+      } else {
+        let storedMeetingStart;
+        let storedMeetingEnd;
+        for (let i=0; i<Object.keys(rows).length; i++) {
+          if (rows[i].id == MeetingId) {
+            continue;
+          } else {
+            storedMeetingStart = rows[i].datetime;
+            storedMeetingEnd = rows[i].datetime + rows[i].duration;
+            // Excellent logic from: https://stackoverflow.com/a/31328290
+            if (storedMeetingStart < meetingEnd && meetingStart < storedMeetingEnd) {
+              overlapMeeting = rows[i];
+              break;
+            }
+          }
+        }
       }
-      if (!errors.isEmpty()) {
+      if (overlapMeeting) {
+        let errorList = [];
+        const timeFormatOptions = { year:'numeric', month:'2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+        const overlapDescription = overlapMeeting.description;
+        const overlapDateTime = new Date(overlapMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
+        let overlapDuration;
+        if (overlapMeeting.duration/60 < 60) {
+          overlapDuration = overlapMeeting.duration/60 + ' minutes';
+        } else if (overlapMeeting.duration/60 == 60) {
+          overlapDuration = overlapMeeting.duration/60/60 + ' hour';
+        } else {
+          overlapDuration = overlapMeeting.duration/60/60 + ' hours';
+        }
+        errorList.push({ msg: 'Overlapping meeting: ' + overlapDescription + ' at ' + overlapDateTime + ' for ' + overlapDuration, });
         const payload = {
           status: 'error',
-          errors: errors.array(),
+          errors: errorList,
         };
         res.status(400).json(payload);
-    } else {
-        let errorList = [];
-        let id = req.body.id;
-        let datetime = timeStamp;
-        let duration = req.body.duration * 60;
-        let description = req.body.description;
-        let room = req.body.room;
-        let remarks = req.body.remarks;
-        let link = req.body.link;
-        let service = req.body.service;
-        let db = new sqlite3.Database(dbFile, (err) => {
-          if (err) {
-            return console.error(err.message);
-          }
-        });
-        db.run('UPDATE meetings SET datetime=?, duration=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, duration, description, room, remarks, link, service,], (err) => {
-          if (err) {
-            errorList.push({ code: err.errno, msg: err.message, });
-            return console.error(err.message);
-          }
-        });
+      } else {
         db.close((err) => {
-          if (errorList.length === 0) {
-            const payload = {
-              status: 'success',
-              datetime: timeStamp,
-              duration: req.body.duration,
-              description: req.body.description,
-              room: req.body.room,
-              remarks: req.body.remarks,
-              link: req.body.link,
-              service: req.body.service,
-              serviceList: serviceList,
-              roomList: roomList,
-            };
-            res.json(payload);
-            addUserLogEntry('edit_meeting', req.session.userId, null, req.body.room, id, null);
-          } else {
+          if (err) {
+            return console.error(err.message);
+          }
+          if (!errors.isEmpty()) {
             const payload = {
               status: 'error',
-              errors: errorList,
+              errors: errors.array(),
             };
             res.status(400).json(payload);
-          }
-          if (err) {
-            return console.error(err.message);
+        } else {
+            let errorList = [];
+            let id = req.body.id;
+            let datetime = timeStamp;
+            let duration = req.body.duration * 60;
+            let description = req.body.description;
+            let room = req.body.room;
+            let remarks = req.body.remarks;
+            let link = req.body.link;
+            let service = req.body.service;
+            let db = new sqlite3.Database(dbFile, (err) => {
+              if (err) {
+                return console.error(err.message);
+              }
+            });
+            db.run('UPDATE meetings SET datetime=?, duration=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, duration, description, room, remarks, link, service,], (err) => {
+              if (err) {
+                errorList.push({ code: err.errno, msg: err.message, });
+                return console.error(err.message);
+              }
+            });
+            db.close((err) => {
+              if (errorList.length === 0) {
+                const payload = {
+                  status: 'success',
+                  datetime: timeStamp,
+                  duration: req.body.duration,
+                  description: req.body.description,
+                  room: req.body.room,
+                  remarks: req.body.remarks,
+                  link: req.body.link,
+                  service: req.body.service,
+                  serviceList: serviceList,
+                  roomList: roomList,
+                };
+                res.json(payload);
+                addUserLogEntry('edit_meeting', req.session.userId, null, req.body.room, id, null);
+              } else {
+                const payload = {
+                  status: 'error',
+                  errors: errorList,
+                };
+                res.status(400).json(payload);
+              }
+              if (err) {
+                return console.error(err.message);
+              }
+            });
           }
         });
       }

@@ -47,7 +47,7 @@ html(lang='en-US')
                   input.btn-check(type='radio' name='time' value=time id=optionName required='required' checked)
                 else
                   input.btn-check(type='radio' name='time' value=time id=optionName required='required')
-                label.btn.btn-outline-primary.rounded-0(for=optionName) #{time}
+                label.time-n-duration-picker.btn.btn-outline-primary.rounded-0(for=optionName) #{time}
               input#timeCustom.form-control.border-primary(type='time' name='time')
             p
             #meeting-durations Meeting Duration:
@@ -66,7 +66,7 @@ html(lang='en-US')
                   input.btn-check(type='radio' name='duration' value=i id=optionName required='required' checked)
                 else
                   input.btn-check(type='radio' name='duration' value=i id=optionName required='required')
-                label.btn.btn-outline-primary.rounded-0(for=optionName) #{humanDuration}
+                label.time-n-duration-picker.btn.btn-outline-primary.rounded-0(for=optionName) #{humanDuration}
             p
             #meeting-description Meeting Description:
             .input-group

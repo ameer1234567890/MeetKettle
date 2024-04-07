@@ -50,6 +50,10 @@ html,body { height: 100%; margin: 0; padding: 0; }
   align-self: flex-end;
 }
 
+.time-n-duration-picker {
+  width: 7rem;
+}
+
 /* Home page specific styles */
 .card-bg-color-one {
   background-color: #99dde7;

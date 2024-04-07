@@ -13,7 +13,7 @@ document.getElementById('timeCustom').addEventListener("click", function() {
 });
 document.getElementById('addMeetingForm').addEventListener("submit", function(event) {
   event.preventDefault();
-  var dateString = new Date().getFullYear() + '/' + (new Date().getMonth()+1) + '/' + new Date().getDay();
+  var dateString = new Date().getFullYear() + '/' + (new Date().getMonth()+1) + '/' + new Date().getDate();
   var timeString;
   if (document.querySelectorAll('input[name=time]:checked')[0]) {
     timeString = document.querySelectorAll('input[name=time]:checked')[0].value;

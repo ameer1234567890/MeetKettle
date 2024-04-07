@@ -31,3 +31,4 @@
 04/04/2024, Added duration, fixed edit modal bugs in home and meeting list pages, restyled home page, more work on kiosk, date formats in 12 hour format
 05/04/2024, More work on kiosk, added kioskaddmeeting page
 06/04/2024, More work on kioskaddmeeting page, some refactoring
+07/04/2024, Fixed booking of overlapping meetings
