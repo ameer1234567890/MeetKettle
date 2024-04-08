@@ -1,4 +1,3 @@
-- Extend current meeting
-- End current meeting
+- Free until...
 - List of meetings for today (tomorrow?)
 - Meeting statistics page

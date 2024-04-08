@@ -120,8 +120,8 @@ deleteModal.addEventListener('show.bs.modal', function (event) {
 });
 document.querySelector('#delete-form').addEventListener('submit', function(event) {
   event.preventDefault();
-  let submitButton = document.querySelector('#modal-delete .btn-primary');
-  let submitButtonIcon = document.querySelector('#modal-delete .btn-primary > i');
+  let submitButton = document.querySelector('#modal-delete .btn-danger');
+  let submitButtonIcon = document.querySelector('#modal-delete .btn-danger > i');
   submitButton.disabled = true;
   submitButtonIcon.classList.remove('fa-check');
   submitButtonIcon.classList.add('fa-spinner');
@@ -139,7 +139,7 @@ document.querySelector('#delete-form').addEventListener('submit', function(event
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
-        submitButton.classList.remove('btn-primary');
+        submitButton.classList.remove('btn-danger');
         submitButton.classList.add('btn-success');
         setTimeout(function() {
           let modal = bootstrap.Modal.getInstance(deleteModal);
@@ -148,7 +148,7 @@ document.querySelector('#delete-form').addEventListener('submit', function(event
           deletedRow.classList.add('fade-transition');
           deletedRow.classList.add('bg-danger');
           submitButton.classList.remove('btn-success');
-          submitButton.classList.add('btn-primary');
+          submitButton.classList.add('btn-danger');
           setTimeout(function() {
             deletedRow.remove();
           }, 1000);
@@ -166,13 +166,13 @@ document.querySelector('#delete-form').addEventListener('submit', function(event
       submitButtonIcon.classList.remove('fa-pulse');
       submitButtonIcon.classList.remove('fa-spinner');
       submitButtonIcon.classList.add('fa-times');
-      submitButton.classList.remove('btn-primary');
+      submitButton.classList.remove('btn-danger');
       submitButton.classList.add('btn-danger');
       setTimeout(function() {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
-        submitButton.classList.add('btn-primary');
+        submitButton.classList.add('btn-danger');
       }, 1000);
     }
   });

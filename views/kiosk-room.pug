@@ -48,14 +48,18 @@ html(lang='en-US')
             - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             span#clock.float-end.fs-4 #{timeNow}
           .d-md-block
-            a#book-button.btn.btn-primary(href='/kiosk/meetingadd') RESERVE NEW MEETING #{roomId}
-              i.fa.fa-plus.mx-2
+            a#book-button.btn.btn-primary(href='/kiosk/meetingadd')
+              i.fa.fa-plus.me-2
+              span RESERVE NEW MEETING
           if (availability == false)
             h1.kiosk-status.text-center.text-danger.pt-5 BUSY
             - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
             - var startTime = new Date(currentMeeting.datetime * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             - var endTime = new Date(currentMeeting.datetime * 1000 + currentMeeting.duration * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
-            #until.text-center.text-dark.fw-bold.fs-4 UNTIL #{endTime}
+            #until.text-center.text-dark.fw-bold.fs-4 UNTIL 
+              span #{endTime}
+              button.btn.btn-outline-danger.ms-2.align-top(data-bs-toggle='modal' data-bs-target='#modal-end' data-id=currentMeeting.id data-datetime=currentMeeting.datetime data-duration=currentMeeting.duration data-roomid=room) END
+              button.btn.btn-outline-primary.ms-2.align-top(data-bs-toggle='modal' data-bs-target='#modal-extend' data-id=currentMeeting.id data-datetime=currentMeeting.datetime data-duration=currentMeeting.duration data-roomid=room) EXTEND
             #meetingCurrent.text-center.text-dark.fs-5 #{currentMeeting.description} | #{startTime} | #{currentMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
           else
             h1.kiosk-status.text-center.text-success.pt-5 FREE
@@ -66,7 +70,7 @@ html(lang='en-US')
               .card.shadow.mb-4
                 .row.g-0
                   .col-md-3
-                    img.align-content-start.pt-3.ps-3(src='/public/images/' + nextMeeting.service + '.svg' width='60' alt=`${nextMeeting.service}`)
+                    img.align-content-start.pt-4.ps-3(src='/public/images/' + nextMeeting.service + '.svg' width='60' alt=`${nextMeeting.service}`)
                   .col-md-9
                     .card-body
                       h5.card-title #{nextMeeting.description}
@@ -86,51 +90,48 @@ html(lang='en-US')
                         span #{meetingEnd}
                         span.me-4.pe-4
 
-    //- Modal for View
-    if (nextMeeting)
-      #modal-view.modal.fade(tabindex='-1')
-        .modal-dialog.modal-dialog-centered
-          .modal-content
-            .modal-header
-              h5.modal-title Edit
-              button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-            .modal-body
-              table.table.table-bordered.table-hover
-                thead
-                  tr
-                    th(scope='col') Field
-                    th(scope='col') Value
-                tbody
-                  tr
-                    - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
-                    - var datetime = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
-                    th(scope='row') Date and Time
-                    td #{datetime}
-                  tr
-                    - nextMeeting.duration = nextMeeting.duration/60
-                    - var duration; if (nextMeeting.duration < 60) { duration = nextMeeting.duration + ' minutes'; } else { duration = nextMeeting.duration/60 + ' hour(s)'; }
-                    th(scope='row') Duration
-                    td #{duration}
-                  tr
-                    th(scope='row') Description
-                    td #{nextMeeting.description}
-                  tr
-                    th(scope='row') Meeting Room
-                    td #{roomName}
-                  tr
-                    th(scope='row') Meeting Service
-                    td #{nextMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
-                  tr
-                    th(scope='row') Meeting Link
-                    td
-                      a(href=nextMeeting.link) #{nextMeeting.link}
-                  tr
-                    th(scope='row') Remarks
-                    td #{nextMeeting.remarks}
-              ul#view-errors.text-danger
-            .modal-footer
-              button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
-                i.fa.fa-times.mx-2
+    //- Modal for Extend Meeting
+    #modal-extend.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Extend Meeting?
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#extend-form(method='POST' action='/meetings/extend')
+              input#extend-id(type='hidden' name='id')
+              input#extend-roomid(type='hidden' name='roomid')
+              input#extend-datetime(type='hidden' name='datetime')
+              input#extend-duration(type='hidden' name='duration')
+              input#extend-extend(type='hidden' name='extend' value='900')
+            p Are you sure you want to extend the meeting by 15 minutes?
+            ul#extend-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+              i.fa.fa-times.mx-2
+            button.btn.btn-primary(type='submit' form='extend-form') Yes
+              i.fa.fa-check.mx-2
+
+    //- Modal for End Meeting
+    #modal-end.modal.fade(tabindex='-1')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title End Meeting?
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#end-form(method='POST' action='/meetings/end')
+              input#end-id(type='hidden' name='id')
+              input#end-roomid(type='hidden' name='roomid')
+              input#end-datetime(type='hidden' name='datetime')
+              input#end-duration(type='hidden' name='duration')
+            p Are you sure you want to end the current meeting?
+            ul#end-errors.text-danger
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') No
+              i.fa.fa-times.mx-2
+            button.btn.btn-danger(type='submit' form='end-form') Yes
+              i.fa.fa-check.mx-2
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
   script(src='/public/js/kiosk-room.js')

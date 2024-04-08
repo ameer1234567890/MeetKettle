@@ -157,12 +157,12 @@ deleteModal.addEventListener('show.bs.modal', function (event) {
   deleteErrorsElement.innerHTML = '';
   deleteButton = event.relatedTarget;
   deleteModal.querySelector('#meeting-desc-in-modal').innerHTML = deleteButton.getAttribute('data-description');
-  deleteModal.querySelector('#delete-id').value =deleteButton.getAttribute('data-id');
+  deleteModal.querySelector('#delete-id').value = deleteButton.getAttribute('data-id');
 });
 document.querySelector('#delete-form').addEventListener('submit', function(event) {
   event.preventDefault();
-  let submitButton = document.querySelector('#modal-delete .btn-primary');
-  let submitButtonIcon = document.querySelector('#modal-delete .btn-primary > i');
+  let submitButton = document.querySelector('#modal-delete .btn-danger');
+  let submitButtonIcon = document.querySelector('#modal-delete .btn-danger > i');
   submitButton.disabled = true;
   submitButtonIcon.classList.remove('fa-check');
   submitButtonIcon.classList.add('fa-spinner');
@@ -180,7 +180,7 @@ document.querySelector('#delete-form').addEventListener('submit', function(event
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
-        submitButton.classList.remove('btn-primary');
+        submitButton.classList.remove('btn-danger');
         submitButton.classList.add('btn-success');
         setTimeout(function() {
           let modal = bootstrap.Modal.getInstance(deleteModal);
@@ -189,7 +189,7 @@ document.querySelector('#delete-form').addEventListener('submit', function(event
           updatedCard.classList.add('fade-transition');
           updatedCard.classList.add('bg-danger');
           submitButton.classList.remove('btn-success');
-          submitButton.classList.add('btn-primary');
+          submitButton.classList.add('btn-danger');
           setTimeout(function() {
             updatedCard.remove();
           }, 1000);
@@ -207,13 +207,13 @@ document.querySelector('#delete-form').addEventListener('submit', function(event
       submitButtonIcon.classList.remove('fa-pulse');
       submitButtonIcon.classList.remove('fa-spinner');
       submitButtonIcon.classList.add('fa-times');
-      submitButton.classList.remove('btn-primary');
+      submitButton.classList.remove('btn-danger');
       submitButton.classList.add('btn-danger');
       setTimeout(function() {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
-        submitButton.classList.add('btn-primary');
+        submitButton.classList.add('btn-danger');
       }, 1000);
     }
   });
