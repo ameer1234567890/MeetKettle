@@ -63,13 +63,29 @@ html(lang='en-US')
             #meetingCurrent.text-center.text-dark.fs-5 &nbsp;
           #meetingNext
             if (nextMeeting)
-              - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
-              - var datetime = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
-              a.btn.btn-secondary.bottom-align-text.fw-bold(href='#' alt='Next Meeting Details' data-bs-toggle='modal' data-bs-target='#modal-view') NEXT MEETING: 
-                span.fw-normal #{datetime} | #{nextMeeting.description} | #{nextMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
-            else
-              a.btn.btn-secondary.disabled.bottom-align-text.fw-bold NEXT MEETING: 
-                span.fw-normal None
+              .card.shadow.mb-4
+                .row.g-0
+                  .col-md-3
+                    img.align-content-start.pt-3.ps-3(src='/public/images/' + nextMeeting.service + '.svg' width='60' alt=`${nextMeeting.service}`)
+                  .col-md-9
+                    .card-body
+                      h5.card-title #{nextMeeting.description}
+                      - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+                      - var datetime = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
+                      p.card-text
+                        span(title=`${datetime}` data-bs-toggle='tooltip' data-bs-placement='right' data-timestamp=nextMeeting.datetime) #{datetime}
+                .row.g-0.px-4
+                      p.card-text.mb-0
+                        - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
+                        - var meetingStart = new Date(nextMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
+                        - var meetingEnd = new Date((nextMeeting.datetime + nextMeeting.duration) * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()
+                        i.fa.fa-clock-o.pe-1
+                        span #{meetingStart}
+                        i.fa.fa-long-arrow-right.text-muted.px-2
+                        i.fa.fa-clock-o.text-muted.pe-1
+                        span #{meetingEnd}
+                        span.me-4.pe-4
+
     //- Modal for View
     if (nextMeeting)
       #modal-view.modal.fade(tabindex='-1')

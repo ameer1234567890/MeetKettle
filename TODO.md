@@ -1,4 +1,3 @@
-- Card for next meeting in kiosk
 - Extend current meeting
 - End current meeting
 - List of meetings for today (tomorrow?)
