@@ -14,7 +14,7 @@ html(lang='en-US')
   body.kiosk-body
 
   if !errors
-    .row.g-0.full-height
+    .row.g-0
       .col-md-3
         .row.h-100.g-0
           .bg-primary.m-0.full-height
@@ -24,7 +24,7 @@ html(lang='en-US')
             - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
             - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             span#clock.float-end.fs-4 #{timeNow}
-          .d-md-block
+          .d-md-block.pb-4
             a#book-button.btn.btn-primary(href='/kiosk/meetingadd')
               i.fa.fa-plus.me-2
               span RESERVE NEW MEETING

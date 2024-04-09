@@ -29,12 +29,18 @@ let rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto', });
 
 let getRelativeDay = (d1, d2 = new Date()) => {
   let secondsInADay = 86400000;
+  let secondsInAWeek = secondsInADay * 7;
+  let diffDays = Math.floor((d1.getTime() - d2.getTime()) / secondsInADay);
+  let diffWeeks = Math.floor((d1.getTime() - d2.getTime()) / secondsInAWeek);
   if (d1.toLocaleDateString('en-GB') == d2.toLocaleDateString('en-GB')) {
     return 'Today';
-  } else if (d1.toLocaleDateString('en-GB') == new Date(d2.getTime()+secondsInADay).toLocaleDateString('en-GB')) {
+  } else if (diffDays == 1) {
     return 'Tomorrow'
+  } else if (diffWeeks == 1) {
+    return 'in ' + diffWeeks + ' week';
+  } else if (diffWeeks >= 1) {
+    return 'in ' + diffWeeks + ' weeks';
   } else {
-    let diffDays = Math.floor((d1.getTime() - d2.getTime()) / secondsInADay);
     return 'in ' + diffDays + ' days';
   }
 };
