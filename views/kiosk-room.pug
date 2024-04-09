@@ -63,8 +63,15 @@ html(lang='en-US')
             #meetingCurrent.text-center.text-dark.fs-5 #{currentMeeting.description} | #{startTime} | #{currentMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
           else
             h1.kiosk-status.text-center.text-success.pt-5 FREE
-            #until.text-center.text-dark.fw-bold.fs-4 &nbsp;
-            #meetingCurrent.text-center.text-dark.fs-5 &nbsp;
+            if (nextMeeting)
+              #until.text-center.text-dark.fw-bold.fs-4 UNTIL 
+                - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
+                - var nextMeetingStartTime = new Date(nextMeeting.datetime * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+                span #{nextMeetingStartTime}
+              #meetingCurrent.text-center.text-dark.fs-5 &nbsp;
+            else
+              #until.text-center.text-dark.fw-bold.fs-4 &nbsp;
+              #meetingCurrent.text-center.text-dark.fs-5 &nbsp;
           #meetingNext
             if (nextMeeting)
               .card.shadow.mb-4

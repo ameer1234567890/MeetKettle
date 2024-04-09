@@ -33,3 +33,4 @@
 06/04/2024, More work on kioskaddmeeting page, some refactoring
 07/04/2024, Fixed booking of overlapping meetings, square add buttons
 08/04/2024, Home page revamped, card layout for next meeting in kiosk, extend & end meeting
+09/04/2024, Added "Free until" to kiosk
