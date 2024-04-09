@@ -1,2 +1,1 @@
-- List of meetings for today (tomorrow?)
 - Meeting statistics page

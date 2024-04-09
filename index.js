@@ -560,6 +560,82 @@ app.get('/kiosk/room',
 );
 
 
+app.get('/kiosk/meetings',
+  query('room')
+    .notEmpty()
+    .withMessage('No room specified'),
+  (req, res) => {
+    if (!checkPermissions('permView', req, res)) { return false; }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const payload = {
+        authUser: req.session.userId,
+        errors: errors.array(),
+      };
+      return res.render('kiosk-meetings', payload);
+    }
+    let roomId = req.query.room;
+    let meetingList = [];
+    let db = new sqlite3.Database(dbFile, (err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+    });
+    const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' ORDER BY datetime ASC LIMIT 10', (err, rows) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      let meeting;
+      for (let i = 0; i < rows.length; i++) {
+        meeting = {
+          'id':rows[i].id,
+          'datetime':rows[i].datetime,
+          'duration':rows[i].duration,
+          'description':rows[i].description,
+          'remarks':rows[i].remarks,
+          'link':rows[i].meetinglink,
+          'service':rows[i].meetingservice,
+        };
+        meetingList.push(meeting);
+      }
+    });
+    db.close((err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      let roomName;
+      let roomLocation;
+      let db = new sqlite3.Database(dbFile, (err) => {
+        if (err) {
+          return console.error(err.message);
+        }
+      });
+      db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
+        if (err) {
+          return console.error(err.message);
+        }
+        roomName = row.name;
+        roomLocation = row.location;
+      });
+      db.close((err) => {
+        if (err) {
+          return console.error(err.message);
+        }
+        const payload = {
+          authUser: req.session.userId,
+          meetings: meetingList,
+          room: roomId,
+          roomName: roomName,
+          roomLocation: roomLocation,
+        };
+        res.render('kiosk-meetings', payload);
+      });
+    });
+  }
+);
+
+
 app.get('/kiosk/meetingadd',
   query('room')
     .notEmpty()

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
   let roomId = new URLSearchParams(document.location.search).get('room');
   document.getElementById('book-button').href = '/kiosk/meetingadd?room=' + roomId;
-  activateTooltips()
+  activateTooltips();
   getWakeLock();
   setTimeout(updateTime, 1000);
 });

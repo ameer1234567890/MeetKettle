@@ -1,0 +1,62 @@
+doctype html
+html(lang='en-US')
+  head
+    title MeetKettle
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='apple-touch-icon' sizes='180x180' href='/public/apple-touch-icon.png')
+    link(rel='icon' type='image/png' sizes='32x32' href='/public/favicon-32x32.png')
+    link(rel='icon' type='image/png' sizes='16x16' href='/public/favicon-16x16.png')
+    link(rel='manifest' href='/public/site.webmanifest')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet", href="/public/css/styles.css")
+
+  body.kiosk-body
+
+  if !errors
+    .row.g-0.full-height
+      .col-md-3
+        .row.h-100.g-0
+          .bg-primary.m-0.full-height
+      .col-md-9.full-height
+        .row.g-0.mx-4.full-height
+          h2.fw-normal.my-4 #{roomName.toUpperCase()}
+            - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }
+            - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+            span#clock.float-end.fs-4 #{timeNow}
+          .d-md-block
+            a#book-button.btn.btn-primary(href='/kiosk/meetingadd')
+              i.fa.fa-plus.me-2
+              span RESERVE NEW MEETING
+          .d-md-block
+            .list-group
+              for meeting in meetings
+                - var meetingStart = new Date(meeting.datetime * 1000)
+                - var meetingEnd = new Date(meeting.datetime * 1000 + meeting.duration * 1000)
+                .list-group-item
+                  .row
+                    .col-md-2.col-lg-1
+                      img.mt-2(src='/public/images/' + meeting.service + '.svg' width='60')
+                    .col-md-10.col-lg-11
+                      .d-flex.w-100.justify-content-between
+                        h5.mb-1 #{meeting.description}
+                        span.fs-5
+                          - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
+                          span(data-timestamp=meeting.datetime) #{meetingStart.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+                          i.fa.fa-long-arrow-right.text-muted.px-2
+                          - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
+                          span #{meetingEnd.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+                      p.mb-1 Meeting Type: #{meeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+                      small.text-muted
+                        - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+                        span #{meetingStart.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+                        i.fa.fa-long-arrow-right.text-muted.px-2
+                        span #{meetingEnd.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
+  script(src='/public/js/kiosk-meetings.js')
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg
