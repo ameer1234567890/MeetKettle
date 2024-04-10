@@ -18,6 +18,8 @@ html(lang='en-US')
       .col-md-3
         .row.h-100.g-0
           .bg-primary.m-0.full-height
+            h1
+              a#arrow-meetings.kiosk-arrow-left.float-start.link-warning(href='/kiosk/room?room=' + room) ⟨
       .col-md-9.full-height
         .row.g-0.mx-4.full-height
           h2.fw-normal.my-4 #{roomName.toUpperCase()}
@@ -25,7 +27,7 @@ html(lang='en-US')
             - var timeNow = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             span#clock.float-end.fs-4 #{timeNow}
           .d-md-block.pb-4
-            a#book-button.btn.btn-primary(href='/kiosk/meetingadd')
+            a#book-button.btn.btn-primary(href='/kiosk/meetingadd?room=' + room)
               i.fa.fa-plus.me-2
               span RESERVE NEW MEETING
           .d-md-block
