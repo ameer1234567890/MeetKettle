@@ -135,7 +135,7 @@ block content
               .mb-3
                 .me-3 Room Facilities: 
                   for facility in facilityList
-                    .form-check.form-switch.form-check-inline.pe-3
+                    .form-check.form-check-inline.pe-3
                       input.form-check-input(id='facility' + facility type='checkbox' name='facility' + facility)
                       label.form-check-label(for='facility' + facility) #{facility.charAt(0).toUpperCase() + facility.slice(1)}
               .form-floating.mb-3
