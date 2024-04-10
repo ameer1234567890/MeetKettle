@@ -14,7 +14,7 @@ html(lang='en-US')
   body.kiosk-body
 
   if !errors
-    .row.g-0
+    .row.g-0.full-height
       .col-md-3
         .row.h-100.g-0
           .bg-primary.m-0.full-height
@@ -29,7 +29,7 @@ html(lang='en-US')
               i.fa.fa-plus.me-2
               span RESERVE NEW MEETING
           .d-md-block
-            .list-group
+            .kiosk-meeting-list.list-group.overflow-auto
               for meeting in meetings
                 - var meetingStart = new Date(meeting.datetime * 1000)
                 - var meetingEnd = new Date(meeting.datetime * 1000 + meeting.duration * 1000)

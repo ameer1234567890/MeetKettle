@@ -25,16 +25,8 @@ html,body { height: 100%; margin: 0; padding: 0; }
 
 .full-height { height: 100% }
 
-.bg-available {
-  background-color: #4caf50;
-}
-
-.bg-unavailable {
-  background-color: #e53935;
-}
-
-.bg-primary {
-  background-color: #0d6efd;
+.kiosk-meeting-list {
+  height: calc(100vh - 10.5rem);
 }
 
 .kiosk-status {

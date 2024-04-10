@@ -38,9 +38,9 @@ html(lang='en-US')
       .col-md-3
         .row.h-100.g-0
           if (availability == false)
-            .bg-unavailable.m-0.full-height
+            .bg-danger.m-0.full-height
           else
-            .bg-available.m-0.full-height
+            .bg-success.m-0.full-height
       .col-md-9.full-height
         .row.g-0.mx-4.full-height
           h2.fw-normal.my-4 #{roomName.toUpperCase()}
