@@ -17,7 +17,7 @@ block content
     .mb-3
       span.me-3 Room Facilities: 
       for facility in facilityList
-        .form-check.form-switch.form-check-inline.pe-3
+        .form-check.form-check-inline.pe-3
           input.form-check-input(id='facility' + facility type='checkbox' name='facility' + facility checked=(facilitiesStatus[facility]))
           label.form-check-label(for='facility' + facility) #{facility.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
     .form-floating.mb-3
