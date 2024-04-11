@@ -34,4 +34,5 @@
 07/04/2024, Fixed booking of overlapping meetings, square add buttons
 08/04/2024, Home page revamped, card layout for next meeting in kiosk, extend & end meeting
 09/04/2024, Added "Free until" to kiosk, Added meeting list in kiosk mode
-10/04/2024, Fixed scrolling in kiosk meeting list
+10/04/2024, Fixed scrolling in kiosk meeting list, better navigation between kiosk pages, Added stats page
+12/04/2024, npm package updates, some work on stats page

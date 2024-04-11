@@ -1,1 +1,6 @@
-- Meeting statistics page
+- Statistics charts:
+  - Number of meetings per day/month (bar chart)
+  - Duration of meetings per day/month (bar chart)
+  - Meetings by type (pie chart)
+  - Meetings by meeting room (pie chart)
+  - Meetings across 24 hours (line chart)

@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  - var navPage = 'stats'
+  if errors
+    h1 #{title}
+    p(class={'text-danger': !errors ? undefined : 'text-danger'}) #{message}
+  br
+  br
+  br
+  
+  if !errors
+    .container
+      .row.row-cols-1.row-cols-lg-2
+        .col
+          h4 Meetings per day:
+          canvas#chart-meetings-per-day
+
+    script(src='https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js')
+    script(src='/public/js/stats.js')
+
+    br
+
+  if errors
+    ul.text-danger
+      for error in errors
+        li!= error.msg
