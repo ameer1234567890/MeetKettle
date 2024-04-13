@@ -412,118 +412,38 @@ app.get('/',
 );
 
 
-app.get('/stats',
-  query('page')
-    .optional().isInt({ min: 1, })
-    .withMessage('Invalid page number provided in query string'),
-  query('q')
-    .optional({ checkFalsy: true, }).matches(/^[a-z0-9_:;,#@ \.\?\$\(\)\[\]\{\}\+\-\*\|]+$/i)
-    .withMessage('Search query contains invalid characters'),
-  (req, res) => {
-    if (!checkPermissions('permView', req, res)) { return false; }
-    const errors = validationResult(req);
-    let q = req.query.q;
-    if (!q) {
-      q = '';
+app.get('/stats', (req, res) => {
+  if (!checkPermissions('permView', req, res)) { return false; }
+  let db = new sqlite3.Database(dbFile, (err) => {
+    if (err) {
+      return console.error(err.message);
     }
-  if (!errors.isEmpty()) {
-      const payload = {
-        authUser: req.session.userId,
-        title: 'List Meetings',
-        message: 'Below errors occured',
-        errors: errors.array(),
-        q: q,
+  });
+  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    let meeting;
+    for (let i = 0; i < rows.length; i++) {
+      meeting = {
+        'id':rows[i].id,
+        'datetime':rows[i].datetime,
+        'duration':rows[i].duration,
+        'description':rows[i].description,
+        'roomid':rows[i].roomid,
+        'remarks':rows[i].remarks,
+        'link':rows[i].meetinglink,
+        'service':rows[i].meetingservice,
       };
-      return res.render('stats', payload);
+      meetingList.push(meeting);
     }
-    let page;
-    if (!req.query.page) {
-      page = 1;
-    } else {
-      page = req.query.page;
+  });
+  db.close((err) => {
+    if (err) {
+      return console.error(err.message);
     }
-    let numPages;
-    let meetingList = [];
-    let db = new sqlite3.Database(dbFile, (err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-    });
-    let roomList = [];
-    db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      let room;
-      for (let i = 0; i < rows.length; i++) {
-        room = {
-          'id':rows[i].id,
-          'name':rows[i].name,
-        };
-        roomList.push(room);
-      }
-    });
-    const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
-    db.get('SELECT COUNT(1) FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' AND datetime > ' + nowMinusTwoHours, (err, row) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      const numRecords = row['COUNT(1)'];
-      numPages = Math.ceil(numRecords / recordsPerPage);
-      const startRecord = (page - 1) * recordsPerPage;
-      db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return console.error(err.message);
-        }
-        let meeting;
-        for (let i = 0; i < rows.length; i++) {
-          meeting = {
-            'id':rows[i].id,
-            'datetime':rows[i].datetime,
-            'duration':rows[i].duration,
-            'description':rows[i].description,
-            'roomid':rows[i].roomid,
-            'remarks':rows[i].remarks,
-            'link':rows[i].meetinglink,
-            'service':rows[i].meetingservice,
-          };
-          meetingList.push(meeting);
-        }
-      });
-    });
-    db.close((err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      if (meetingList.length === 0) {
-        const payload = {
-          authUser: req.session.userId,
-          title: 'No Meetings',
-          errors: true,
-          message: 'There are no meetings scheduled',
-          meetings: meetingList,
-          currentPage: page,
-          numPages: numPages,
-          roomList: roomList,
-          serviceList: serviceList,
-          q: q,
-        };
-        res.render('stats', payload);
-      } else {
-        const payload = {
-          authUser: req.session.userId,
-          meetings: meetingList,
-          currentPage: page,
-          numPages: numPages,
-          roomList: roomList,
-          serviceList: serviceList,
-          q: q,
-        };
-        res.render('stats', payload);
-      }
-    });
-  }
-);
+  });
+});
 
 
 app.get('/kiosk',
