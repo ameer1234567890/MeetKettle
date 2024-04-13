@@ -10,14 +10,20 @@ block content
       input#user.form-control(type='text' name='user' value=`${user}` placeholder='admin' required='required')
       label.form-label(for='user') User
         span.text-danger  *
-    .form-floating.mb-3
-      input#password.form-control(type='password' name='password' placeholder=' ' required='required')
-      label.form-label(for='password') Password
-        span.text-danger  *
-    .form-floating.mb-3
-      input#password2.form-control(type='password' name='password2' placeholder=' ' required='required')
-      label.form-label(for='password2') Confirm Password
-        span.text-danger  *
+    #passwordBox.input-group.mb-3
+      .form-floating.flex-grow-1
+          input#password.form-control(type='password' name='password' placeholder=' ' required='required')
+          label(for='password') Password
+            span.text-danger  *
+      a.input-group-text.text-decoration-none(href='#')
+        i.fa.fa-eye-slash
+    #passwordBox2.input-group.mb-3
+      .form-floating.flex-grow-1
+          input#password2.form-control(type='password' name='password2' placeholder=' ' required='required')
+          label(for='password2') Confirm Password
+            span.text-danger  *
+      a.input-group-text.text-decoration-none(href='#')
+        i.fa.fa-eye-slash
     .form-floating.mb-3
       select#role.form-select(name='role')
         for urole in roleList
@@ -36,3 +42,5 @@ block content
     ul.text-danger
       for error in errors
         li!= error.msg
+
+  script(src='/public/js/users-add.js')

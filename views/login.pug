@@ -10,10 +10,15 @@ block content
       input#user.form-control(type='text' name='user' value=`${user}` placeholder=' ' required='required')
       label.form-label(for='user') User
         span.text-danger  *
-    .form-floating.mb-3
-      input#password.form-control(type='password' name='password' placeholder=' ' required='required')
-      label.form-label(for='password') Password
-        span.text-danger  *
+    #passwordBox.input-group.mb-3
+      .form-floating.flex-grow-1
+          input#password.form-control(type='password' name='password' placeholder=' ' required='required')
+          label(for='password') Password
+            span.text-danger  *
+      a.input-group-text.text-decoration-none(href='#')
+        i.fa.fa-eye-slash
     button.btn.btn-primary(type='submit') Login
       i.fa.fa-unlock.mx-2
     a.ms-4(href='/forgot') Forgot Password?
+
+  script(src='/public/js/login.js')
