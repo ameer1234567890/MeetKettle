@@ -274,6 +274,26 @@ cron.schedule('30 13 * * *', () => {
 });
 
 
+const getRoomList = () => {
+  let roomList = [];
+  sqliteSync.connect(dbFile);
+  sqliteSync.run('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (res) => {
+    if (res.error) {
+      return console.error(res.error);
+    }
+    let room;
+    for (let i = 0; i < res.length; i++) {
+      room = {
+        'id':res[i].id,
+        'name':res[i].name,
+      };
+      roomList.push(room);
+    }
+  });
+  return roomList;
+};
+
+
 app.get('/site.webmanifest', (req, res) => {
   res.sendFile('public/site.webmanifest', { root: __dirname, });
 });
@@ -754,7 +774,6 @@ app.post('/kiosk/meetingadd',
         return console.error(err.message);
       }
     });
-    let roomList = [];
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
       if (err) {
         return console.error(err.message);
@@ -805,8 +824,6 @@ app.post('/kiosk/meetingadd',
           remarks: req.body.remarks,
           link: req.body.link,
           service: req.body.service,
-          serviceList: serviceList,
-          roomList: roomList,
         });
       } else {
         db.close((err) => {
@@ -826,8 +843,6 @@ app.post('/kiosk/meetingadd',
               remarks: req.body.remarks,
               link: req.body.link,
               service: req.body.service,
-              serviceList: serviceList,
-              roomList: roomList,
             };
             return res.render('kiosk-meeting-add', payload);
           } else {
@@ -864,8 +879,6 @@ app.post('/kiosk/meetingadd',
                   remarks: req.body.remarks,
                   link: req.body.link,
                   service: req.body.service,
-                  serviceList: serviceList,
-                  roomList: roomList,
                 });
                 addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
               } else {
@@ -881,8 +894,6 @@ app.post('/kiosk/meetingadd',
                   remarks: req.body.remarks,
                   link: req.body.link,
                   service: req.body.service,
-                  serviceList: serviceList,
-                  roomList: roomList,
                 });
               }
               if (err) {
@@ -2615,20 +2626,7 @@ app.get('/meetings',
         return console.error(err.message);
       }
     });
-    let roomList = [];
-    db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      let room;
-      for (let i = 0; i < rows.length; i++) {
-        room = {
-          'id':rows[i].id,
-          'name':rows[i].name,
-        };
-        roomList.push(room);
-      }
-    });
+    const roomList = getRoomList();
     db.get('SELECT COUNT(1) FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\'', (err, row) => {
       if (err) {
         return console.error(err.message);
@@ -2679,45 +2677,22 @@ app.get('/meetings',
 
 app.get('/meetings/add', (req, res) => {
   if (!checkPermissions('permEdit', req, res)) { return false; }
-  let roomList = [];
-  let db = new sqlite3.Database(dbFile, (err) => {
-    if (err) {
-      return console.error(err.message);
-    }
-  });
-  db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) {
-      return console.error(err.message);
-    }
-    let room;
-    for (let i = 0; i < rows.length; i++) {
-      room = {
-        'id':rows[i].id,
-        'name':rows[i].name,
-      };
-      roomList.push(room);
-    }
-  });
-  db.close((err) => {
-    if (err) {
-      return console.error(err.message);
-    }
-    const payload = {
-      authUser: req.session.userId,
-      title: 'Add a new Meeting',
-      message: 'Please enter meeting details to proceed',
-      datetime: '',
-      duration: '',
-      description: '',
-      room: '',
-      remarks: '',
-      link: '',
-      service: '',
-      serviceList: serviceList,
-      roomList: roomList,
-    };
-    res.render('meetings-add', payload);
-  });
+  const roomList = getRoomList();
+  const payload = {
+    authUser: req.session.userId,
+    title: 'Add a new Meeting',
+    message: 'Please enter meeting details to proceed',
+    datetime: '',
+    duration: '',
+    description: '',
+    room: '',
+    remarks: '',
+    link: '',
+    service: '',
+    serviceList: serviceList,
+    roomList: roomList,
+  };
+  res.render('meetings-add', payload);
 });
 
 
@@ -2760,20 +2735,7 @@ app.post('/meetings/add',
         return console.error(err.message);
       }
     });
-    let roomList = [];
-    db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      let room;
-      for (let i = 0; i < rows.length; i++) {
-        room = {
-          'id':rows[i].id,
-          'name':rows[i].name,
-        };
-        roomList.push(room);
-      }
-    });
+    const roomList = getRoomList();
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', (err, rows) => {
       let overlapMeeting;
       if (err) {
@@ -2950,20 +2912,7 @@ app.post('/meetings/edit',
         return console.error(err.message);
       }
     });
-    let roomList = [];
-    db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      let room;
-      for (let i = 0; i < rows.length; i++) {
-        room = {
-          'id':rows[i].id,
-          'name':rows[i].name,
-        };
-        roomList.push(room);
-      }
-    });
+    const roomList = getRoomList();
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', (err, rows) => {
       let overlapMeeting;
       if (err) {
