@@ -9,9 +9,7 @@ const sessions = require('express-session');
 const cookieParser = require('cookie-parser');
 const SQLiteStore = require('connect-sqlite3')(sessions);
 const { body, query, validationResult } = require('express-validator');
-const devHttpPort = 80;
-const prodHttpPort = 8080;
-const prodHttpsPort = 8443;
+const PORT = 6338;
 const firstRunFile = './db/.firstrun';
 const dbFile = './db/kettle.sqlite';
 const dbBackupFile = 'db/kettle.backup.sqlite';
@@ -3219,41 +3217,46 @@ app.post('/meetings/end',
 );
 
 
-app.post('/meetings/delete', (req, res) => {
-  if (!checkPermissionsJson('permAdmin', req, res)) { return false; }
-  let errorList = [];
-  let db = new sqlite3.Database(dbFile, (err) => {
-    if (err) {
-      return console.error(err.message);
-    }
-  });
-  let id = req.body.id;
-  db.run('UPDATE meetings SET deleted=? WHERE id = \'' + id + '\'', [1,], (err) => {
-    if (err) {
-      errorList.push({ code: err.errno, msg: err.message, });
-      return console.error(err.message);
-    }
-  });
-  db.close((err) => {
-    if (errorList.length === 0) {
-      const payload = {
-        status: 'success',
-        id: id,
-      };
-      res.json(payload);
-      addUserLogEntry('delete_meeting', req.session.userId, null, null, id, null);
-    } else {
-      const payload = {
-        status: 'error',
-        errors: errorList,
-      };
-      res.json(payload);
-    }
-    if (err) {
-      return console.error(err.message);
-    }
-  });
-});
+app.post('/meetings/delete',
+  body('id')
+      .notEmpty()
+      .withMessage('ID must not be empty'),
+  (req, res) => {
+    if (!checkPermissionsJson('permAdmin', req, res)) { return false; }
+    let errorList = [];
+    let db = new sqlite3.Database(dbFile, (err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+    });
+    let id = req.body.id;
+    db.run('UPDATE meetings SET deleted=? WHERE id = \'' + id + '\'', [1,], (err) => {
+      if (err) {
+        errorList.push({ code: err.errno, msg: err.message, });
+        return console.error(err.message);
+      }
+    });
+    db.close((err) => {
+      if (errorList.length === 0) {
+        const payload = {
+          status: 'success',
+          id: id,
+        };
+        res.json(payload);
+        addUserLogEntry('delete_meeting', req.session.userId, null, null, id, null);
+      } else {
+        const payload = {
+          status: 'error',
+          errors: errorList,
+        };
+        res.json(payload);
+      }
+      if (err) {
+        return console.error(err.message);
+      }
+    });
+  }
+);
 
 
 app.get('/about', (req, res) => {
@@ -3267,39 +3270,16 @@ app.get('/about', (req, res) => {
 });
 
 
-/*
- * If you need secure http connections:
- * sudo apt install certbot
- * sudo certbot -d <your_domain_here> --manual --preferred-challenges dns certonly
- * sudo cp -aL /etc/letsencrypt/live/<your_domain_here>/. cert/
- * sudo chown <user>.<user> -R cert
- * 
- * To auto renew certificate, setup below cron entry
- * 0 13 * * * root /usr/bin/certbot renew --post-hook "sudo cp -a /etc/letsencrypt/live/<your_domain_here>/. /<meetkettle_dir>/cert/ && sudo chown <user>.<user> -R /<meetkettle_dir>/cert && touch /<meetkettle_dir>/index.js" --quiet
- */
-if (process.env.NODE_ENV === 'production') {
-  const http = require('http');
-  const https = require('https');
-  const privateKey = fs.readFileSync('cert/privkey.pem', 'utf8');
-  const certificate = fs.readFileSync('cert/cert.pem', 'utf8');
-  const ca = fs.readFileSync('cert/chain.pem', 'utf8');
-  const credentials = {
-    key: privateKey,
-    cert: certificate,
-    ca: ca,
-  };
-  const httpServer = http.createServer(app);
-  const httpsServer = https.createServer(credentials, app);
-  httpServer.listen(prodHttpPort, () => {
-    console.log('HTTP Server running on port %s', prodHttpPort);
-  });
-  httpsServer.listen(prodHttpsPort, () => {
-    console.log('HTTPS Server running on port %s', prodHttpsPort);
-  });
-} else {
-  const server = app.listen(devHttpPort, () => {
-    const host = server.address().address;
-    const port = server.address().port;
-    console.log('App listening at http://%s:%s', host, port);
-  });
-}
+const https = require('https');
+const privateKey = fs.readFileSync('cert/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('cert/cert.pem', 'utf8');
+const ca = fs.readFileSync('cert/chain.pem', 'utf8');
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca: ca,
+};
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(PORT, () => {
+  console.log('HTTPS Server running on port %s', PORT);
+});
