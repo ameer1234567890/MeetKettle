@@ -46,7 +46,7 @@ html(lang='en-US')
                 - var timeInRange = false
                 if (datetimeShort == time)
                   input.btn-check(type='radio' name='time' value=time id=optionName required='required' checked)
-                  timeInRange = true
+                  - timeInRange = true
                 else
                   input.btn-check(type='radio' name='time' value=time id=optionName required='required')
                 label.time-n-duration-picker.btn.btn-outline-primary.rounded-0(for=optionName) #{time}

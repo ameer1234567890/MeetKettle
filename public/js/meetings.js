@@ -21,6 +21,7 @@ editModal.addEventListener('show.bs.modal', function (event) {
   }
   editModal.querySelector('#datetime').value = new Date((meetingDateTime) * 1000).toISOString().slice(0, -8);
   editModal.querySelector('#duration').value = editButton.getAttribute('data-duration');
+  editModal.querySelector('#repeat').value = editButton.getAttribute('data-repeat');
   editModal.querySelector('#description').value = editButton.getAttribute('data-description');
   editModal.querySelector('#room').value = editButton.getAttribute('data-room');
   editModal.querySelector('#remarks').value = editButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
@@ -57,15 +58,17 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         let duration; if (data.duration < 60) { duration = data.duration + ' minutes'; } else { duration = data.duration/60 + ' hour(s)'; }
         updatedRow.childNodes[1].innerText = duration;
         editButton.setAttribute('data-duration', data.duration);
-        updatedRow.childNodes[2].innerText = data.description;
+        updatedRow.childNodes[2].innerText = data.repeat.charAt(0).toUpperCase() + data.repeat.slice(1);
+        editButton.setAttribute('data-repeat', data.repeat);
+        updatedRow.childNodes[3].innerText = data.description;
         editButton.setAttribute('data-description', data.description);
         for (let i = 0; i < roomList.length; i++) {
           if (roomList[i].id === data.room) {
-            updatedRow.childNodes[3].innerText = roomList[i].name;
+            updatedRow.childNodes[4].innerText = roomList[i].name;
           }
         }
         editButton.setAttribute('data-room', data.room);
-        updatedRow.childNodes[4].innerHTML = '<img class="align-top me-2" src="/public/images/' + data.service + '.svg" width="25">' + data.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
+        updatedRow.childNodes[5].innerHTML = '<img class="align-top me-2" src="/public/images/' + data.service + '.svg" width="25">' + data.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
         editButton.setAttribute('data-service', data.service);
         editButton.setAttribute('data-remarks', data.remarks);
         editButton.setAttribute('data-link', data.link);

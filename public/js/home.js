@@ -5,6 +5,7 @@ viewModal.addEventListener('show.bs.modal', function (event) {
   viewButton = event.relatedTarget;
   let viewCard = viewButton.parentElement.parentElement.parentElement;
   let duration = viewButton.getAttribute('data-duration')/60;
+  let repeat = viewButton.getAttribute('data-repeat');
   if (duration < 60) { duration = duration + ' minutes'; } else { duration = duration/60 + ' hour(s)'; }
   let meetingRoom = viewButton.getAttribute('data-room');
   let timezoneOffset = new Date().getTimezoneOffset().toString();
@@ -21,11 +22,12 @@ viewModal.addEventListener('show.bs.modal', function (event) {
   let timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
   viewModal.querySelector('tr:nth-child(1) > td').innerText = new Date((viewButton.getAttribute('data-datetime')) * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase();
   viewModal.querySelector('tr:nth-child(2) > td').innerText = duration;
-  viewModal.querySelector('tr:nth-child(3) > td').innerText = viewCard.querySelector('h5').innerText;
-  viewModal.querySelector('tr:nth-child(4) > td').innerText = meetingRoom;
-  viewModal.querySelector('tr:nth-child(5) > td').innerText = viewButton.getAttribute('data-service').split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
-  viewModal.querySelector('tr:nth-child(6) > td').innerHTML = '<a href="' + viewButton.getAttribute('data-link') + '" rel="noopener" target="_blank">' + viewButton.getAttribute('data-link') + '</a>';
-  viewModal.querySelector('tr:nth-child(7) > td').innerText = viewButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
+  viewModal.querySelector('tr:nth-child(3) > td').innerText = repeat.charAt(0).toUpperCase() + repeat.slice(1);
+  viewModal.querySelector('tr:nth-child(4) > td').innerText = viewCard.querySelector('h5').innerText;
+  viewModal.querySelector('tr:nth-child(5) > td').innerText = meetingRoom;
+  viewModal.querySelector('tr:nth-child(6) > td').innerText = viewButton.getAttribute('data-service').split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
+  viewModal.querySelector('tr:nth-child(7) > td').innerHTML = '<a href="' + viewButton.getAttribute('data-link') + '" rel="noopener" target="_blank">' + viewButton.getAttribute('data-link') + '</a>';
+  viewModal.querySelector('tr:nth-child(8) > td').innerText = viewButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
 });
 
 
@@ -53,6 +55,7 @@ editModal.addEventListener('show.bs.modal', function (event) {
   meetingDateTime = new Date((meetingDateTime) * 1000).toISOString().slice(0, -8);
   editModal.querySelector('#datetime').value = meetingDateTime;
   editModal.querySelector('#duration').value = editButton.getAttribute('data-duration');
+  editModal.querySelector('#repeat').value = editButton.getAttribute('data-repeat');
   editModal.querySelector('#description').value = editCard.querySelector('h5').innerText;
   editModal.querySelector('#room').value = editButton.getAttribute('data-room');
   editModal.querySelector('#remarks').value = editButton.getAttribute('data-remarks').replaceAll('&amp;', '&').replaceAll('&#x2F;', '/');
@@ -92,6 +95,8 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         editButton.setAttribute('data-datetime', data.datetime);
         viewButton.setAttribute('data-duration', data.duration*60);
         editButton.setAttribute('data-duration', data.duration);
+        viewButton.setAttribute('data-repeat', data.repeat);
+        editButton.setAttribute('data-repeat', data.repeat);
         updatedCard.querySelector('h5').innerText = data.description;
         viewButton.setAttribute('data-description', data.description);
         editButton.setAttribute('data-description', data.description);

@@ -48,12 +48,17 @@ html(lang='en-US')
                           i.fa.fa-long-arrow-right.text-muted.px-2
                           - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, }
                           span #{meetingEnd.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
-                      p.mb-1 Meeting Type: #{meeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
-                      small.text-muted
-                        - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
-                        span #{meetingStart.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
-                        i.fa.fa-long-arrow-right.text-muted.px-2
-                        span #{meetingEnd.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+                      p.mb-1 #{meeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+                      .d-flex.w-100.justify-content-between
+                        small.text-muted
+                          - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+                          span #{meetingStart.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+                          i.fa.fa-long-arrow-right.text-muted.px-2
+                          span #{meetingEnd.toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()}
+                        span.text-muted
+                          if (meeting.repeat != 'once')
+                            i.fa.fa-repeat.me-2
+                            span #{meeting.repeat.charAt(0).toUpperCase() + meeting.repeat.slice(1)}
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js')
   script(src='/public/js/kiosk-meetings.js')

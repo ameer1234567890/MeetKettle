@@ -294,8 +294,10 @@ const getRoomList = () => {
 
 const getOverlapMeeting = (meetingStart, meetingEnd, roomId, meetingId = 0) => {
   let overlapMeeting;
+  const meetingStartMinusOneDay = (new Date(meetingStart * 1000).getTime() / 1000) - (3600 * 24);
+  const meetingStartPlusOneDay = (new Date(meetingStart * 1000).getTime() / 1000) + (3600 * 24);
   sqliteSync.connect(dbFile);
-  sqliteSync.run('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', [], (res) => {
+  sqliteSync.run('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + meetingStartMinusOneDay + '\' AND datetime < \'' + meetingStartPlusOneDay + '\' ORDER BY datetime DESC', [], (res) => {
     if (res.error) {
       return console.error(res.error);
     }
@@ -316,6 +318,75 @@ const getOverlapMeeting = (meetingStart, meetingEnd, roomId, meetingId = 0) => {
     }
   });
   return overlapMeeting;
+};
+
+
+const getRecurringMeetings = (roomId) => {
+  let meetings =[];
+  let meeting = {};
+  let isRecurringMeeting = false;
+  let query;
+  let storedMeetingRepeat;
+  let storedMeetingWeekday;
+  let storedMeetingDayOfMonth;
+  let storedMeetingMonthOfYear;
+  let storedMeetingTime;
+  let storedMeetingTimeStampToday;
+  const currentWeekday = new Date().getDay();
+  const currentDayOfMonth = new Date().getDate();
+  const currentMonthOfYear = new Date().getMonth();
+  if (roomId == 'all') {
+    query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 ORDER BY datetime DESC';
+  } else {
+    query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC';
+  }
+  sqliteSync.connect(dbFile);
+  sqliteSync.run(query, [], (res) => {
+    if (res.error) {
+      return console.error(res.error);
+    }
+    for (let i = 0; i < res.length; i++) {
+      isRecurringMeeting = false;
+      storedMeetingRepeat = res[i].repeat;
+      storedMeetingWeekday = new Date(res[i].datetime * 1000).getDay();
+      storedMeetingDayOfMonth = new Date(res[i].datetime * 1000).getDate();
+      storedMeetingMonthOfYear = new Date(res[i].datetime * 1000).getMonth();
+      if (storedMeetingRepeat == 'daily') {
+        isRecurringMeeting = true;
+        row = res[i];
+      } else if (storedMeetingRepeat == 'weekly' && storedMeetingWeekday == currentWeekday) {
+        isRecurringMeeting = true;
+        row = res[i];
+      } else if (storedMeetingRepeat == 'monthly' && storedMeetingDayOfMonth == currentDayOfMonth) {
+        isRecurringMeeting = true;
+        row = res[i];
+      } else if (storedMeetingRepeat == 'yearly' && storedMeetingMonthOfYear == currentMonthOfYear) {
+        isRecurringMeeting = true;
+        row = res[i];
+      }
+      if (isRecurringMeeting) {
+        storedMeetingTime = new Date(res[i].datetime * 1000).getHours() + ':' + new Date(res[i].datetime * 1000).getMinutes() + ':' + new Date(res[i].datetime * 1000).getSeconds();
+        storedMeetingTimeStampToday = new Date(storedMeetingTimeStampToday = new Date().getFullYear() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getDate() + ' ' + storedMeetingTime).getTime() / 1000;
+        meeting = {
+          'id':res[i].id,
+          'datetime':storedMeetingTimeStampToday,
+          'duration':res[i].duration,
+          'repeat':res[i].repeat,
+          'description':res[i].description,
+          'roomid':res[i].roomid,
+          'remarks':res[i].remarks,
+          'link':res[i].meetinglink,
+          'service':res[i].meetingservice,
+        };
+        meetings.push(meeting);
+      }
+    }
+  });
+  meetings = meetings.slice(0);
+  meetings.sort((a,b) => {
+      return a.datetime - b.datetime;
+  });
+  return meetings;
 };
 
 
@@ -395,33 +466,31 @@ app.get('/',
       }
     });
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
-    db.get('SELECT COUNT(1) FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' AND datetime > ' + nowMinusTwoHours, (err, row) => {
+    const startRecord = (page - 1) * recordsPerPage;
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
       if (err) {
         return console.error(err.message);
       }
-      const numRecords = row['COUNT(1)'];
-      numPages = Math.ceil(numRecords / recordsPerPage);
-      const startRecord = (page - 1) * recordsPerPage;
-      db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return console.error(err.message);
-        }
-        let meeting;
-        for (let i = 0; i < rows.length; i++) {
-          meeting = {
-            'id':rows[i].id,
-            'datetime':rows[i].datetime,
-            'duration':rows[i].duration,
-            'description':rows[i].description,
-            'roomid':rows[i].roomid,
-            'remarks':rows[i].remarks,
-            'link':rows[i].meetinglink,
-            'service':rows[i].meetingservice,
-          };
-          meetingList.push(meeting);
-        }
-      });
+      let meeting;
+      for (let i = 0; i < rows.length; i++) {
+        meeting = {
+          'id':rows[i].id,
+          'datetime':rows[i].datetime,
+          'duration':rows[i].duration,
+          'repeat':rows[i].repeat,
+          'description':rows[i].description,
+          'roomid':rows[i].roomid,
+          'remarks':rows[i].remarks,
+          'link':rows[i].meetinglink,
+          'service':rows[i].meetingservice,
+        };
+        meetingList.push(meeting);
+      }
     });
+    const recurringMeetings = getRecurringMeetings('all');
+    meetingList = {...recurringMeetings, ...meetingList};
+    const numRecords = Object.keys(meetingList).length + 1;
+    numPages = Math.ceil(numRecords / recordsPerPage);
     db.close((err) => {
       if (err) {
         return console.error(err.message);
@@ -603,6 +672,8 @@ app.get('/kiosk/room',
         meetingList.push(meeting);
       }
     });
+    const recurringMeetings = getRecurringMeetings(roomId);
+    meetingList = {...recurringMeetings, ...meetingList};
     db.close((err) => {
       if (err) {
         return console.error(err.message);
@@ -671,6 +742,7 @@ app.get('/kiosk/meetings',
           'id':rows[i].id,
           'datetime':rows[i].datetime,
           'duration':rows[i].duration,
+          'repeat':rows[i].repeat,
           'description':rows[i].description,
           'remarks':rows[i].remarks,
           'link':rows[i].meetinglink,
@@ -679,6 +751,8 @@ app.get('/kiosk/meetings',
         meetingList.push(meeting);
       }
     });
+    const recurringMeetings = getRecurringMeetings(roomId);
+    meetingList = {...recurringMeetings, ...meetingList};
     db.close((err) => {
       if (err) {
         return console.error(err.message);
@@ -776,21 +850,12 @@ app.post('/kiosk/meetingadd',
   body('room')
     .notEmpty()
     .withMessage('Room must not be empty'),
-  body('remarks')
-    .escape(),
-  body('remarks')
-    .optional({ checkFalsy: true, }).matches(/^[a-z0-9_/:;,#@& \.\?\$\(\)\[\]\{\}\+\-\*\|\n\r]+$/i)
-    .withMessage('Remarks contain invalid characters'),
-  body('service')
-    .escape(),
-  body('link')
-    .optional({ checkFalsy: true, }).isURL({ protocols: ['http','https',], require_protocol: true, validate_length: false, })
-    .withMessage('Invalid meeting link'),
   (req, res) => {
     if (!checkPermissions('permEdit', req, res)) { return false; }
     const errors = validationResult(req);
     const roomId = req.body.room;
     const duration = req.body.duration;
+    const repeat = 'once';
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
@@ -806,129 +871,116 @@ app.post('/kiosk/meetingadd',
       roomName = row.name;
       roomLocation = row.location;
     });
-    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC', (err, rows) => {
-      let overlapMeeting;
-      if (err) {
-        return console.error(err.message);
+    const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId);
+    if (overlapMeeting) {
+      let errorList = [];
+      const timeFormatOptions = { year:'numeric', month:'2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
+      const overlapDescription = overlapMeeting.description;
+      const overlapDateTime = new Date(overlapMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
+      let overlapDuration;
+      if (overlapMeeting.duration/60 < 60) {
+        overlapDuration = overlapMeeting.duration/60 + ' minutes';
+      } else if (overlapMeeting.duration/60 == 60) {
+        overlapDuration = overlapMeeting.duration/60/60 + ' hour';
       } else {
-        let storedMeetingStart;
-        let storedMeetingEnd;
-        for (let i=0; i<Object.keys(rows).length; i++) {
-          storedMeetingStart = rows[i].datetime;
-          storedMeetingEnd = rows[i].datetime + rows[i].duration;
-          // Excellent logic from: https://stackoverflow.com/a/31328290
-          if (storedMeetingStart < meetingEnd && meetingStart < storedMeetingEnd) {
-            overlapMeeting = rows[i];
-            break;
-          }
-        }
+        overlapDuration = overlapMeeting.duration/60/60 + ' hours';
       }
-      if (overlapMeeting) {
-        let errorList = [];
-        const timeFormatOptions = { year:'numeric', month:'2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
-        const overlapDescription = overlapMeeting.description;
-        const overlapDateTime = new Date(overlapMeeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions);
-        let overlapDuration;
-        if (overlapMeeting.duration/60 < 60) {
-          overlapDuration = overlapMeeting.duration/60 + ' minutes';
-        } else if (overlapMeeting.duration/60 == 60) {
-          overlapDuration = overlapMeeting.duration/60/60 + ' hour';
+      errorList.push({ msg: 'Overlapping meeting: ' + overlapDescription + ' at ' + overlapDateTime + ' for ' + overlapDuration, });
+      res.render('kiosk-meeting-add', {
+        authUser: req.session.userId,
+        title: 'Error',
+        message: 'Errors occured. Please refer below.',
+        errors: errorList,
+        datetime: req.body.datetime,
+        duration: req.body.duration,
+        repeat: repeat,
+        description: req.body.description,
+        room: req.body.room,
+        remarks: req.body.remarks,
+        link: req.body.link,
+        service: req.body.service,
+      });
+    } else {
+      db.close((err) => {
+        if (err) {
+          return console.error(err.message);
+        }
+        if (!errors.isEmpty()) {
+          const payload = {
+            authUser: req.session.userId,
+            title: 'Add a new Meetings',
+            message: 'Below errors occured',
+            errors: errors.array(),
+            datetime: req.body.datetime,
+            duration: req.body.duration,
+            repeat: repeat,
+            description: req.body.description,
+            room: req.body.room,
+            remarks: req.body.remarks,
+            link: req.body.link,
+            service: req.body.service,
+          };
+          return res.render('kiosk-meeting-add', payload);
         } else {
-          overlapDuration = overlapMeeting.duration/60/60 + ' hours';
+          let errorList = [];
+          let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
+          let datetime = timeStamp;
+          let duration = req.body.duration * 60;
+          let description = req.body.description;
+          let room = req.body.room;
+          let remarks = req.body.remarks;
+          let link = req.body.link;
+          let service = req.body.service;
+          let db = new sqlite3.Database(dbFile, (err) => {
+            if (err) {
+              return console.error(err.message);
+            }
+          });
+          db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
+            if (err) {
+              errorList.push({ code: err.errno, msg: err.message, });
+              return console.error(err.message);
+            }
+          });
+          db.close((err) => {
+            if (errorList.length === 0) {
+              res.render('kiosk-meeting-add-complete', {
+                authUser: req.session.userId,
+                title: 'Success',
+                message: 'Meeting has been added as follows.',
+                datetime: req.body.datetime,
+                duration: req.body.duration,
+                repeat: repeat,
+                description: req.body.description,
+                room: req.body.room,
+                remarks: req.body.remarks,
+                link: req.body.link,
+                service: req.body.service,
+              });
+              addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
+            } else {
+              res.render('kiosk-meeting-add', {
+                authUser: req.session.userId,
+                title: 'Error',
+                message: 'Errors occured. Please refer below.',
+                errors: errors.array(),
+                datetime: req.body.datetime,
+                duration: req.body.duration,
+                repeat: repeat,
+                description: req.body.description,
+                room: req.body.room,
+                remarks: req.body.remarks,
+                link: req.body.link,
+                service: req.body.service,
+              });
+            }
+            if (err) {
+              return console.error(err.message);
+            }
+          });
         }
-        errorList.push({ msg: 'Overlapping meeting: ' + overlapDescription + ' at ' + overlapDateTime + ' for ' + overlapDuration, });
-        res.render('kiosk-meeting-add', {
-          authUser: req.session.userId,
-          title: 'Error',
-          message: 'Errors occured. Please refer below.',
-          errors: errorList,
-          datetime: req.body.datetime,
-          duration: req.body.duration,
-          description: req.body.description,
-          room: req.body.room,
-          remarks: req.body.remarks,
-          link: req.body.link,
-          service: req.body.service,
-        });
-      } else {
-        db.close((err) => {
-          if (err) {
-            return console.error(err.message);
-          }
-          if (!errors.isEmpty()) {
-            const payload = {
-              authUser: req.session.userId,
-              title: 'Add a new Meetings',
-              message: 'Below errors occured',
-              errors: errors.array(),
-              datetime: req.body.datetime,
-              duration: req.body.duration,
-              description: req.body.description,
-              room: req.body.room,
-              remarks: req.body.remarks,
-              link: req.body.link,
-              service: req.body.service,
-            };
-            return res.render('kiosk-meeting-add', payload);
-          } else {
-            let errorList = [];
-            let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
-            let datetime = timeStamp;
-            let description = req.body.description;
-            let duration = req.body.duration * 60;
-            let room = req.body.room;
-            let remarks = req.body.remarks;
-            let link = req.body.link;
-            let service = req.body.service;
-            let db = new sqlite3.Database(dbFile, (err) => {
-              if (err) {
-                return console.error(err.message);
-              }
-            });
-            db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
-              if (err) {
-                errorList.push({ code: err.errno, msg: err.message, });
-                return console.error(err.message);
-              }
-            });
-            db.close((err) => {
-              if (errorList.length === 0) {
-                res.render('kiosk-meeting-add-complete', {
-                  authUser: req.session.userId,
-                  title: 'Success',
-                  message: 'Meeting has been added as follows.',
-                  datetime: req.body.datetime,
-                  duration: req.body.duration,
-                  description: req.body.description,
-                  room: req.body.room,
-                  remarks: req.body.remarks,
-                  link: req.body.link,
-                  service: req.body.service,
-                });
-                addUserLogEntry('add_meeting', req.session.userId, null, req.body.room, id, null);
-              } else {
-                res.render('kiosk-meeting-add', {
-                  authUser: req.session.userId,
-                  title: 'Error',
-                  message: 'Errors occured. Please refer below.',
-                  errors: errors.array(),
-                  datetime: req.body.datetime,
-                  duration: req.body.duration,
-                  description: req.body.description,
-                  room: req.body.room,
-                  remarks: req.body.remarks,
-                  link: req.body.link,
-                  service: req.body.service,
-                });
-              }
-              if (err) {
-                return console.error(err.message);
-              }
-            });
-          }
-        });
-      }
-    });
+      });
+    }
   }
 );
 
@@ -1023,7 +1075,7 @@ app.post('/firstrun',
             return console.error(err.message);
           }
         });
-        db.run('CREATE TABLE meetings(id TEXT, datetime INT, duration INT, description TEXT, roomid TEXT, remarks TEXT, meetinglink TEXT, meetingservice TEXT, deleted INT)', (err) => {
+        db.run('CREATE TABLE meetings(id TEXT, datetime INT, duration INT, repeat TEXT, description TEXT, roomid TEXT, remarks TEXT, meetinglink TEXT, meetingservice TEXT, deleted INT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
             return console.error(err.message);
@@ -2652,33 +2704,29 @@ app.get('/meetings',
       }
     });
     const roomList = getRoomList();
-    db.get('SELECT COUNT(1) FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\'', (err, row) => {
+    const startRecord = (page - 1) * recordsPerPage;
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
       if (err) {
         return console.error(err.message);
       }
-      const numRecords = row['COUNT(1)'];
-      numPages = Math.ceil(numRecords / recordsPerPage);
-      const startRecord = (page - 1) * recordsPerPage;
-      db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return console.error(err.message);
-        }
-        let meeting;
-        for (let i = 0; i < rows.length; i++) {
-          meeting = {
-            'id':rows[i].id,
-            'datetime':rows[i].datetime,
-            'duration':rows[i].duration,
-            'description':rows[i].description,
-            'roomid':rows[i].roomid,
-            'remarks':rows[i].remarks,
-            'link':rows[i].meetinglink,
-            'service':rows[i].meetingservice,
-          };
-          meetingList.push(meeting);
-        }
-      });
+      let meeting;
+      for (let i = 0; i < rows.length; i++) {
+        meeting = {
+          'id':rows[i].id,
+          'datetime':rows[i].datetime,
+          'duration':rows[i].duration,
+          'repeat':rows[i].repeat,
+          'description':rows[i].description,
+          'roomid':rows[i].roomid,
+          'remarks':rows[i].remarks,
+          'link':rows[i].meetinglink,
+          'service':rows[i].meetingservice,
+        };
+        meetingList.push(meeting);
+      }
     });
+    const numRecords = Object.keys(meetingList).length + 1;
+    numPages = Math.ceil(numRecords / recordsPerPage);
     db.close((err) => {
       if (err) {
         return console.error(err.message);
@@ -2728,6 +2776,9 @@ app.post('/meetings/add',
   body('duration')
     .notEmpty()
     .withMessage('Duration must not be empty'),
+  body('repeat')
+    .notEmpty()
+    .withMessage('Repeat parameter must not be empty'),
   body('description')
     .notEmpty()
     .withMessage('Description must not be empty'),
@@ -2752,6 +2803,7 @@ app.post('/meetings/add',
     const errors = validationResult(req);
     const roomId = req.body.room;
     const duration = req.body.duration;
+    const repeat = req.body.repeat;
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
@@ -2828,7 +2880,7 @@ app.post('/meetings/add',
               return console.error(err.message);
             }
           });
-          db.run('INSERT INTO meetings(id, datetime, duration, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, description, room, remarks, link, service,], (err) => {
+          db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
               return console.error(err.message);
@@ -2842,6 +2894,7 @@ app.post('/meetings/add',
                 message: 'Meeting has been added as follows.',
                 datetime: req.body.datetime,
                 duration: req.body.duration,
+                repeat: req.body.repeat,
                 description: req.body.description,
                 room: req.body.room,
                 remarks: req.body.remarks,
@@ -2859,6 +2912,7 @@ app.post('/meetings/add',
                 errors: errors.array(),
                 datetime: req.body.datetime,
                 duration: req.body.duration,
+                repeat: req.body.repeat,
                 description: req.body.description,
                 room: req.body.room,
                 remarks: req.body.remarks,
@@ -2886,6 +2940,9 @@ app.post('/meetings/edit',
   body('duration')
     .notEmpty()
     .withMessage('Duration must not be empty'),
+  body('repeat')
+    .notEmpty()
+    .withMessage('Repeat parameter must not be empty'),
   body('description')
     .notEmpty()
     .withMessage('Description must not be empty'),
@@ -2911,6 +2968,7 @@ app.post('/meetings/edit',
     const errors = validationResult(req);
     const roomId = req.body.room;
     const duration = req.body.duration;
+    const repeat = req.body.repeat;
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
@@ -2957,6 +3015,7 @@ app.post('/meetings/edit',
           let id = req.body.id;
           let datetime = timeStamp;
           let duration = req.body.duration * 60;
+          let repeat = req.body.repeat;
           let description = req.body.description;
           let room = req.body.room;
           let remarks = req.body.remarks;
@@ -2967,7 +3026,7 @@ app.post('/meetings/edit',
               return console.error(err.message);
             }
           });
-          db.run('UPDATE meetings SET datetime=?, duration=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, duration, description, room, remarks, link, service,], (err) => {
+          db.run('UPDATE meetings SET datetime=?, duration=?, repeat=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
               return console.error(err.message);
@@ -2979,6 +3038,7 @@ app.post('/meetings/edit',
                 status: 'success',
                 datetime: timeStamp,
                 duration: req.body.duration,
+                repeat: req.body.repeat,
                 description: req.body.description,
                 room: req.body.room,
                 remarks: req.body.remarks,

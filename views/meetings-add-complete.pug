@@ -21,6 +21,9 @@ block content
           - var duration; if (duration < 60) { duration = duration + ' minutes'; } else { duration = duration/60 + ' hour(s)'; }
           td #{duration}
         tr
+          th(scope='row') Repeat
+          td #{repeat.charAt(0).toUpperCase() + repeat.slice(1)}
+        tr
           th(scope='row') Description
           td #{description}
         tr

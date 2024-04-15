@@ -37,3 +37,5 @@
 10/04/2024, Fixed scrolling in kiosk meeting list, better navigation between kiosk pages, Added stats page
 12/04/2024, npm package updates, some work on stats page
 13/04/2024, Kept back stats page for later development, Refactor duplicate code to utility functions, View password option in password fields
+14/04/2024, Recurring meetings
+15/04/2024, More work on recurring meetings
