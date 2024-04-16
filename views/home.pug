@@ -23,7 +23,8 @@ block content
                 .col-md-9
                   .card-body
                     h5.card-title #{meeting.description}
-                    i.fa.fa-repeat.float-end.text-muted(title=`${meeting.repeat.charAt(0).toUpperCase() + meeting.repeat.slice(1)}` data-bs-toggle='tooltip' data-bs-placement='bottom' data-repeat=meeting.repeat)
+                    if (meeting.repeat)
+                      i.fa.fa-repeat.float-end.text-muted(title=`${meeting.repeat.charAt(0).toUpperCase() + meeting.repeat.slice(1)}` data-bs-toggle='tooltip' data-bs-placement='bottom' data-repeat=meeting.repeat)
                     p.card-text
                       - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
                       - var datetime = new Date(meeting.datetime * 1000).toLocaleString('en-GB', timeFormatOptions).toUpperCase()

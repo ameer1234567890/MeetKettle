@@ -39,3 +39,4 @@
 13/04/2024, Kept back stats page for later development, Refactor duplicate code to utility functions, View password option in password fields
 14/04/2024, Recurring meetings
 15/04/2024, More work on recurring meetings
+16/04/2024, Fixed: Crashes due to incorrect method of combining objects

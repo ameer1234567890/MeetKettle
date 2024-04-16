@@ -488,7 +488,9 @@ app.get('/',
       }
     });
     const recurringMeetings = getRecurringMeetings('all');
-    meetingList = {...recurringMeetings, ...meetingList};
+    for (meeting of recurringMeetings) {
+      meetingList.push(meeting);
+    }
     const numRecords = Object.keys(meetingList).length + 1;
     numPages = Math.ceil(numRecords / recordsPerPage);
     db.close((err) => {
@@ -673,7 +675,9 @@ app.get('/kiosk/room',
       }
     });
     const recurringMeetings = getRecurringMeetings(roomId);
-    meetingList = {...recurringMeetings, ...meetingList};
+    for (meeting of recurringMeetings) {
+      meetingList.push(meeting);
+    }
     db.close((err) => {
       if (err) {
         return console.error(err.message);
@@ -752,7 +756,9 @@ app.get('/kiosk/meetings',
       }
     });
     const recurringMeetings = getRecurringMeetings(roomId);
-    meetingList = {...recurringMeetings, ...meetingList};
+    for (meeting of recurringMeetings) {
+      meetingList.push(meeting);
+    }
     db.close((err) => {
       if (err) {
         return console.error(err.message);
