@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cross-env NODE_ENV=development node index.js",
-    "dev": "cross-env NODE_ENV=development node index.js",
-    "prod": "cross-env NODE_ENV=production node index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +22,6 @@
     "compression": "^1.7.4",
     "connect-sqlite3": "^0.9.15",
     "cookie-parser": "^1.4.6",
-    "cross-env": "^7.0.3",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "express-validator": "^7.0.1",
