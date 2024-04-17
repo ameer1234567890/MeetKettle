@@ -382,10 +382,6 @@ const getRecurringMeetings = (roomId) => {
       }
     }
   });
-  meetings = meetings.slice(0);
-  meetings.sort((a,b) => {
-      return a.datetime - b.datetime;
-  });
   return meetings;
 };
 
@@ -512,6 +508,7 @@ app.get('/',
         };
         res.render('home', payload);
       } else {
+        meetingList.sort((a,b) => a.datetime - b.datetime);
         const payload = {
           authUser: req.session.userId,
           meetings: meetingList,
@@ -782,6 +779,7 @@ app.get('/kiosk/meetings',
         if (err) {
           return console.error(err.message);
         }
+        meetingList.sort((a,b) => a.datetime - b.datetime);
         const payload = {
           authUser: req.session.userId,
           meetings: meetingList,
