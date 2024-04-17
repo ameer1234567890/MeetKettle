@@ -1258,7 +1258,7 @@ app.get('/login', (req, res) => {
 
 
 app.post('/login',
-  body('user').escape(),
+  body('user').escape().toLowerCase(),
   body('password').escape(),
   (req, res) => {
     if (!firstrunComplete()) {
@@ -1871,6 +1871,7 @@ app.get('/admin/users/add', (req, res) => {
 app.post('/admin/users/add',
   body('password').escape(),
   body('password2').escape(),
+  body('user').toLowerCase(),
   body('user')
     .isLength({ min: 5, })
     .withMessage('Username must be at least 5 characters long'),
