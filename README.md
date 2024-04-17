@@ -11,7 +11,6 @@ A meeting room booking web app
 * [express-session](href='https://www.npmjs.com/package/express-session') - Simple session middleware for Express.
 
 #### Roadmap
-* Recurring meetings
 * Calendar layout of meetings
 * White-labelling
 * Meeting room occupancy API
@@ -19,8 +18,7 @@ A meeting room booking web app
 #### How to deploy locally
 * Clone this repository
 * Install the dependencies by running `npm install`
-* Install nodemon globally by using `npm install -g cross-env`
 * Install nodemon globally by using `npm install -g nodemon`
+* Place certificate files (`privkey.pem`, `cert.pem` & `chain.pem`) inside `/cert` folder
 * Start the server by running `nodemon`
-* The web UI should be accessible at http://localhost/
-* For a production version, setup certificates as described at the end of `index.js`, change port values at the begining of `index.js` and run `nodemon --exec npm start prod`
+* The web UI should be accessible at https://localhost:6338/

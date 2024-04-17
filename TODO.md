@@ -1,5 +1,3 @@
-- Sort meetings by time in kiosk-meetings page
-
 - Statistics charts:
   - Number of meetings per day/month (bar chart)
   - Duration of meetings per day/month (bar chart)

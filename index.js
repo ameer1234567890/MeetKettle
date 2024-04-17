@@ -404,7 +404,7 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/offline', (req, res) => {
   const payload = {
     title: 'You are Offline',
-    message: 'Please connect to the internet to use MeetKettle',
+    message: 'Your connection to MeetKettle has been disrupted!',
   };
   res.render('offline', payload);
 });

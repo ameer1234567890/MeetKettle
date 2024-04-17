@@ -40,4 +40,4 @@
 14/04/2024, Recurring meetings
 15/04/2024, More work on recurring meetings
 16/04/2024, Fixed: Crashes due to incorrect method of combining objects, display only the next 24 hours in kiosk meeting list
-17/04/2024, Sort meetings by time in kiosk meeting list and home page
+17/04/2024, Sort meetings by time in kiosk meeting list and home page, updated offline page, about page and README
