@@ -121,10 +121,13 @@ let actions = {
 const oneYear = 1000 * 60 * 60 * 24 * 365;
 app.use(sessions({
     secret: config.sessionSecret,
-    saveUninitialized:true,
+    saveUninitialized: false,
     cookie: { maxAge: oneYear, },
     resave: false,
-    store: new SQLiteStore({ dir:'./db/', db: 'sessions.sqlite', }),
+    store: new SQLiteStore({
+      dir: './db/', db: 'sessions.sqlite',
+      checkPeriod: 86400000,
+    }),
 }));
 
 
