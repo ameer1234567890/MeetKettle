@@ -22,3 +22,9 @@ A meeting room booking web app
 * Place certificate files (`privkey.pem`, `cert.pem` & `chain.pem`) inside `/cert` folder
 * Start the server by running `nodemon`
 * The web UI should be accessible at https://localhost:6338/
+
+#### Deploy via docker
+* Clone this repository
+* Create `cert` and `db` directory and change mountpoints in `/docker-compose.yml` as required.
+* Place certificate files (`privkey.pem`, `cert.pem` & `chain.pem`) inside `/cert` folder
+* Run `docker compose up --build -d`

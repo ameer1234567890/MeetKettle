@@ -42,4 +42,4 @@
 16/04/2024, Fixed: Crashes due to incorrect method of combining objects, display only the next 24 hours in kiosk meeting list
 17/04/2024, Sort meetings by time in kiosk meeting list and home page, updated offline page, about page and README, case insensitive usernames
 18/04/2024, Improved session storage, Logo cache for offline
-19/04/2024, Run unsecure server if no certificate is found
+19/04/2024, Run unsecure server if no certificate is found, added docker

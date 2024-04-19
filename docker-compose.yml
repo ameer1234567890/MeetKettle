@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  meetkettle:
+    container_name: meetkettle
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - TZ=Asia/Karachi
+    ports:
+      - 6338:6338
+    volumes:
+      - ./db:/kettle/db
+      - ./cert:/kettle/cert
+    restart: unless-stopped
