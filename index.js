@@ -3339,16 +3339,24 @@ app.get('/about', (req, res) => {
 });
 
 
-const https = require('https');
-const privateKey = fs.readFileSync('cert/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('cert/cert.pem', 'utf8');
-const ca = fs.readFileSync('cert/chain.pem', 'utf8');
-const credentials = {
-  key: privateKey,
-  cert: certificate,
-  ca: ca,
-};
-const httpsServer = https.createServer(credentials, app);
-httpsServer.listen(PORT, () => {
-  console.log('HTTPS Server running on port %s', PORT);
-});
+if (fs.existsSync('cert/privkey.pem') && fs.existsSync('cert/cert.pem') && fs.existsSync('cert/chain.pem')) {
+  const https = require('https');
+  const privateKey = fs.readFileSync('cert/privkey.pem', 'utf8');
+  const certificate = fs.readFileSync('cert/cert.pem', 'utf8');
+  const ca = fs.readFileSync('cert/chain.pem', 'utf8');
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: ca,
+  };
+  const httpsServer = https.createServer(credentials, app);
+  httpsServer.listen(PORT, () => {
+    console.log('HTTPS Server running on port %s', PORT);
+  });
+} else {
+  const http = require('http');
+  const httpServer = http.createServer(app);
+  httpServer.listen(PORT, () => {
+    console.log('HTTP Server running on port %s', PORT);
+  });
+}
