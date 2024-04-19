@@ -2007,6 +2007,17 @@ app.post('/admin/users/edit',
       });
       let user = req.body.user;
       let role = req.body.role;
+      if (req.session.userRole == 'Super-Admin' && role != 'Super-Admin') {
+        db.get('SELECT * FROM users WHERE role = \'Super-Admin\' AND user != \'' + user + '\'', (err, row) => {
+          if (err) {
+            errorList.push({ code: err.errno, msg: err.message, });
+            return console.error(err.message);
+          }
+          if (!row) {
+            return errorList.push({ msg: 'This action is not allowed since there are no Super-Admin users left!', });
+          }
+        });
+      }
       db.run('UPDATE users SET role=? WHERE user = \'' + user + '\'', [role,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
