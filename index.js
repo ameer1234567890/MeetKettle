@@ -1014,6 +1014,7 @@ app.get('/firstrun', (req, res) => {
 
 app.post('/firstrun',
   body('password').escape(),
+  body('user').toLowerCase(),
   body('user')
     .isLength({ min: 5, })
     .withMessage('Username must be at least 5 characters long'),
