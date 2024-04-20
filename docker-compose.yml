@@ -3,9 +3,7 @@ version: "3"
 services:
   meetkettle:
     container_name: meetkettle
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ameer1234567890/meetkettle
     environment:
       - TZ=Asia/Karachi
     ports:

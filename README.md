@@ -28,4 +28,4 @@ A meeting room booking web app
 * Create `cert` and `db` directory and change mountpoints in `/docker-compose.yml` as required.
 * Place certificate files (`privkey.pem`, `cert.pem` & `chain.pem`) inside `/cert` folder.
 * Change timezone via `TZ` variable in `docker-compose.yml`
-* Run `docker compose up --build -d`
+* Run `docker compose up -d`
