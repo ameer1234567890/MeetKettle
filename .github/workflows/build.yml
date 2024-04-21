@@ -42,7 +42,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ameer1234567890/meetkettle:${{GITHUB_REF##*/}}
+          tags: ameer1234567890/meetkettle:${GITHUB_REF##*/}
       -
         name: What
         run: echo ameer1234567890/meetkettle:${GITHUB_REF##*/}
