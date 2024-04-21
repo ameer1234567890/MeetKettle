@@ -2,9 +2,14 @@ name: Build Docker Container
 
 on:
   push:
-    branches:
-      - main
-      - master
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Docker Tag'
+        required: true
+        default: 'latest'
 
 jobs:
   docker:
@@ -28,4 +33,4 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ameer1234567890/meetkettle:latest
+          tags: ${{ github.event.inputs.tags || steps.meta.outputs.tags }}
