@@ -30,11 +30,11 @@ block content
         else
           if prevPage == 1
             li.page-item
-              a.page-link(href='/rooms')
+              a.page-link(href='/kiosk')
                 i.fa.fa-angle-double-left
           else
             li.page-item
-              a.page-link(href='/rooms?page=' + prevPage)
+              a.page-link(href='/kiosk?page=' + prevPage)
                 i.fa.fa-angle-double-left
 
         //- Page numbers
@@ -47,10 +47,10 @@ block content
           else
             if i == 1
               li.page-item
-                a.page-link(href='/rooms') #{i}
+                a.page-link(href='/kiosk') #{i}
             else
               li.page-item
-                a.page-link(href='/rooms?page=' + i) #{i}
+                a.page-link(href='/kiosk?page=' + i) #{i}
 
         //- Next link
         if currentPage >= numPages
@@ -60,7 +60,7 @@ block content
         else
           - var nextPage = parseFloat(currentPage) + 1
           li.page-item
-            a.page-link(href='/rooms?page=' + nextPage)
+            a.page-link(href='/kiosk?page=' + nextPage)
               i.fa.fa-angle-double-right
 
   script(src='/public/js/kiosk.js')
