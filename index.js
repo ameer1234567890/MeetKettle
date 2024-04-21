@@ -3344,6 +3344,7 @@ app.get('/about', (req, res) => {
   if (!firstrunComplete()) {
     return res.redirect('/firstrun');
   }
+  let versionLogic;
   async function getVersionFromGithub() {
     let version = kettleCache.get('version');
     if (!version) {
@@ -3351,22 +3352,22 @@ app.get('/about', (req, res) => {
       try {
         const data = await response.json();
         kettleCache.set('version', data.version, 3600);
+        versionLogic = 'github';
         return data.version;
       } catch (error) {
         return console.log(error);
       }
     } else {
+      versionLogic = 'cache';
       return version;
     }
   }
   getVersionFromGithub().then((upstreamVersion) => {
-    if (upstreamVersion > version) {
-      updateAvailable = true;
-    }
     const payload = {
       authUser: req.session.userId,
       version: version,
       upstreamVersion: upstreamVersion,
+      versionLogic: versionLogic,
     };
     res.render('about', payload);
   });
