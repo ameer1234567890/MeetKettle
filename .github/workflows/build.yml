@@ -42,16 +42,4 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ameer1234567890/meetkettle:${{ github.event.inputs.tags || steps.meta.outputs.tags }}
-      -
-        name: What
-        run: echo ameer1234567890/meetkettle:${GITHUB_REF##*/}
-      -
-        name: What
-        run: echo ameer1234567890/meetkettle:${github.event.inputs.tags}
-      -
-        name: What
-        run: echo ameer1234567890/meetkettle:${steps.meta.outputs.tags}
-      -
-        name: What
-        run: echo ameer1234567890/meetkettle:${{ github.event.inputs.tags || steps.meta.outputs.tags }}
+          tags: ameer1234567890/meetkettle:${GITHUB_REF##*/}
