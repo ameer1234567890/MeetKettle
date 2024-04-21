@@ -418,126 +418,104 @@ app.get('/offline', (req, res) => {
 });
 
 
-app.get('/',
-  query('page')
-    .optional().isInt({ min: 1, })
-    .withMessage('Invalid page number provided in query string'),
-  query('q')
-    .optional({ checkFalsy: true, }).matches(/^[a-z0-9_:;,#@ \.\?\$\(\)\[\]\{\}\+\-\*\|]+$/i)
-    .withMessage('Search query contains invalid characters'),
-  (req, res) => {
-    if (!checkPermissions('permView', req, res)) { return false; }
-    const errors = validationResult(req);
-    let q = req.query.q;
-    if (!q) {
-      q = '';
+app.get('/', (req, res) => {
+  if (!checkPermissions('permView', req, res)) { return false; }
+  const errors = validationResult(req);
+  let q = req.query.q;
+  if (!q) {
+    q = '';
+  }
+if (!errors.isEmpty()) {
+    const payload = {
+      authUser: req.session.userId,
+      title: 'List Meetings',
+      message: 'Below errors occured',
+      errors: errors.array(),
+      q: q,
+    };
+    return res.render('home', payload);
+  }
+  let page;
+  if (!req.query.page) {
+    page = 1;
+  } else {
+    page = req.query.page;
+  }
+  let numPages;
+  let numRecords;
+  let meetingList = [];
+  let db = new sqlite3.Database(dbFile, (err) => {
+    if (err) {
+      return console.error(err.message);
     }
-  if (!errors.isEmpty()) {
-      const payload = {
-        authUser: req.session.userId,
-        title: 'List Meetings',
-        message: 'Below errors occured',
-        errors: errors.array(),
-        q: q,
+  });
+  let roomList = [];
+  db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    let room;
+    for (let i = 0; i < rows.length; i++) {
+      room = {
+        'id':rows[i].id,
+        'name':rows[i].name,
       };
-      return res.render('home', payload);
+      roomList.push(room);
     }
-    let page;
-    if (!req.query.page) {
-      page = 1;
-    } else {
-      page = req.query.page;
+  });
+  const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
+  const startRecord = (page - 1) * recordsPerPage;
+  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC', [], (err, rows) => {
+    if (err) {
+      return console.error(err.message);
     }
-    let numPages;
-    let numRecords;
-    let meetingList = [];
-    let db = new sqlite3.Database(dbFile, (err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-    });
-    let roomList = [];
-    db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      let room;
-      for (let i = 0; i < rows.length; i++) {
-        room = {
-          'id':rows[i].id,
-          'name':rows[i].name,
-        };
-        roomList.push(room);
-      }
-    });
-    const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
-    const startRecord = (page - 1) * recordsPerPage;
-    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      let meeting;
-      for (let i = 0; i < rows.length; i++) {
-        meeting = {
-          'id':rows[i].id,
-          'datetime':rows[i].datetime,
-          'duration':rows[i].duration,
-          'repeat':rows[i].repeat,
-          'description':rows[i].description,
-          'roomid':rows[i].roomid,
-          'remarks':rows[i].remarks,
-          'link':rows[i].meetinglink,
-          'service':rows[i].meetingservice,
-        };
-        meetingList.push(meeting);
-      }
-    });
-    db.get('SELECT COUNT(1) AS count FROM meetings WHERE deleted IS NOT 1', [], (err, row) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      numRecords = row.count;
-    });
-    const recurringMeetings = getRecurringMeetings('all');
-    for (meeting of recurringMeetings) {
+    let meeting;
+    for (let i = 0; i < rows.length; i++) {
+      meeting = {
+        'id':rows[i].id,
+        'datetime':rows[i].datetime,
+        'duration':rows[i].duration,
+        'repeat':rows[i].repeat,
+        'description':rows[i].description,
+        'roomid':rows[i].roomid,
+        'remarks':rows[i].remarks,
+        'link':rows[i].meetinglink,
+        'service':rows[i].meetingservice,
+      };
       meetingList.push(meeting);
     }
-    db.close((err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      numRecords = numRecords + recurringMeetings.length;
-      numPages = Math.ceil(numRecords / recordsPerPage);
-      if (meetingList.length === 0) {
-        const payload = {
-          authUser: req.session.userId,
-          title: 'No Meetings',
-          errors: true,
-          message: 'There are no meetings scheduled',
-          meetings: meetingList,
-          currentPage: page,
-          numPages: numPages,
-          roomList: roomList,
-          serviceList: serviceList,
-          q: q,
-        };
-        res.render('home', payload);
-      } else {
-        meetingList.sort((a,b) => a.datetime - b.datetime);
-        const payload = {
-          authUser: req.session.userId,
-          meetings: meetingList,
-          currentPage: page,
-          numPages: numPages,
-          roomList: roomList,
-          serviceList: serviceList,
-          q: q,
-        };
-        res.render('home', payload);
-      }
-    });
+  });
+  const recurringMeetings = getRecurringMeetings('all');
+  for (meeting of recurringMeetings) {
+    meetingList.push(meeting);
   }
-);
+  db.close((err) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    if (meetingList.length === 0) {
+      const payload = {
+        authUser: req.session.userId,
+        title: 'No Meetings',
+        errors: true,
+        message: 'There are no meetings scheduled',
+        meetings: meetingList,
+        roomList: roomList,
+        serviceList: serviceList,
+      };
+      res.render('home', payload);
+    } else {
+      meetingList.sort((a,b) => a.datetime - b.datetime);
+      const payload = {
+        authUser: req.session.userId,
+        meetings: meetingList,
+        roomList: roomList,
+        serviceList: serviceList,
+      };
+      res.render('home', payload);
+    }
+  });
+});
 
 
 app.get('/stats', (req, res) => {

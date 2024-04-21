@@ -23,7 +23,7 @@ block content
                 .col-md-9
                   .card-body
                     h5.card-title #{meeting.description}
-                    if (meeting.repeat)
+                    if (meeting.repeat != 'once')
                       i.fa.fa-repeat.float-end.text-muted(title=`${meeting.repeat.charAt(0).toUpperCase() + meeting.repeat.slice(1)}` data-bs-toggle='tooltip' data-bs-placement='bottom' data-repeat=meeting.repeat)
                     p.card-text
                       - var timeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, }
@@ -51,78 +51,6 @@ block content
                     i.fa.fa-trash.pe-1
                     span Delete
     br
-
-    //- Pagination links
-    nav
-      ul.pagination.justify-content-center
-
-        //- First page link
-        if currentPage === 1
-          li.page-item.disabled
-            span.page-link
-              i.fa.fa-angle-double-left
-        else
-          li.page-item
-            a.navigate.page-link(href='/')
-              i.fa.fa-angle-double-left
-
-        //- Previous page link
-        - var prevPage = parseFloat(currentPage) - 1
-        if prevPage == 0
-          li.page-item.disabled
-            span.page-link
-              i.fa.fa-angle-left
-        else
-          if prevPage == 1
-            li.page-item
-              a.navigate.page-link(href='/')
-                i.fa.fa-angle-left
-          else
-            li.page-item
-              a.navigate.page-link(href='/?page=' + prevPage)
-                i.fa.fa-angle-left
-
-        //- Page numbers
-        - var firstNumPage = parseFloat(currentPage) - 2
-        if firstNumPage < 1
-          - var firstNumPage = 1
-        - var lastNumPage = parseFloat(currentPage) + 2
-        if lastNumPage > numPages
-          - var lastNumPage = numPages
-        - var i = firstNumPage - 1
-        while i < lastNumPage
-          - i++
-          if i == currentPage
-            li.page-item.active
-              span.page-link #{i}
-          else
-            if i == 1
-              li.page-item
-                a.navigate.page-link(href='/') #{i}
-            else
-              li.page-item
-                a.navigate.page-link(href='/?page=' + i) #{i}
-
-        //- Next page link
-        if currentPage >= numPages
-          li.page-item.disabled
-            span.page-link
-              i.fa.fa-angle-right
-        else
-          - var nextPage = parseFloat(currentPage) + 1
-          li.page-item
-            a.navigate.page-link(href='/?page=' + nextPage)
-              i.fa.fa-angle-right
-
-        //- Last page link
-        if currentPage >= numPages
-          li.page-item.disabled
-            span.page-link
-              i.fa.fa-angle-double-right
-        else
-          li.page-item
-            a.navigate.page-link(href='/?page=' + numPages)
-              i.fa.fa-angle-double-right
     
     //- Modal for View
     #modal-view.modal.fade(tabindex='-1')
