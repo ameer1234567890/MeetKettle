@@ -15,7 +15,7 @@ const dbFile = './db/kettle.sqlite';
 const dbBackupFile = 'db/kettle.backup.sqlite';
 const sessionDbFile = './db/sessions.sqlite';
 const app = express();
-
+const { version } = require('./package.json');
 
 app.use(compression());
 app.use(express.json());
@@ -3344,10 +3344,26 @@ app.get('/about', (req, res) => {
   if (!firstrunComplete()) {
     return res.redirect('/firstrun');
   }
-  const payload = {
-    authUser: req.session.userId,
-  };
-  res.render('about', payload);
+  async function getVersionFromGithub() {
+    response = await fetch('https://raw.githubusercontent.com/ameer1234567890/MeetKettle/master/package.json');
+    try {
+      const data = await response.json();
+      return data.version;
+    } catch (error) {
+      return console.log(error);
+    }
+  }
+  getVersionFromGithub().then((upstreamVersion) => {
+    if (upstreamVersion > version) {
+      updateAvailable = true;
+    }
+    const payload = {
+      authUser: req.session.userId,
+      version: version,
+      upstreamVersion: upstreamVersion,
+    };
+    res.render('about', payload);
+  });
 });
 
 

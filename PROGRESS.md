@@ -43,3 +43,5 @@
 17/04/2024, Sort meetings by time in kiosk meeting list and home page, updated offline page, about page and README, case insensitive usernames
 18/04/2024, Improved session storage, Logo cache for offline
 19/04/2024, Run unsecure server if no certificate is found, added docker, fixed case-sensitive user name during first run, disallow last existing super admin from self demoting, added docker build & push to docker hub
+20/04/2024, Fixed docker builds and docker-compose documentation
+21/04/2024, Improvements to docker builds, implement versioning

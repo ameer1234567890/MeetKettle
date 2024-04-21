@@ -6,6 +6,13 @@ block content
 
   br
 
+  h2.h5 v#{version} 
+    if (upstreamVersion > version)
+      i.fa.fa-exclamation-triangle.text-warning.ms-4.me-2
+      a.fw-normal(href='https://github.com/ameer1234567890/MeetKettle/releases/tag/v' + upstreamVersion) New version #{upstreamVersion} available
+
+  br
+
   h2.h5 Designed and developed by Ameer Dawood
   p MeetKettle, the name is a combination of "Meet" and "Kettle" which when translated to Dhivehi has a synonym meaning "to do something". The combination of these two words mean to do or conduct a meeting.
   p MeetKettle is opensource and licensed under MIT license. MeetKettle's source code can be viewed at 
