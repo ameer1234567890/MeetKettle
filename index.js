@@ -444,6 +444,7 @@ app.get('/',
       page = req.query.page;
     }
     let numPages;
+    let numRecords;
     let meetingList = [];
     let db = new sqlite3.Database(dbFile, (err) => {
       if (err) {
@@ -466,7 +467,7 @@ app.get('/',
     });
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
     const startRecord = (page - 1) * recordsPerPage;
-    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
+    db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
       if (err) {
         return console.error(err.message);
       }
@@ -486,16 +487,22 @@ app.get('/',
         meetingList.push(meeting);
       }
     });
+    db.get('SELECT COUNT(1) AS count FROM meetings WHERE deleted IS NOT 1', [], (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      numRecords = row.count;
+    });
     const recurringMeetings = getRecurringMeetings('all');
     for (meeting of recurringMeetings) {
       meetingList.push(meeting);
     }
-    const numRecords = Object.keys(meetingList).length + 1;
-    numPages = Math.ceil(numRecords / recordsPerPage);
     db.close((err) => {
       if (err) {
         return console.error(err.message);
       }
+      numRecords = numRecords + recurringMeetings.length;
+      numPages = Math.ceil(numRecords / recordsPerPage);
       if (meetingList.length === 0) {
         const payload = {
           authUser: req.session.userId,
@@ -1437,6 +1444,9 @@ app.post('/admin/rpp/set',
   body('rpp')
     .isNumeric()
     .withMessage('Records per page must be a number'),
+  body('rpp')
+    .isFloat({ min: 5, max: 500 })
+    .withMessage('Records per page must be between 5 and 500'),
   (req, res) => {
     if (!checkPermissionsJson('permSuper', req, res)) { return false; }
     const errors = validationResult(req);
@@ -2746,8 +2756,13 @@ app.get('/meetings',
         meetingList.push(meeting);
       }
     });
-    const numRecords = Object.keys(meetingList).length + 1;
-    numPages = Math.ceil(numRecords / recordsPerPage);
+    db.get('SELECT COUNT(1) AS count FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\'', [], (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      numRecords = row.count;
+      numPages = Math.ceil(numRecords / recordsPerPage);
+    });
     db.close((err) => {
       if (err) {
         return console.error(err.message);
