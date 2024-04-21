@@ -10,11 +10,21 @@ on:
         description: 'Docker Tag'
         required: true
         default: 'latest'
-
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      -
+        name: Check out
+        uses: actions/checkout@v3
+
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ameer1234567890/meetkettle
+          tags: type=semver,pattern={{version}}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
