@@ -9,6 +9,7 @@ const sessions = require('express-session');
 const cookieParser = require('cookie-parser');
 const SQLiteStore = require('connect-sqlite3')(sessions);
 const { body, query, validationResult } = require('express-validator');
+const NodeCache = require('node-cache');
 const PORT = 6338;
 const firstRunFile = './db/.firstrun';
 const dbFile = './db/kettle.sqlite';
@@ -16,6 +17,7 @@ const dbBackupFile = 'db/kettle.backup.sqlite';
 const sessionDbFile = './db/sessions.sqlite';
 const app = express();
 const { version } = require('./package.json');
+const kettleCache = new NodeCache();
 
 app.use(compression());
 app.use(express.json());
@@ -3343,12 +3345,18 @@ app.get('/about', (req, res) => {
     return res.redirect('/firstrun');
   }
   async function getVersionFromGithub() {
-    response = await fetch('https://raw.githubusercontent.com/ameer1234567890/MeetKettle/master/package.json');
-    try {
-      const data = await response.json();
-      return data.version;
-    } catch (error) {
-      return console.log(error);
+    let version = kettleCache.get('version');
+    if (!version) {
+      response = await fetch('https://raw.githubusercontent.com/ameer1234567890/MeetKettle/master/package.json');
+      try {
+        const data = await response.json();
+        kettleCache.set('version', data.version, 3600);
+        return data.version;
+      } catch (error) {
+        return console.log(error);
+      }
+    } else {
+      return version;
     }
   }
   getVersionFromGithub().then((upstreamVersion) => {
