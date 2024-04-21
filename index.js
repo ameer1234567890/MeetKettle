@@ -338,6 +338,7 @@ const getRecurringMeetings = (roomId) => {
   const currentWeekday = new Date().getDay();
   const currentDayOfMonth = new Date().getDate();
   const currentMonthOfYear = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
   if (roomId == 'all') {
     query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 ORDER BY datetime DESC';
   } else {
@@ -354,6 +355,10 @@ const getRecurringMeetings = (roomId) => {
       storedMeetingWeekday = new Date(res[i].datetime * 1000).getDay();
       storedMeetingDayOfMonth = new Date(res[i].datetime * 1000).getDate();
       storedMeetingMonthOfYear = new Date(res[i].datetime * 1000).getMonth();
+      storedMeetingYear = new Date(res[i].datetime * 1000).getFullYear();
+      let currentDateString = currentYear + '/' + currentMonthOfYear + '/' + currentDayOfMonth;
+      let storedMeetingDateString = storedMeetingYear + '/' + storedMeetingMonthOfYear + '/' + storedMeetingDayOfMonth;
+      if (currentDateString == storedMeetingDateString) continue;
       if (storedMeetingRepeat == 'daily') {
         isRecurringMeeting = true;
         row = res[i];
