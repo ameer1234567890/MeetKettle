@@ -1,6 +1,13 @@
 # MeetKettle
 A meeting room booking web app
 
+#### Screenshots
+![Home Page](https://github.com/ameer1234567890/MeetKettle/blob/master/screenshots/home.png?raw=true)
+![Meetings](https://github.com/ameer1234567890/MeetKettle/blob/master/screenshots/meetings.png?raw=true)
+![Rooms](https://github.com/ameer1234567890/MeetKettle/blob/master/screenshots/rooms.png?raw=true)
+![Kiosk Free](https://github.com/ameer1234567890/MeetKettle/blob/master/screenshots/kiosk-free.png?raw=true)
+![Kiosk Busy](https://github.com/ameer1234567890/MeetKettle/blob/master/screenshots/kiosk-busy.png?raw=true)
+
 #### The Stack
 * [Node.js](href='https://nodejs.org/') - A free, open-sourced, cross-platform JavaScript run-time environment that lets developers write command line tools and server-side scripts outside of a browser.
 * [Express](href='https://expressjs.com/') - Fast, unopinionated, minimalist web framework for Node.js.

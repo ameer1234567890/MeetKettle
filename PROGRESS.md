@@ -45,3 +45,4 @@
 19/04/2024, Run unsecure server if no certificate is found, added docker, fixed case-sensitive user name during first run, disallow last existing super admin from self demoting, added docker build & push to docker hub
 20/04/2024, Fixed docker builds and docker-compose documentation
 21/04/2024, Improvements to docker builds, implement versioning, release v1.0.0, fixed pagination links in kiosk selector, fixed pagination logic, fixed duplicate recurring meetings, removed pagination in home page, larger view modal, added subtle tables, added upstream version caching, removed unnecessary body-parser module, streamline version checking
+22/04/2024, Added screenshots
