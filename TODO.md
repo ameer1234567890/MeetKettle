@@ -1,5 +1,3 @@
-- SQL JOIN statements for room name
-- Restructure row to list
 - DB migrate logic
 - Statistics charts:
   - Number of meetings per day/month (bar chart)
