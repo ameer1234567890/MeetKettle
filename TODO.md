@@ -1,4 +1,3 @@
-- Check recurring meetings in kiosk and kiosk meeting list
 - SQL JOIN statements for room name
 - Restructure row to list
 - DB migrate logic

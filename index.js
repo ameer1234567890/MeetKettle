@@ -335,6 +335,7 @@ const getRecurringMeetings = (roomId) => {
   let storedMeetingWeekday;
   let storedMeetingDayOfMonth;
   let storedMeetingMonthOfYear;
+  let storedMeetingYear;
   let storedMeetingTime;
   let storedMeetingTimeStampToday;
   const currentWeekday = new Date().getDay();
@@ -443,8 +444,6 @@ if (!errors.isEmpty()) {
   } else {
     page = req.query.page;
   }
-  let numPages;
-  let numRecords;
   let meetingList = [];
   let db = new sqlite3.Database(dbFile, (err) => {
     if (err) {
@@ -466,7 +465,6 @@ if (!errors.isEmpty()) {
     }
   });
   const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
-  const startRecord = (page - 1) * recordsPerPage;
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC', [], (err, rows) => {
     if (err) {
       return console.error(err.message);
@@ -487,13 +485,15 @@ if (!errors.isEmpty()) {
       meetingList.push(meeting);
     }
   });
-  const recurringMeetings = getRecurringMeetings('all');
-  for (meeting of recurringMeetings) {
-    meetingList.push(meeting);
-  }
   db.close((err) => {
     if (err) {
       return console.error(err.message);
+    }
+    const recurringMeetings = getRecurringMeetings('all');
+    for (meeting of recurringMeetings) {
+      if (!meetingList.some(nMeeting => nMeeting.id === meeting.id)) {
+        meetingList.push(meeting);
+      }
     }
     if (meetingList.length === 0) {
       const payload = {
@@ -666,13 +666,15 @@ app.get('/kiosk/room',
         meetingList.push(meeting);
       }
     });
-    const recurringMeetings = getRecurringMeetings(roomId);
-    for (meeting of recurringMeetings) {
-      meetingList.push(meeting);
-    }
     db.close((err) => {
       if (err) {
         return console.error(err.message);
+      }
+      const recurringMeetings = getRecurringMeetings(roomId);
+      for (meeting of recurringMeetings) {
+        if (!meetingList.some(nMeeting => nMeeting.id === meeting.id)) {
+          meetingList.push(meeting);
+        }
       }
       let roomName;
       let roomLocation;
@@ -748,13 +750,15 @@ app.get('/kiosk/meetings',
         meetingList.push(meeting);
       }
     });
-    const recurringMeetings = getRecurringMeetings(roomId);
-    for (meeting of recurringMeetings) {
-      meetingList.push(meeting);
-    }
     db.close((err) => {
       if (err) {
         return console.error(err.message);
+      }
+      const recurringMeetings = getRecurringMeetings(roomId);
+      for (meeting of recurringMeetings) {
+        if (!meetingList.some(nMeeting => nMeeting.id === meeting.id)) {
+          meetingList.push(meeting);
+        }
       }
       let roomName;
       let roomLocation;
