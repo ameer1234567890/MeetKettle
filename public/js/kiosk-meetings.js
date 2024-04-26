@@ -32,7 +32,7 @@ let getRelativeDay = (d1, d2 = new Date()) => {
   let diffWeeks = Math.floor((d1.getTime() - d2.getTime()) / secondsInAWeek);
   if (d1.toLocaleDateString('en-GB') == d2.toLocaleDateString('en-GB')) {
     return 'Today';
-  } else if (diffDays == 1) {
+  } else if (diffDays == 1  || diffDays == 0) {
     return 'Tomorrow'
   } else if (diffWeeks == 1) {
     return 'in ' + diffWeeks + ' week';
