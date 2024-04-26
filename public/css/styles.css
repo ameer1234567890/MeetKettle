@@ -29,14 +29,12 @@ html,body { height: 100%; margin: 0; padding: 0; }
   height: calc(100vh - 10.5rem);
 }
 
-.kiosk-arrow-right {
+.kiosk-arrow-right, .kiosk-arrow-left {
   font-size: 6.8rem;
   text-decoration: none;
 }
 
 .kiosk-arrow-left {
-  font-size: 6.8rem;
-  text-decoration: none;
   padding-top: 31vh;
 }
 
