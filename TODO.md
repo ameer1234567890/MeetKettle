@@ -1,4 +1,3 @@
-- DB migrate logic
 - Statistics charts:
   - Number of meetings per day/month (bar chart)
   - Duration of meetings per day/month (bar chart)

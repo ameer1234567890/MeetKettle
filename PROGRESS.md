@@ -46,4 +46,5 @@
 20/04/2024, Fixed docker builds and docker-compose documentation
 21/04/2024, Improvements to docker builds, implement versioning, release v1.0.0, fixed pagination links in kiosk selector, fixed pagination logic, fixed duplicate recurring meetings, removed pagination in home page, larger view modal, added subtle tables, added upstream version caching, removed unnecessary body-parser module, streamline version checking
 22/04/2024, Added screenshots
-26/04/2024, CSS optimizations, fixed duplicate meetings in home and kiosk
+26/04/2024, CSS optimizations, fixed duplicate meetings in home and kiosk, removed npm package
+27/04/2024, DB upgrade functionality when DB schema changes

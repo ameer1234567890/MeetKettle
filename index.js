@@ -33,6 +33,9 @@ let serviceList = [];
 let roleList = ['Viewer', 'Editor', 'Admin', 'Super-Admin',];
 let firstRunComplete = false;
 let recordsPerPage = 10;
+let { dbversion } = require('./package.json');
+let dbVersionFromDB = 0;
+let dbUpgradeRequired = false;
 if (!fs.existsSync(dbFile)) {
   const sessionSecret = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
   config.sessionSecret = sessionSecret;
@@ -71,23 +74,35 @@ if (!fs.existsSync(dbFile)) {
       return console.error(err.message);
     }
   });
-  db.all('SELECT * FROM config WHERE key=?', ['facilityList',], (err, row) => {
+  db.get('SELECT * FROM config WHERE key=?', ['facilityList',], (err, row) => {
     if (err) {
       return console.error(err.message);
     }
-    facilityList = row[0].value.split(',');
+    facilityList = row.value.split(',');
   });
-  db.all('SELECT * FROM config WHERE key=?', ['serviceList',], (err, row) => {
+  db.get('SELECT * FROM config WHERE key=?', ['serviceList',], (err, row) => {
     if (err) {
       return console.error(err.message);
     }
-    serviceList = row[0].value.split(',');
+    serviceList = row.value.split(',');
   });
-  db.all('SELECT * FROM config WHERE key=?', ['recordsPerPage',], (err, row) => {
+  db.get('SELECT * FROM config WHERE key=?', ['recordsPerPage',], (err, row) => {
     if (err) {
       return console.error(err.message);
     }
-    recordsPerPage = parseFloat(row[0].value);
+    recordsPerPage = parseFloat(row.value);
+  });
+  db.get('SELECT * FROM config WHERE key=?', ['dbVersion',], (err, row) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    if (row) {
+      dbVersionFromDB = parseFloat(row.value);
+      if (dbVersionFromDB != dbversion) dbUpgradeRequired = true;
+    } else {
+      dbVersionFromDB = 0;
+      dbUpgradeRequired = true;
+    }
   });
   db.close((err) => {
     if (err) {
@@ -116,6 +131,7 @@ let actions = {
   add_facility: 'added new meeting room facility',
   delete_facility: 'deleted meeting room facility',
   db_backup: ' ran a database backup',
+  db_upgrade: ' ran a database schema upgrade',
 };
 
 
@@ -168,6 +184,7 @@ const addUserLogEntry = (event, user, userid, roomid, meetingid, data) => {
 
 
 const checkPermissions = (perm, req, res) => {
+  if (dbUpgradeRequired) res.redirect('/dbupgrade');
   if (!firstrunComplete()) {
     return res.redirect('/firstrun');
   }
@@ -196,6 +213,7 @@ const checkPermissions = (perm, req, res) => {
 
 
 const checkPermissionsJson = (perm, req, res) => {
+  if (dbUpgradeRequired) res.redirect('/dbupgrade');
   if (!firstrunComplete()) {
     return res.redirect('/firstrun');
   }
@@ -386,8 +404,8 @@ const getRecurringMeetings = (roomId) => {
           'description':res[i].description,
           'roomid':res[i].roomid,
           'remarks':res[i].remarks,
-          'link':res[i].meetinglink,
-          'service':res[i].meetingservice,
+          'link':res[i].link,
+          'service':res[i].service,
         };
         meetings.push(meeting);
       }
@@ -428,7 +446,7 @@ app.get('/', (req, res) => {
   if (!q) {
     q = '';
   }
-if (!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     const payload = {
       authUser: req.session.userId,
       title: 'List Meetings',
@@ -479,8 +497,8 @@ if (!errors.isEmpty()) {
         'description':rows[i].description,
         'roomid':rows[i].roomid,
         'remarks':rows[i].remarks,
-        'link':rows[i].meetinglink,
-        'service':rows[i].meetingservice,
+        'link':rows[i].link,
+        'service':rows[i].service,
       };
       meetingList.push(meeting);
     }
@@ -540,8 +558,8 @@ app.get('/stats', (req, res) => {
         'description':rows[i].description,
         'roomid':rows[i].roomid,
         'remarks':rows[i].remarks,
-        'link':rows[i].meetinglink,
-        'service':rows[i].meetingservice,
+        'link':rows[i].link,
+        'service':rows[i].service,
       };
       meetingList.push(meeting);
     }
@@ -660,8 +678,8 @@ app.get('/kiosk/room',
           'duration':rows[i].duration,
           'description':rows[i].description,
           'remarks':rows[i].remarks,
-          'link':rows[i].meetinglink,
-          'service':rows[i].meetingservice,
+          'link':rows[i].link,
+          'service':rows[i].service,
         };
         meetingList.push(meeting);
       }
@@ -744,8 +762,8 @@ app.get('/kiosk/meetings',
           'repeat':rows[i].repeat,
           'description':rows[i].description,
           'remarks':rows[i].remarks,
-          'link':rows[i].meetinglink,
-          'service':rows[i].meetingservice,
+          'link':rows[i].link,
+          'service':rows[i].service,
         };
         meetingList.push(meeting);
       }
@@ -940,7 +958,7 @@ app.post('/kiosk/meetingadd',
               return console.error(err.message);
             }
           });
-          db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
+          db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, link, service) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
               return console.error(err.message);
@@ -1080,7 +1098,7 @@ app.post('/firstrun',
             return console.error(err.message);
           }
         });
-        db.run('CREATE TABLE meetings(id TEXT, datetime INT, duration INT, repeat TEXT, description TEXT, roomid TEXT, remarks TEXT, meetinglink TEXT, meetingservice TEXT, deleted INT)', (err) => {
+        db.run('CREATE TABLE meetings(id TEXT, datetime INT, duration INT, repeat TEXT, description TEXT, roomid TEXT, remarks TEXT, link TEXT, service TEXT, deleted INT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
             return console.error(err.message);
@@ -1111,6 +1129,13 @@ app.post('/firstrun',
             errorList.push({ code: err.errno, msg: err.message, });
             return console.error(err.message);
           }
+        });
+        db.run('INSERT INTO config(key, value) VALUES(?, ?)', ['dbVersion', dbversion.toString(),], (err) => {
+          if (err) {
+            errorList.push({ code: err.errno, msg: err.message, });
+            return console.error(err.message);
+          }
+          dbVersionFromDB = dbversion;
         });
         db.close((err) => {
           if (errorList.length === 0) {
@@ -1727,7 +1752,7 @@ app.post('/admin/services/delete',
           return console.error(err.message);
         }
       });
-      db.all('SELECT * FROM meetings WHERE meetingservice LIKE \'%' + service + '%\'', [], (err, rows) => {
+      db.all('SELECT * FROM meetings WHERE service LIKE \'%' + service + '%\'', [], (err, rows) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
           return console.error(err.message);
@@ -2289,8 +2314,8 @@ app.get('/admin/userlog',
             'description':rows[i].description,
             'roomid':rows[i].roomid,
             'remarks':rows[i].remarks,
-            'link':rows[i].meetinglink,
-            'service':rows[i].meetingservice,
+            'link':rows[i].link,
+            'service':rows[i].service,
           };
           meetingList.push(meeting);
         }
@@ -2353,6 +2378,68 @@ app.post('/admin/backup', (req, res) => {
       };
       res.json(payload);
       addUserLogEntry('db_backup', req.session.userId, null, null, null, null);
+    } else {
+      const payload = {
+        status: 'error',
+        errors: errorList,
+      };
+      res.status(400).json(payload);
+    }
+    if (err) {
+      return console.error(err.message);
+    }
+  });
+});
+
+
+app.get('/dbupgrade', (req, res) => {
+  const payload = {
+    authUser: req.session.userId,
+    title: 'Database Upgrade Required!',
+    subtitle: 'A database schema upgrade is required in order to start using the new version of the app.',
+  };
+  res.render('dbupgrade', payload);
+});
+
+
+app.post('/dbupgrade', (req, res) => {
+  let errorList = [];
+  let db = new sqlite3.Database(dbFile, (err) => {
+    if (err) {
+      return console.error(err.message);
+    }
+  });
+  let queries = [];
+  let query;
+  let thisVersion = 0;
+  if (dbVersionFromDB == 0) {
+    thisVersion = 1;
+    query = 'ALTER TABLE meetings RENAME COLUMN meetinglink TO link';
+    queries.push(query);
+    query = 'ALTER TABLE meetings RENAME COLUMN meetingservice TO service';
+    queries.push(query);
+    query = 'INSERT INTO config (key, value) VALUES(\'dbVersion\', \'' + thisVersion + '\')';
+    queries.push(query);
+    queries.forEach(query => {
+      db.run(query, (err) => {
+        if (err) {
+          errorList.push({ code: err.errno, msg: err.message, });
+          return console.error(err.message);
+        } else {
+          dbVersionFromDB = thisVersion;
+          if (dbVersionFromDB == dbversion) dbUpgradeRequired = false;
+        }
+      });
+    });
+    }
+  db.close((err) => {
+    if (errorList.length === 0) {
+      const payload = {
+        status: 'success',
+        message: 'Database schema has been upgraded successfully',
+      };
+      res.json(payload);
+      addUserLogEntry('db_upgrade', req.session.userId, null, null, null, null);
     } else {
       const payload = {
         status: 'error',
@@ -2739,8 +2826,8 @@ app.get('/meetings',
           'description':rows[i].description,
           'roomid':rows[i].roomid,
           'remarks':rows[i].remarks,
-          'link':rows[i].meetinglink,
-          'service':rows[i].meetingservice,
+          'link':rows[i].link,
+          'service':rows[i].service,
         };
         meetingList.push(meeting);
       }
@@ -2905,7 +2992,7 @@ app.post('/meetings/add',
               return console.error(err.message);
             }
           });
-          db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, meetinglink, meetingservice) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
+          db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, link, service) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
               return console.error(err.message);
@@ -3051,7 +3138,7 @@ app.post('/meetings/edit',
               return console.error(err.message);
             }
           });
-          db.run('UPDATE meetings SET datetime=?, duration=?, repeat=?, description=?, roomid=?, remarks=?, meetinglink=?, meetingservice=? WHERE id = \'' + id + '\'', [datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
+          db.run('UPDATE meetings SET datetime=?, duration=?, repeat=?, description=?, roomid=?, remarks=?, link=?, service=? WHERE id = \'' + id + '\'', [datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
               return console.error(err.message);

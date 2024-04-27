@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  - var navPage = 'admin'
+  h1 #{title}
+  span #{subtitle} 
+
+
+  .pb-5
+
+  button#dbupgrade.btn.btn-primary Run Database Schema Upgrade
+    i.fa.fa-database.fa-fw.ms-2
+  
+  #result.pt-5
+
+  script(src='/public/js/dbupgrade.js')
