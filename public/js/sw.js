@@ -32,7 +32,7 @@ self.addEventListener('fetch', (event) => {
         }
         const networkResponse = await fetch(event.request);
         return networkResponse;
-      } catch (error) {
+      } catch {
         const cache = await caches.open(CACHE_NAME);
         const cachedResponse = await cache.match(OFFLINE_URL);
         return cachedResponse;
