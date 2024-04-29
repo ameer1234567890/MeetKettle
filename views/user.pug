@@ -11,20 +11,28 @@ block content
       h5.card-title.pb-3 Change Password
       .card-text
         form(method='POST' action='/user')
-          .form-floating.mb-3
-            input#password.form-control(type='password' name='password' placeholder=' ' required='required')
-            label.form-label(for='password') Password
-              span.text-danger  *
-          .form-floating.mb-3
-            input#password2.form-control(type='password' name='password2' placeholder=' ' required='required')
-            label.form-label(for='password2') Confirm Password
-              span.text-danger  *
+          #passwordBox.input-group.mb-3
+            .form-floating.flex-grow-1
+                input#password.form-control(type='password' name='password' placeholder=' ' required='required')
+                label(for='password') Password
+                  span.text-danger  *
+            a.input-group-text.text-decoration-none(href='#')
+              i.fa.fa-eye-slash
+          #passwordBox2.input-group.mb-3
+            .form-floating.flex-grow-1
+                input#password2.form-control(type='password' name='password2' placeholder=' ' required='required')
+                label(for='password2') Confirm Password
+                  span.text-danger  *
+            a.input-group-text.text-decoration-none(href='#')
+              i.fa.fa-eye-slash
           button.btn.btn-primary.btn-labeled(type='submit') Change
             i.fa.fa-key.mx-2
       if changes
         ul.text-success
           for change in changes
             li!= change.msg
+      br
+      
       if errors
         ul.text-danger
           for error in errors
