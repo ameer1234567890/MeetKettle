@@ -1,3 +1,5 @@
+/* global bootstrap, Intl, roomList */
+
 // View modal
 let viewButton;
 let viewModal = document.getElementById('modal-view');
@@ -9,10 +11,8 @@ viewModal.addEventListener('show.bs.modal', function (event) {
   if (duration < 60) { duration = duration + ' minutes'; } else { duration = duration/60 + ' hour(s)'; }
   let meetingRoom = viewButton.getAttribute('data-room');
   let timezoneOffset = new Date().getTimezoneOffset().toString();
-  let offsetSign;
   if (timezoneOffset.charAt(0) === '-') {
     timezoneOffset = timezoneOffset.slice(1, 4);
-    offsetSign = '+';
   }
   for (let i = 0; i < roomList.length; i++) {
     if (roomList[i].id === meetingRoom) {

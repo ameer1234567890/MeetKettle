@@ -1,3 +1,5 @@
+/* global bootstrap, Intl */
+
 document.addEventListener("DOMContentLoaded", function() {
   activateTooltips();
   getWakeLock();
@@ -14,9 +16,8 @@ function activateTooltips() {
 
 
 async function getWakeLock() {
-  let wakeLock = null;
   try {
-    wakeLock = await navigator.wakeLock.request('screen');
+    await navigator.wakeLock.request('screen');
     console.log('Wake Lock is active!');
   } catch (err) {
     console.log(`${err.name}, ${err.message}`);

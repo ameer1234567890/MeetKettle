@@ -1,3 +1,5 @@
+/* global bootstrap */
+
 // Edit Modal
 let editButton;
 let editModal = document.getElementById('modal-edit');

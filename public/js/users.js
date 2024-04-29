@@ -1,3 +1,5 @@
+/* global bootstrap */
+
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#passwordBox a').addEventListener('click', function(event) {
     event.preventDefault();

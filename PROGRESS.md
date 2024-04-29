@@ -48,3 +48,5 @@
 22/04/2024, Added screenshots
 26/04/2024, CSS optimizations, fixed duplicate meetings in home and kiosk, removed npm package
 27/04/2024, DB upgrade functionality when DB schema changes
+28/04/2024, Added eslint and fixed linting errors
+29/04/2024, Added eslint vscode config & fixed linting errors in client side JavaScript

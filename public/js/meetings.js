@@ -1,3 +1,5 @@
+/* global bootstrap, roomList */
+
 // Edit modal
 let editButton;
 let editModal = document.getElementById('modal-edit');
@@ -5,7 +7,6 @@ let editErrorsElement = document.querySelector('#edit-errors');
 editModal.addEventListener('show.bs.modal', function (event) {
   editErrorsElement.innerHTML = '';
   editButton = event.relatedTarget;
-  let editRow = editButton.parentElement.parentElement.parentElement;
   let meetingDateTime = editButton.getAttribute('data-datetime');
   editModal.querySelector('#id').value = editButton.getAttribute('data-id');
   let timezoneOffset = new Date().getTimezoneOffset().toString();

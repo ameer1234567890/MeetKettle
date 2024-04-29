@@ -1,3 +1,5 @@
+/* global Chart */
+
 const ctx = document.getElementById('chart-meetings-per-day');
 
 new Chart(ctx, {

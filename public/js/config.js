@@ -1,3 +1,5 @@
+/* global bootstrap */
+
 // Set recordsPerPage form
 document.querySelector('#set-rpp-form').addEventListener('submit', function(event) {
   let errorsElement = document.querySelector('#rpp-errors');

@@ -1,4 +1,3 @@
-const OFFLINE_VERSION = 1;
 const CACHE_NAME = 'offline';
 const OFFLINE_URL = '/offline';
 const SW_URL = '/sw.js';

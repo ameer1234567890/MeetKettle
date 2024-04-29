@@ -1,0 +1,13 @@
+{
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "javascript"
+  ],
+  "eslint.experimental.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.options": {
+    "overrideConfigFile": "./eslint.config.mjs"
+  },
+  "editor.tabSize": 2,
+}
