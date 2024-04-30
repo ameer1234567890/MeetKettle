@@ -67,7 +67,7 @@ if (!fs.existsSync(dbFile)) {
   db.close((err) => { if (err) return logger.error(err.message); });
 } else {
   sqliteSync.connect(dbFile);
-  sqliteSync.run('SELECT * FROM config WHERE key=?', ['sessionSecret',], function (res) {
+  sqliteSync.run('SELECT * FROM config WHERE key=?', ['sessionSecret',], (res) => {
     if (res.error) return logger.error(res.error);
     config.sessionSecret = res[0].value;
   });
@@ -2286,7 +2286,7 @@ app.post('/rooms/add',
       let facilities = '';
       let thisFacility;
       let thisFacilityWithPrefix;
-      Object.keys(facilityList).forEach(function (key) {
+      Object.keys(facilityList).forEach((key) => {
         thisFacility = facilityList[key];
         thisFacilityWithPrefix = 'facility' + thisFacility;
         if (req.body[thisFacilityWithPrefix] === 'on') {
@@ -2368,7 +2368,7 @@ app.post('/rooms/edit',
       let facilities = '';
       let thisFacility;
       let thisFacilityWithPrefix;
-      Object.keys(facilityList).forEach(function (key) {
+      Object.keys(facilityList).forEach((key) => {
         thisFacility = facilityList[key];
         thisFacilityWithPrefix = 'facility' + thisFacility;
         if (req.body[thisFacilityWithPrefix] === 'on') {
@@ -3040,7 +3040,7 @@ app.post('/meetings/delete',
 app.get('/about', (req, res) => {
   if (!firstrunComplete()) { return res.redirect('/firstrun'); }
   let versionLogic;
-  async function getVersionFromGithub() {
+  const getVersionFromGithub = async () => {
     let version = kettleCache.get('version');
     if (!version) {
       let response = await fetch('https://raw.githubusercontent.com/ameer1234567890/MeetKettle/master/package.json');
@@ -3056,7 +3056,7 @@ app.get('/about', (req, res) => {
       versionLogic = 'cache';
       return version;
     }
-  }
+  };
   getVersionFromGithub().then((upstreamVersion) => {
     const payload = {
       authUser: req.session.userId,
