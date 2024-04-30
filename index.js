@@ -26,7 +26,7 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.json(),
+    winston.format.printf(info => `[${info.timestamp}] [${info.level}]: ${info.message}`+(info.splat!==undefined?`${info.splat}`:" "))
   ),
   transports: [
     new winston.transports.DailyRotateFile({ level: 'error', filename: './logs/error-%DATE%.log', datePattern: 'YYYY-MM-DD', zippedArchive: true, maxSize: '10m', maxFiles: '14d' }),
