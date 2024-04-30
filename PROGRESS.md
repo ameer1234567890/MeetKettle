@@ -50,3 +50,4 @@
 27/04/2024, DB upgrade functionality when DB schema changes
 28/04/2024, Added eslint and fixed linting errors
 29/04/2024, Added eslint vscode config & fixed linting errors in client side JavaScript, fixed more linting errors, added view password option in user page & firstrun page
+30/04/2024, Added logging & major restructuring - phase 1

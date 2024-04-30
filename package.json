@@ -29,7 +29,9 @@
     "node-cron": "^3.0.3",
     "pug": "^3.0.2",
     "sqlite-sync": "^0.3.9",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "nodemonConfig": {
     "ignore": [
