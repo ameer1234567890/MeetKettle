@@ -250,9 +250,7 @@ const getRoomList = () => {
   let roomList = [];
   sqliteSync.connect(dbFile);
   sqliteSync.run('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (res) => {
-    if (res.error) {
-      return logger.error(res.error);
-    }
+    if (res.error) return logger.error(res.error);
     let room;
     for (let i = 0; i < res.length; i++) {
       room = {
@@ -272,9 +270,7 @@ const getOverlapMeeting = (meetingStart, meetingEnd, roomId, meetingId = 0) => {
   const meetingStartPlusOneDay = (new Date(meetingStart * 1000).getTime() / 1000) + (3600 * 24);
   sqliteSync.connect(dbFile);
   sqliteSync.run('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + meetingStartMinusOneDay + '\' AND datetime < \'' + meetingStartPlusOneDay + '\' ORDER BY datetime DESC', [], (res) => {
-    if (res.error) {
-      return logger.error(res.error);
-    }
+    if (res.error) return logger.error(res.error);
     let storedMeetingStart;
     let storedMeetingEnd;
     for (let i = 0; i < res.length; i++) {
@@ -389,17 +385,12 @@ app.get('/offline', (req, res) => {
 app.get('/', (req, res) => {
   if (!checkPermissions('permView', req, res)) { return false; }
   const errors = validationResult(req);
-  let q = req.query.q;
-  if (!q) {
-    q = '';
-  }
   if (!errors.isEmpty()) {
     const payload = {
       authUser: req.session.userId,
       title: 'List Meetings',
       message: 'Below errors occured',
       errors: errors.array(),
-      q: q,
     };
     return res.render('home', payload);
   }
@@ -407,9 +398,7 @@ app.get('/', (req, res) => {
   let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
   let roomList = [];
   db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) {
-      return logger.error(err.message);
-    }
+    if (err) return logger.error(err.message);
     let room;
     for (let i = 0; i < rows.length; i++) {
       room = {
@@ -421,9 +410,7 @@ app.get('/', (req, res) => {
   });
   const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC', [], (err, rows) => {
-    if (err) {
-      return logger.error(err.message);
-    }
+    if (err) return logger.error(err.message);
     let meeting;
     for (let i = 0; i < rows.length; i++) {
       meeting = {
@@ -477,9 +464,7 @@ app.get('/stats', (req, res) => {
   if (!checkPermissions('permView', req, res)) { return false; }
   let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) {
-      return logger.error(err.message);
-    }
+    if (err) return logger.error(err.message);
     let meeting;
     let meetingList = [];
     for (let i = 0; i < rows.length; i++) {
@@ -526,16 +511,12 @@ app.get('/kiosk',
     let roomList = [];
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     db.get('SELECT COUNT(1) FROM rooms WHERE deleted IS NOT 1', (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / recordsPerPage);
       const startRecord = (page - 1) * recordsPerPage;
       db.all('SELECT * FROM rooms WHERE deleted IS NOT 1 LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         let room;
         for (let i = 0; i < rows.length; i++) {
           room = {
@@ -585,9 +566,7 @@ app.get('/kiosk/room',
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' ORDER BY datetime ASC LIMIT 10', (err, rows) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       let meeting;
       for (let i = 0; i < rows.length; i++) {
         meeting = {
@@ -614,9 +593,7 @@ app.get('/kiosk/room',
       let roomLocation;
       let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
       db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         roomName = row.name;
         roomLocation = row.location;
       });
@@ -656,9 +633,7 @@ app.get('/kiosk/meetings',
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
     const nowPlus24Hours = (new Date().getTime() / 1000) + (3600 * 24);
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' AND datetime < \'' + nowPlus24Hours + '\' ORDER BY datetime ASC LIMIT 10', (err, rows) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       let meeting;
       for (let i = 0; i < rows.length; i++) {
         meeting = {
@@ -686,9 +661,7 @@ app.get('/kiosk/meetings',
       let roomLocation;
       let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
       db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         roomName = row.name;
         roomLocation = row.location;
       });
@@ -728,9 +701,7 @@ app.get('/kiosk/meetingadd',
     let roomLocation;
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       roomName = row.name;
       roomLocation = row.location;
     });
@@ -775,9 +746,7 @@ app.post('/kiosk/meetingadd',
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       const roomName = row.name;
       const roomLocation = row.location;
       const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId);
@@ -1167,9 +1136,7 @@ app.post('/login',
     let user = req.body.user;
     let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
     db.get('SELECT * FROM users WHERE deleted IS NOT 1 AND user=?', user, (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       if (!row) {
         res.render('login', {
           authUser: req.session.userId,
@@ -1243,10 +1210,7 @@ app.post('/forgot',
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     let user = req.body.user;
     db.all('SELECT * FROM users WHERE user = \'' + user + '\'', [], (err, rows) => {
-      if (err) {
-        errorList.push({ code: err.errno, msg: err.message, });
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       if (rows.length === 0) {
         errorList.push({ code: '101', msg: 'Username does not exist', });
       }
@@ -1439,10 +1403,7 @@ app.post('/admin/facilities/delete',
       let errorList = [];
       let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
       db.all('SELECT * FROM rooms WHERE facilities LIKE \'%' + facility + '%\'', [], (err, rows) => {
-        if (err) {
-          errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         if (rows.length > 0) {
           errorList.push({ code: 101, msg: 'Facility is attached to an existing room.', });
         }
@@ -1576,10 +1537,7 @@ app.post('/admin/services/delete',
       let errorList = [];
       let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
       db.all('SELECT * FROM meetings WHERE service LIKE \'%' + service + '%\'', [], (err, rows) => {
-        if (err) {
-          errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         if (rows.length > 0) {
           errorList.push({ code: 101, msg: 'Service is attached to an existing meeting.', });
         }
@@ -1656,16 +1614,12 @@ app.get('/admin/users',
     let userList = [];
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     db.get('SELECT COUNT(1) FROM users', (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / recordsPerPage);
       const startRecord = (page - 1) * recordsPerPage;
       db.all('SELECT * FROM users LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         let user;
         for (let i = 0; i < rows.length; i++) {
           user = {
@@ -1768,10 +1722,7 @@ app.post('/admin/users/add',
       let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
       let role = req.body.role;
       db.get('SELECT * FROM users WHERE user=\'' + user + '\'', (err, row) => {
-        if (err) {
-          errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         if (row) {
           errorList.push({ code: 101, msg: 'User already exists', });
         } else {
@@ -1836,10 +1787,7 @@ app.post('/admin/users/edit',
       let role = req.body.role;
       if (req.session.userRole == 'Super-Admin' && role != 'Super-Admin') {
         db.get('SELECT * FROM users WHERE role = \'Super-Admin\' AND user != \'' + user + '\'', (err, row) => {
-          if (err) {
-            errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
-          }
+          if (err) return logger.error(err.message);
           if (!row) {
             return errorList.push({ msg: 'This action is not allowed since there are no Super-Admin users left!', });
           }
@@ -1880,10 +1828,7 @@ app.post('/admin/users/deactivate', (req, res) => {
   let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
   let user = req.body.user;
   db.all('SELECT * FROM users WHERE role=\'Super-Admin\' AND user=\'' + user + '\' AND deleted IS NOT 1', (err, rows) => {
-    if (err) {
-      errorList.push({ code: err.errno, msg: err.message, });
-      return logger.error(err.message);
-    }
+    if (err) return logger.error(err.message);
     if (rows.length === 1) {
       errorList.push({ code: 101, msg: 'The only Super-Admin account cannot be disabled', });
     } else {
@@ -2043,16 +1988,12 @@ app.get('/admin/userlog',
     let meetingList = [];
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     db.get('SELECT COUNT(1) FROM userlog', (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / (recordsPerPage * 2));
       const startRecord = (page - 1) * (recordsPerPage * 2);
       db.all('SELECT * FROM userlog ORDER BY datetime DESC LIMIT ' + (recordsPerPage * 2) + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         let log;
         for (let i = 0; i < rows.length; i++) {
           log = {
@@ -2068,9 +2009,7 @@ app.get('/admin/userlog',
         }
       });
       db.all('SELECT * FROM rooms', [], (err, rows) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         let room;
         for (let i = 0; i < rows.length; i++) {
           room = {
@@ -2081,9 +2020,7 @@ app.get('/admin/userlog',
         }
       });
       db.all('SELECT * FROM meetings', [], (err, rows) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         let meeting;
         for (let i = 0; i < rows.length; i++) {
           meeting = {
@@ -2244,16 +2181,12 @@ app.get('/rooms',
     let roomList = [];
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
     db.get('SELECT COUNT(1) FROM rooms WHERE deleted IS NOT 1', (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / recordsPerPage);
       const startRecord = (page - 1) * recordsPerPage;
       db.all('SELECT * FROM rooms WHERE deleted IS NOT 1 LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) {
-          return logger.error(err.message);
-        }
+        if (err) return logger.error(err.message);
         let room;
         for (let i = 0; i < rows.length; i++) {
           room = {
@@ -2549,9 +2482,7 @@ app.get('/meetings',
     const roomList = getRoomList();
     const startRecord = (page - 1) * recordsPerPage;
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       let meeting;
       for (let i = 0; i < rows.length; i++) {
         meeting = {
@@ -2569,9 +2500,7 @@ app.get('/meetings',
       }
     });
     db.get('SELECT COUNT(1) AS count FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\'', [], (err, row) => {
-      if (err) {
-        return logger.error(err.message);
-      }
+      if (err) return logger.error(err.message);
       numPages = Math.ceil(row.count / recordsPerPage);
     });
     db.close((err) => {
@@ -2745,7 +2674,7 @@ app.post('/meetings/add',
                 authUser: req.session.userId,
                 title: 'Error',
                 message: 'Errors occured. Please refer below.',
-                errors: errors.array(),
+                errors: errorList,
                 datetime: req.body.datetime,
                 duration: req.body.duration,
                 repeat: req.body.repeat,
