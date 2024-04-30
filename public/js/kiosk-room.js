@@ -1,6 +1,6 @@
 /* global bootstrap, Intl */
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
   activateTooltips();
   getWakeLock();
   setTimeout(updateTime, 1000);

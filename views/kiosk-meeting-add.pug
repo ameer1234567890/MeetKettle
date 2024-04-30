@@ -40,22 +40,25 @@ html(lang='en-US')
               - var time
               - var optionName
               - var datetimeShort = new Date(datetime).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+              - var timeInRange = false
               each i in [0, 1, 2, 3, 4, 5]
                 - time = new Date(timeOneRaw + 900000 * i).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
                 - optionName = 'option' + i
-                - var timeInRange = false
                 if (datetimeShort == time)
-                  input.btn-check(type='radio' name='time' value=time id=optionName required='required' checked)
+                  input.btn-check(type='radio' name='time' value=time id=optionName required checked)
                   - timeInRange = true
                 else
-                  input.btn-check(type='radio' name='time' value=time id=optionName required='required')
+                  input.btn-check(type='radio' name='time' value=time id=optionName)
                 label.time-n-duration-picker.btn.btn-outline-primary.rounded-0(for=optionName) #{time}
               if (timeInRange)
                 input#timeCustom.form-control.border-primary(type='time' name='time')
               else
-                - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false, }
-                - var datetimeShort24hrs = new Date(datetime).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
-                input#timeCustom.form-control.border-primary(type='time' name='time' value=`${datetimeShort24hrs}`)
+                if (datetime)
+                  - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false, }
+                  - var datetimeShort24hrs = new Date(datetime).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
+                  input#timeCustom.form-control.border-primary(type='time' name='time' value=`${datetimeShort24hrs}` required)
+                else
+                  input#timeCustom.form-control.border-primary(type='time' name='time' required)
             p
             #meeting-durations Meeting Duration:
             .input-group

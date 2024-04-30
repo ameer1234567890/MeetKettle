@@ -1,16 +1,28 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
   validateMeetingTime();
   getWakeLock();
   setTimeout(updateTime, 1000);
 });
-document.getElementById('timeCustom').addEventListener("click", function() {
-  var timeBoxes = document.getElementsByName('time');
+const timeBoxes = document.querySelectorAll('[type="radio"][name="time"]');
+const timeCustom = document.getElementById('timeCustom');
+document.getElementById('timeCustom').addEventListener('click', function() {
+  timeCustom.required = true;
   for (var i = 0; i < timeBoxes.length; i++) {
-    if (timeBoxes[i].type === 'radio' && timeBoxes[i].checked) {
+    timeBoxes[i].required = false;
+    if (timeBoxes[i].checked) {
       timeBoxes[i].checked = false;
     }
   }
 });
+for (var i = 0; i < timeBoxes.length; i++) {
+  timeBoxes[i].addEventListener('click', function() {
+    timeCustom.required = false;
+    timeCustom.value = '';
+    for (var i = 0; i < timeBoxes.length; i++) {
+      timeBoxes[i].required = true;
+    }
+  });
+  }
 document.getElementById('addMeetingForm').addEventListener("submit", function(event) {
   event.preventDefault();
   var dateString = new Date().getFullYear() + '/' + (new Date().getMonth()+1) + '/' + new Date().getDate();

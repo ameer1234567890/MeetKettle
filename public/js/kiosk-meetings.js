@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
   getWakeLock();
   setTimeout(updateTime, 1000);
 });
