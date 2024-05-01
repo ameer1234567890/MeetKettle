@@ -413,18 +413,7 @@ app.get('/', (req, res) => {
   }
   let meetingList = [];
   let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
-  let roomList = [];
-  db.all('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) return logger.error(err.message);
-    let room;
-    for (let i = 0; i < rows.length; i++) {
-      room = {
-        'id':rows[i].id,
-        'name':rows[i].name,
-      };
-      roomList.push(room);
-    }
-  });
+  const roomList = getRoomList();
   const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC', [], (err, rows) => {
     if (err) return logger.error(err.message);
