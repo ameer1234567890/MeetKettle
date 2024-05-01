@@ -29,8 +29,22 @@ const logger = winston.createLogger({
     winston.format.printf(info => `[${info.timestamp}] [${info.level}]: ${info.message}`+(info.splat!==undefined?`${info.splat}`:" "))
   ),
   transports: [
-    new winston.transports.DailyRotateFile({ level: 'error', filename: './logs/error-%DATE%.log', datePattern: 'YYYY-MM-DD', zippedArchive: true, maxSize: '10m', maxFiles: '14d' }),
-    new winston.transports.DailyRotateFile({ level: 'info', filename: './logs/info-%DATE%.log', datePattern: 'YYYY-MM-DD', zippedArchive: true, maxSize: '10m', maxFiles: '14d' }),
+    new winston.transports.DailyRotateFile({
+      level: 'error',
+      filename: './logs/error-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '10m',
+      maxFiles: '14d',
+    }),
+    new winston.transports.DailyRotateFile({
+      level: 'info',
+      filename: './logs/info-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '10m',
+      maxFiles: '14d',
+    }),
     new winston.transports.Console(),
   ],
 });
