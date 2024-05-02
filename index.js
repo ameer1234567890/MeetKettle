@@ -22,11 +22,21 @@ const winston = require('winston');
 require('winston-daily-rotate-file');
 
 
+const printMessage = (message, stack) => {
+  if (stack) {
+    return stack;
+  } else {
+    return message;
+  }
+}
+
+
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
+    winston.format.errors({ stack: true }),
     winston.format.timestamp(),
-    winston.format.printf(info => `[${info.timestamp}] [${info.level}]: ${info.message}`+(info.splat!==undefined?`${info.splat}`:" "))
+    winston.format.printf(info => `[${info.timestamp}] [${info.level}]: ${printMessage(info.message, info.stack)}`+(info.splat!==undefined?`${info.splat}`:" "))
   ),
   transports: [
     new winston.transports.DailyRotateFile({
@@ -70,39 +80,39 @@ let dbUpgradeRequired = false;
 if (!fs.existsSync(dbFile)) {
   const sessionSecret = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
   config.sessionSecret = sessionSecret;
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   db.run('CREATE TABLE config(key TEXT, value TEXT)', (err) => {
     if (err) {
-      return logger.error(err.message);
+      return logger.error(new Error(err.message));
     } else {
       db.run('INSERT INTO config(key, value) VALUES(?, ?)', ['sessionSecret', sessionSecret,], (err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         config.sessionSecret = sessionSecret;
       });
     }
   });
-  db.close((err) => { if (err) return logger.error(err.message); });
+  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 } else {
   sqliteSync.connect(dbFile);
   sqliteSync.run('SELECT * FROM config WHERE key=?', ['sessionSecret',], (res) => {
-    if (res.error) return logger.error(res.error);
+    if (res.error) return logger.error(new Error(res.err));
     config.sessionSecret = res[0].value;
   });
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   db.get('SELECT * FROM config WHERE key=?', ['facilityList',], (err, row) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     facilityList = row.value.split(',');
   });
   db.get('SELECT * FROM config WHERE key=?', ['serviceList',], (err, row) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     serviceList = row.value.split(',');
   });
   db.get('SELECT * FROM config WHERE key=?', ['recordsPerPage',], (err, row) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     recordsPerPage = parseFloat(row.value);
   });
   db.get('SELECT * FROM config WHERE key=?', ['dbVersion',], (err, row) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (row) {
       dbVersionFromDB = parseFloat(row.value);
       if (dbVersionFromDB != dbversion) dbUpgradeRequired = true;
@@ -111,7 +121,7 @@ if (!fs.existsSync(dbFile)) {
       dbUpgradeRequired = true;
     }
   });
-  db.close((err) => { if (err) return logger.error(err.message); });
+  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 }
 
 let actions = {
@@ -164,12 +174,12 @@ const firstrunComplete = () => {
 
 
 const addUserLogEntry = (event, user, userid, roomid, meetingid, data) => {
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let timesstamp = Date.now();
   db.run('INSERT INTO userlog(event, datetime, user, userid, roomid, meetingid, data) VALUES(?, ?, ?, ?, ?, ?, ?)', [event, timesstamp, user, userid, roomid, meetingid,data,], (err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
   });
-  db.close((err) => { if (err) return logger.error(err.message); });
+  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 };
 
 
@@ -234,26 +244,26 @@ const checkPermissionsJson = (perm, req, res) => {
 
 
 const removeUserSessions = (user) => {
-  let db = new sqlite3.Database(sessionDbFile, (err) => {if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(sessionDbFile, (err) => {if (err) return logger.error(new Error(err.message)); });
   db.run('DELETE FROM sessions WHERE sess LIKE \'%"userId":"' + user + '"%\'', (err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
   });
-  db.close((err) => { if (err) return logger.error(err.message); });
+  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 };
 
 
 const runDbBackup = () => {
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let backup = db.backup(dbBackupFile, (err) => {
     if (err) {
-      return logger.error(err.message);
+      return logger.error(new Error(err.message));
     } else {
       logger.info('Database backup succeeded');
     }
   });
   backup.step(-1);
   backup.finish();
-  db.close((err) => { if (err) return logger.error(err.message); });
+  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 };
 
 
@@ -267,7 +277,7 @@ const getRoomList = () => {
   let roomList = [];
   sqliteSync.connect(dbFile);
   sqliteSync.run('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (res) => {
-    if (res.error) return logger.error(res.error);
+    if (res.error) return logger.error(new Error(res.err));
     let room;
     for (let i = 0; i < res.length; i++) {
       room = {
@@ -287,7 +297,7 @@ const getOverlapMeeting = (meetingStart, meetingEnd, roomId, meetingId = 0) => {
   const meetingStartPlusOneDay = (new Date(meetingStart * 1000).getTime() / 1000) + (3600 * 24);
   sqliteSync.connect(dbFile);
   sqliteSync.run('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + meetingStartMinusOneDay + '\' AND datetime < \'' + meetingStartPlusOneDay + '\' ORDER BY datetime DESC', [], (res) => {
-    if (res.error) return logger.error(res.error);
+    if (res.error) return logger.error(new Error(res.err));
     let storedMeetingStart;
     let storedMeetingEnd;
     for (let i = 0; i < res.length; i++) {
@@ -332,7 +342,7 @@ const getRecurringMeetings = (roomId) => {
   sqliteSync.connect(dbFile);
   sqliteSync.run(query, [], (res) => {
     if (res.error) {
-      return logger.error(res.error);
+      return logger.error(new Error(res.err));
     }
     for (let i = 0; i < res.length; i++) {
       isRecurringMeeting = false;
@@ -412,11 +422,11 @@ app.get('/', (req, res) => {
     return res.render('home', payload);
   }
   let meetingList = [];
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   const roomList = getRoomList();
   const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND datetime > ' + nowMinusTwoHours + ' ORDER BY datetime DESC', [], (err, rows) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     let meeting;
     for (let i = 0; i < rows.length; i++) {
       meeting = {
@@ -434,7 +444,7 @@ app.get('/', (req, res) => {
     }
   });
   db.close((err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     const recurringMeetings = getRecurringMeetings('all');
     for (let meeting of recurringMeetings) {
       if (!meetingList.some(nMeeting => nMeeting.id === meeting.id)) {
@@ -468,9 +478,9 @@ app.get('/', (req, res) => {
 
 app.get('/stats', (req, res) => {
   if (!checkPermissions('permView', req, res)) { return false; }
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     let meeting;
     let meetingList = [];
     for (let i = 0; i < rows.length; i++) {
@@ -487,7 +497,7 @@ app.get('/stats', (req, res) => {
       meetingList.push(meeting);
     }
   });
-  db.close((err) => { if (err) return logger.error(err.message); });
+  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 });
 
 
@@ -515,14 +525,14 @@ app.get('/kiosk',
     }
     let numPages;
     let roomList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     db.get('SELECT COUNT(1) FROM rooms WHERE deleted IS NOT 1', (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / recordsPerPage);
       const startRecord = (page - 1) * recordsPerPage;
       db.all('SELECT * FROM rooms WHERE deleted IS NOT 1 LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         let room;
         for (let i = 0; i < rows.length; i++) {
           room = {
@@ -538,7 +548,7 @@ app.get('/kiosk',
       });
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const payload = {
         authUser: req.session.userId,
         title: 'Kiosk Mode',
@@ -569,10 +579,10 @@ app.get('/kiosk/room',
     }
     let roomId = req.query.room;
     let meetingList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' ORDER BY datetime ASC LIMIT 10', (err, rows) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       let meeting;
       for (let i = 0; i < rows.length; i++) {
         meeting = {
@@ -588,7 +598,7 @@ app.get('/kiosk/room',
       }
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const recurringMeetings = getRecurringMeetings(roomId);
       for (let meeting of recurringMeetings) {
         if (!meetingList.some(nMeeting => nMeeting.id === meeting.id)) {
@@ -597,14 +607,14 @@ app.get('/kiosk/room',
       }
       let roomName;
       let roomLocation;
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         roomName = row.name;
         roomLocation = row.location;
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         const payload = {
           authUser: req.session.userId,
           meetings: meetingList,
@@ -635,11 +645,11 @@ app.get('/kiosk/meetings',
     }
     let roomId = req.query.room;
     let meetingList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const nowMinusTwoHours = (new Date().getTime() / 1000) - (3600 * 2);
     const nowPlus24Hours = (new Date().getTime() / 1000) + (3600 * 24);
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + nowMinusTwoHours + '\' AND datetime < \'' + nowPlus24Hours + '\' ORDER BY datetime ASC LIMIT 10', (err, rows) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       let meeting;
       for (let i = 0; i < rows.length; i++) {
         meeting = {
@@ -656,7 +666,7 @@ app.get('/kiosk/meetings',
       }
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const recurringMeetings = getRecurringMeetings(roomId);
       for (let meeting of recurringMeetings) {
         if (!meetingList.some(nMeeting => nMeeting.id === meeting.id)) {
@@ -665,14 +675,14 @@ app.get('/kiosk/meetings',
       }
       let roomName;
       let roomLocation;
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         roomName = row.name;
         roomLocation = row.location;
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         meetingList.sort((a,b) => a.datetime - b.datetime);
         const payload = {
           authUser: req.session.userId,
@@ -705,14 +715,14 @@ app.get('/kiosk/meetingadd',
     let roomId = req.query.room;
     let roomName;
     let roomLocation;
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       roomName = row.name;
       roomLocation = row.location;
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const payload = {
         authUser: req.session.userId,
         room: roomId,
@@ -750,9 +760,9 @@ app.post('/kiosk/meetingadd',
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     db.get('SELECT name, location FROM rooms WHERE deleted IS NOT 1 AND id IS \'' + roomId + '\'', (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const roomName = row.name;
       const roomLocation = row.location;
       const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId);
@@ -788,7 +798,7 @@ app.post('/kiosk/meetingadd',
         });
       } else {
         db.close((err) => {
-          if (err) return logger.error(err.message);
+          if (err) return logger.error(new Error(err.message));
           if (!errors.isEmpty()) {
             const payload = {
               authUser: req.session.userId,
@@ -817,15 +827,15 @@ app.post('/kiosk/meetingadd',
             let remarks = req.body.remarks;
             let link = req.body.link;
             let service = req.body.service;
-            let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+            let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
             db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, link, service) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
               if (err) {
                 errorList.push({ code: err.errno, msg: err.message, });
-                return logger.error(err.message);
+                return logger.error(new Error(err.message));
               }
             });
             db.close((err) => {
-              if (err) return logger.error(err.message);
+              if (err) return logger.error(new Error(err.message));
               if (errorList.length === 0) {
                 res.render('kiosk-meeting-add-complete', {
                   authUser: req.session.userId,
@@ -933,11 +943,11 @@ app.post('/firstrun',
         });
       } else {
         let errorList = [];
-        let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+        let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
         db.run('CREATE TABLE users(user TEXT, password TEXT, role TEXT, resetrequested INT, deleted INT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           } else {
             let user = req.body.user;
             let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
@@ -945,7 +955,7 @@ app.post('/firstrun',
             db.run('INSERT INTO users(user, password, role) VALUES(?, ?, ?)', [user, passwordHash, role,], (err) => {
               if (err) {
                 errorList.push({ code: err.errno, msg: err.message, });
-                return logger.error(err.message);
+                return logger.error(new Error(err.message));
               }
             });
           }
@@ -953,45 +963,45 @@ app.post('/firstrun',
         db.run('CREATE TABLE rooms(id TEXT, name TEXT, location TEXT, facilities TEXT, capacity INT, oos INT, deleted INT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         db.run('CREATE TABLE meetings(id TEXT, datetime INT, duration INT, repeat TEXT, description TEXT, roomid TEXT, remarks TEXT, link TEXT, service TEXT, deleted INT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         db.run('CREATE TABLE userlog(event TEXT, datetime INT, user TEXT, userid TEXT, roomid TEXT, meetingid TEXT, data TEXT)', (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         facilityList = [ 'laptop', 'wifi', 'ethernet', 'webcam', 'projector', 'coffee', ];
         db.run('INSERT INTO config(key, value) VALUES(?, ?)', ['facilityList', facilityList.toString(),], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         serviceList = [ 'face_to_face', 'zoom', 'google_meet', 'teams', ];
         db.run('INSERT INTO config(key, value) VALUES(?, ?)', ['serviceList', serviceList.toString(),], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         db.run('INSERT INTO config(key, value) VALUES(?, ?)', ['recordsPerPage', recordsPerPage.toString(),], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         db.run('INSERT INTO config(key, value) VALUES(?, ?)', ['dbVersion', dbversion.toString(),], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
           dbVersionFromDB = dbversion;
         });
@@ -1007,7 +1017,7 @@ app.post('/firstrun',
             addUserLogEntry('add_user', req.body.user, req.body.user, null, null, null);
             fs.writeFileSync(firstRunFile, '', err => {
               if (err) {
-                logger.error(err);
+                logger.error(new Error(err.message));
               }
             });
           } else {
@@ -1019,7 +1029,7 @@ app.post('/firstrun',
             });
           }
           if (err) {
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
       }
@@ -1077,13 +1087,13 @@ app.post('/user',
       });
     } else {
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let user = req.session.userId;
       let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
       db.run('UPDATE users SET password=? WHERE user = \'' + user + '\'', [passwordHash,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
       db.close((err) => {
@@ -1111,7 +1121,7 @@ app.post('/user',
           });
         }
         if (err) {
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
     }
@@ -1138,11 +1148,11 @@ app.post('/login',
   body('password').escape(),
   (req, res) => {
     if (!firstrunComplete()) { return res.redirect('/firstrun'); }
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     let user = req.body.user;
     let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
     db.get('SELECT * FROM users WHERE deleted IS NOT 1 AND user=?', user, (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       if (!row) {
         res.render('login', {
           authUser: req.session.userId,
@@ -1182,7 +1192,7 @@ app.post('/login',
         }
       }
     });
-    db.close((err) => { if (err) return logger.error(err.message); });
+    db.close((err) => { if (err) return logger.error(new Error(err.message)); });
   }
 );
 
@@ -1213,10 +1223,10 @@ app.post('/forgot',
   (req, res) => {
     if (!firstrunComplete()) { return res.redirect('/firstrun'); }
     let errorList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     let user = req.body.user;
     db.all('SELECT * FROM users WHERE user = \'' + user + '\'', [], (err, rows) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       if (rows.length === 0) {
         errorList.push({ code: '101', msg: 'Username does not exist', });
       }
@@ -1224,11 +1234,11 @@ app.post('/forgot',
     db.run('UPDATE users SET resetrequested=? WHERE user = \'' + user + '\'', [1,], (err) => {
       if (err) {
         errorList.push({ code: err.errno, msg: err.message, });
-        return logger.error(err.message);
+        return logger.error(new Error(err.message));
       }
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       if (errorList.length === 0) {
         let changes = [
           {
@@ -1295,16 +1305,16 @@ app.post('/admin/rpp/set',
       res.status(400).json(payload);
     } else {
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let rpp = req.body.rpp;
       db.run('UPDATE config SET value=? WHERE key = \'recordsPerPage\'', [rpp,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const payload = {
             status: 'success',
@@ -1360,16 +1370,16 @@ app.post('/admin/facilities/add',
         res.status(400).json(payload);
       } else {
         let errorList = [];
-        let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+        let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
         facilityList.push(facility);
         db.run('UPDATE config SET value=? WHERE key = \'facilityList\'', [facilityList.toString(),], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         db.close((err) => {
-          if (err) return logger.error(err.message);
+          if (err) return logger.error(new Error(err.message));
           if (errorList.length === 0) {
             const payload = {
               status: 'success',
@@ -1407,31 +1417,31 @@ app.post('/admin/facilities/delete',
     } else {
       let facility = req.body.facility.toLowerCase().replace(' ', '_');
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       db.all('SELECT * FROM rooms WHERE facilities LIKE \'%' + facility + '%\'', [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (rows.length > 0) {
           errorList.push({ code: 101, msg: 'Facility is attached to an existing room.', });
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const index = facilityList.indexOf(facility);
           facilityList.splice(index, 1);
           let db2 = new sqlite3.Database(dbFile, (err) => {
             if (err) {
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db2.run('UPDATE config SET value=? WHERE key = \'facilityList\'', [facilityList.toString(),], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db2.close((err) => {
-            if (err) return logger.error(err.message);
+            if (err) return logger.error(new Error(err.message));
             if (errorList.length === 0) {
               const payload = {
                 status: 'success',
@@ -1494,16 +1504,16 @@ app.post('/admin/services/add',
         res.status(400).json(payload);
       } else {
         let errorList = [];
-        let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+        let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
         serviceList.push(service);
         db.run('UPDATE config SET value=? WHERE key = \'serviceList\'', [serviceList.toString(),], (err) => {
           if (err) {
             errorList.push({ code: err.errno, msg: err.message, });
-            return logger.error(err.message);
+            return logger.error(new Error(err.message));
           }
         });
         db.close((err) => {
-          if (err) return logger.error(err.message);
+          if (err) return logger.error(new Error(err.message));
           if (errorList.length === 0) {
             const payload = {
               status: 'success',
@@ -1541,31 +1551,31 @@ app.post('/admin/services/delete',
     } else {
       let service = req.body.service.toLowerCase().replace(' ', '_');
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       db.all('SELECT * FROM meetings WHERE service LIKE \'%' + service + '%\'', [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (rows.length > 0) {
           errorList.push({ code: 101, msg: 'Service is attached to an existing meeting.', });
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const index = serviceList.indexOf(service);
           serviceList.splice(index, 1);
           let db2 = new sqlite3.Database(dbFile, (err) => {
             if (err) {
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db2.run('UPDATE config SET value=? WHERE key = \'serviceList\'', [serviceList.toString(),], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db2.close((err) => {
-            if (err) return logger.error(err.message);
+            if (err) return logger.error(new Error(err.message));
             if (errorList.length === 0) {
               const payload = {
                 status: 'success',
@@ -1618,14 +1628,14 @@ app.get('/admin/users',
     }
     let numPages;
     let userList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     db.get('SELECT COUNT(1) FROM users', (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / recordsPerPage);
       const startRecord = (page - 1) * recordsPerPage;
       db.all('SELECT * FROM users LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         let user;
         for (let i = 0; i < rows.length; i++) {
           user = {
@@ -1639,7 +1649,7 @@ app.get('/admin/users',
       });
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const payload = {
         authUser: req.session.userId,
         title: 'Administration',
@@ -1723,25 +1733,25 @@ app.post('/admin/users/add',
       res.render('users-add', payload);
     } else {
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let user = req.body.user;
       let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
       let role = req.body.role;
       db.get('SELECT * FROM users WHERE user=\'' + user + '\'', (err, row) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (row) {
           errorList.push({ code: 101, msg: 'User already exists', });
         } else {
           db.run('INSERT INTO users(user, password, role) VALUES(?, ?, ?)', [user, passwordHash, role,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const payload = {
             authUser: req.session.userId,
@@ -1788,12 +1798,12 @@ app.post('/admin/users/edit',
       res.status(400).json(payload);
     } else {
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let user = req.body.user;
       let role = req.body.role;
       if (req.session.userRole == 'Super-Admin' && role != 'Super-Admin') {
         db.get('SELECT * FROM users WHERE role = \'Super-Admin\' AND user != \'' + user + '\'', (err, row) => {
-          if (err) return logger.error(err.message);
+          if (err) return logger.error(new Error(err.message));
           if (!row) {
             return errorList.push({ msg: 'This action is not allowed since there are no Super-Admin users left!', });
           }
@@ -1802,11 +1812,11 @@ app.post('/admin/users/edit',
       db.run('UPDATE users SET role=? WHERE user = \'' + user + '\'', [role,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const payload = {
             status: 'success',
@@ -1831,23 +1841,23 @@ app.post('/admin/users/edit',
 app.post('/admin/users/deactivate', (req, res) => {
   if (!checkPermissionsJson('permSuper', req, res)) { return false; }
   let errorList = [];
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let user = req.body.user;
   db.all('SELECT * FROM users WHERE role=\'Super-Admin\' AND user=\'' + user + '\' AND deleted IS NOT 1', (err, rows) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (rows.length === 1) {
       errorList.push({ code: 101, msg: 'The only Super-Admin account cannot be disabled', });
     } else {
       db.run('UPDATE users SET deleted=? WHERE user = \'' + user + '\'', [1,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
     }
   });
   db.close((err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (errorList.length === 0) {
       const payload = {
         status: 'success',
@@ -1870,16 +1880,16 @@ app.post('/admin/users/deactivate', (req, res) => {
 app.post('/admin/users/activate', (req, res) => {
   if (!checkPermissionsJson('permSuper', req, res)) { return false; }
   let errorList = [];
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let user = req.body.user;
   db.run('UPDATE users SET deleted=? WHERE user = \'' + user + '\'', [null,], (err) => {
     if (err) {
       errorList.push({ code: err.errno, msg: err.message, });
-      return logger.error(err.message);
+      return logger.error(new Error(err.message));
     }
   });
   db.close((err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (errorList.length === 0) {
       const payload = {
         status: 'success',
@@ -1935,17 +1945,17 @@ app.post('/admin/users/reset',
       res.status(400).json(payload);
     } else {
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let user = req.body.user;
       let passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
       db.run('UPDATE users SET password=?, resetrequested=? WHERE user = \'' + user + '\'', [passwordHash, null,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const payload = {
             status: 'success',
@@ -1992,14 +2002,14 @@ app.get('/admin/userlog',
     let logs = [];
     let roomList = [];
     let meetingList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     db.get('SELECT COUNT(1) FROM userlog', (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / (recordsPerPage * 2));
       const startRecord = (page - 1) * (recordsPerPage * 2);
       db.all('SELECT * FROM userlog ORDER BY datetime DESC LIMIT ' + (recordsPerPage * 2) + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         let log;
         for (let i = 0; i < rows.length; i++) {
           log = {
@@ -2015,7 +2025,7 @@ app.get('/admin/userlog',
         }
       });
       db.all('SELECT * FROM rooms', [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         let room;
         for (let i = 0; i < rows.length; i++) {
           room = {
@@ -2026,7 +2036,7 @@ app.get('/admin/userlog',
         }
       });
       db.all('SELECT * FROM meetings', [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         let meeting;
         for (let i = 0; i < rows.length; i++) {
           meeting = {
@@ -2043,7 +2053,7 @@ app.get('/admin/userlog',
       });  
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const payload = {
         authUser: req.session.userId,
         title: 'Userlog',
@@ -2076,17 +2086,17 @@ app.get('/admin/backup', (req, res) => {
 app.post('/admin/backup', (req, res) => {
   if (!checkPermissionsJson('permSuper', req, res)) { return false; }
   let errorList = [];
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let backup = db.backup(dbBackupFile, (err) => {
     if (err) {
       errorList.push({ code: err.errno, msg: err.message, });
-      return logger.error(err.message);
+      return logger.error(new Error(err.message));
     }
   });
   backup.step(-1);
   backup.finish();
   db.close((err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (errorList.length === 0 && !backup.failed) {
       const payload = {
         status: 'success',
@@ -2117,7 +2127,7 @@ app.get('/dbupgrade', (req, res) => {
 
 app.post('/dbupgrade', (req, res) => {
   let errorList = [];
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let queries = [];
   let query;
   let thisVersion = 0;
@@ -2133,7 +2143,7 @@ app.post('/dbupgrade', (req, res) => {
       db.run(query, (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         } else {
           dbVersionFromDB = thisVersion;
           if (dbVersionFromDB == dbversion) dbUpgradeRequired = false;
@@ -2142,7 +2152,7 @@ app.post('/dbupgrade', (req, res) => {
     });
     }
   db.close((err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (errorList.length === 0) {
       const payload = {
         status: 'success',
@@ -2185,14 +2195,14 @@ app.get('/rooms',
     }
     let numPages;
     let roomList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     db.get('SELECT COUNT(1) FROM rooms WHERE deleted IS NOT 1', (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const numRecords = row['COUNT(1)'];
       numPages = Math.ceil(numRecords / recordsPerPage);
       const startRecord = (page - 1) * recordsPerPage;
       db.all('SELECT * FROM rooms WHERE deleted IS NOT 1 LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         let room;
         for (let i = 0; i < rows.length; i++) {
           room = {
@@ -2208,7 +2218,7 @@ app.get('/rooms',
       });
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const payload = {
         authUser: req.session.userId,
         title: 'List Rooms',
@@ -2300,7 +2310,7 @@ app.post('/rooms/add',
         }
       });
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let id = crypto.createHash('sha256').update(Math.random().toString(36).slice(-8)).digest('hex');
       let name = req.body.name;
       let location = req.body.location;
@@ -2309,11 +2319,11 @@ app.post('/rooms/add',
       db.run('INSERT INTO rooms(id, name, location, facilities, capacity, oos) VALUES(?, ?, ?, ?, ?, ?)', [id, name, location, facilities, capacity, oos,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           res.render('rooms-add-complete', {
             authUser: req.session.userId,
@@ -2382,7 +2392,7 @@ app.post('/rooms/edit',
         }
       });
       let errorList = [];
-      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+      let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
       let id = req.body.id;
       let name = req.body.name;
       let location = req.body.location;
@@ -2391,11 +2401,11 @@ app.post('/rooms/edit',
       db.run('UPDATE rooms SET name=?, location=?, facilities=?, capacity=?, oos=? WHERE id = \'' + id + '\'', [name, location, facilities, capacity, oos,], (err) => {
         if (err) {
           errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(err.message);
+          return logger.error(new Error(err.message));
         }
       });
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
           const payload = {
             status: 'success',
@@ -2424,16 +2434,16 @@ app.post('/rooms/edit',
 app.post('/rooms/delete', (req, res) => {
   if (!checkPermissionsJson('permAdmin', req, res)) { return false; }
   let errorList = [];
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   let id = req.body.id;
   db.run('UPDATE rooms SET deleted=? WHERE id = \'' + id + '\'', [1,], (err) => {
     if (err) {
       errorList.push({ code: err.errno, msg: err.message, });
-      return logger.error(err.message);
+      return logger.error(new Error(err.message));
     }
   });
   db.close((err) => {
-    if (err) return logger.error(err.message);
+    if (err) return logger.error(new Error(err.message));
     if (errorList.length === 0) {
       const payload = {
         status: 'success',
@@ -2484,11 +2494,11 @@ app.get('/meetings',
     }
     let numPages;
     let meetingList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const roomList = getRoomList();
     const startRecord = (page - 1) * recordsPerPage;
     db.all('SELECT * FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\' ORDER BY datetime DESC LIMIT ' + recordsPerPage + ' OFFSET ' + startRecord, [], (err, rows) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       let meeting;
       for (let i = 0; i < rows.length; i++) {
         meeting = {
@@ -2506,11 +2516,11 @@ app.get('/meetings',
       }
     });
     db.get('SELECT COUNT(1) AS count FROM meetings WHERE deleted IS NOT 1 AND description LIKE \'%' + q + '%\'', [], (err, row) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       numPages = Math.ceil(row.count / recordsPerPage);
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       const payload = {
         authUser: req.session.userId,
         title: 'List Meetings',
@@ -2587,7 +2597,7 @@ app.post('/meetings/add',
     const timeStamp = new Date(req.body.datetime).getTime() / 1000;
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const roomList = getRoomList();
     const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId);
     if (overlapMeeting) {
@@ -2621,7 +2631,7 @@ app.post('/meetings/add',
       });
     } else {
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (!errors.isEmpty()) {
           const payload = {
             authUser: req.session.userId,
@@ -2649,15 +2659,15 @@ app.post('/meetings/add',
           let remarks = req.body.remarks;
           let link = req.body.link;
           let service = req.body.service;
-          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
           db.run('INSERT INTO meetings(id, datetime, duration, repeat, description, roomid, remarks, link, service) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db.close((err) => {
-            if (err) return logger.error(err.message);
+            if (err) return logger.error(new Error(err.message));
             if (errorList.length === 0) {
               res.render('meetings-add-complete', {
                 authUser: req.session.userId,
@@ -2740,7 +2750,7 @@ app.post('/meetings/edit',
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + (parseInt(duration) * 60);
     const meetingId = req.body.id;
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const roomList = getRoomList();
     const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId, meetingId);
     if (overlapMeeting) {
@@ -2764,7 +2774,7 @@ app.post('/meetings/edit',
       res.status(400).json(payload);
     } else {
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (!errors.isEmpty()) {
           const payload = {
             status: 'error',
@@ -2782,15 +2792,15 @@ app.post('/meetings/edit',
           let remarks = req.body.remarks;
           let link = req.body.link;
           let service = req.body.service;
-          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
           db.run('UPDATE meetings SET datetime=?, duration=?, repeat=?, description=?, roomid=?, remarks=?, link=?, service=? WHERE id = \'' + id + '\'', [datetime, duration, repeat, description, room, remarks, link, service,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db.close((err) => {
-            if (err) return logger.error(err.message);
+            if (err) return logger.error(new Error(err.message));
             if (errorList.length === 0) {
               const payload = {
                 status: 'success',
@@ -2848,7 +2858,7 @@ app.post('/meetings/extend',
     const meetingStart = timeStamp;
     const meetingEnd = timeStamp + ((parseInt(duration)) + parseInt(extend));
     const meetingId = req.body.id;
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId, meetingId);
     if (overlapMeeting) {
       let errorList = [];
@@ -2871,7 +2881,7 @@ app.post('/meetings/extend',
       res.status(400).json(payload);
     } else {
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (!errors.isEmpty()) {
           const payload = {
             status: 'error',
@@ -2882,15 +2892,15 @@ app.post('/meetings/extend',
           let errorList = [];
           let id = req.body.id;
           let newDuration = (parseInt(req.body.duration) + parseInt(req.body.extend));
-          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
           db.run('UPDATE meetings SET duration=? WHERE id = \'' + id + '\'', [newDuration,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db.close((err) => {
-            if (err) return logger.error(err.message);
+            if (err) return logger.error(new Error(err.message));
             if (errorList.length === 0) {
               const newEndTime = new Date((parseInt(req.body.datetime) + parseInt(newDuration)) * 1000).getTime() / 1000;
               const payload = {
@@ -2938,7 +2948,7 @@ app.post('/meetings/end',
     const meetingStart = timeStamp;
     const meetingEnd = (new Date().getTime() / 1000) - (1 * 60);
     const meetingId = req.body.id;
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId, meetingId);
     if (overlapMeeting) {
       let errorList = [];
@@ -2961,7 +2971,7 @@ app.post('/meetings/end',
       res.status(400).json(payload);
     } else {
       db.close((err) => {
-        if (err) return logger.error(err.message);
+        if (err) return logger.error(new Error(err.message));
         if (!errors.isEmpty()) {
           const payload = {
             status: 'error',
@@ -2972,15 +2982,15 @@ app.post('/meetings/end',
           let errorList = [];
           let id = req.body.id;
           let newDuration = Math.floor((meetingEnd - meetingStart) / 60) * 60;
-          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
           db.run('UPDATE meetings SET duration=? WHERE id = \'' + id + '\'', [newDuration,], (err) => {
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(err.message);
+              return logger.error(new Error(err.message));
             }
           });
           db.close((err) => {
-            if (err) return logger.error(err.message);
+            if (err) return logger.error(new Error(err.message));
             if (errorList.length === 0) {
               let newEndTime = new Date((parseInt(req.body.datetime) + parseInt(newDuration)) * 1000).getTime() / 1000;
               const payload = {
@@ -3014,16 +3024,16 @@ app.post('/meetings/delete',
   (req, res) => {
     if (!checkPermissionsJson('permAdmin', req, res)) { return false; }
     let errorList = [];
-    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(err.message); });
+    let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     let id = req.body.id;
     db.run('UPDATE meetings SET deleted=? WHERE id = \'' + id + '\'', [1,], (err) => {
       if (err) {
         errorList.push({ code: err.errno, msg: err.message, });
-        return logger.error(err.message);
+        return logger.error(new Error(err.message));
       }
     });
     db.close((err) => {
-      if (err) return logger.error(err.message);
+      if (err) return logger.error(new Error(err.message));
       if (errorList.length === 0) {
         const payload = {
           status: 'success',
@@ -3056,7 +3066,8 @@ app.get('/about', (req, res) => {
         versionLogic = 'github';
         return data.version;
       } catch (error) {
-        return logger.error(error);
+        logger.error(new Error(error))
+        return null;
       }
     } else {
       versionLogic = 'cache';

@@ -7,6 +7,9 @@ block content
   br
 
   h2.h5 v#{version} 
+    if (!upstreamVersion)
+      i.fa.fa-exclamation-triangle.text-warning.ms-4.me-2
+      span.fw-normal.fs-6.text-muted Error: Unable to obtain upstream version
     if (upstreamVersion > version)
       i.fa.fa-exclamation-triangle.text-warning.ms-4.me-2
       a.fw-normal(href='https://github.com/ameer1234567890/MeetKettle/releases/tag/v' + upstreamVersion) New version #{upstreamVersion} available
