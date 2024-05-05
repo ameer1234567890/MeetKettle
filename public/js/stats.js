@@ -1,22 +1,26 @@
-/* global Chart */
+/* global Chart, serviceList, countByService, roomList, countByRoom */
 
-const ctx = document.getElementById('chart-meetings-per-day');
+const chartMeetingsByType = document.getElementById('chart-meetings-by-type');
+const chartMeetingsByRoom = document.getElementById('chart-meetings-by-room');
 
-new Chart(ctx, {
-  type: 'bar',
+new Chart(chartMeetingsByType, {
+  type: 'pie',
   data: {
-    labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    labels: serviceList,
     datasets: [{
       label: 'Meetings',
-      data: [12, 19, 3, 5, 2, 3, 1],
-      borderWidth: 1
+      data: countByService,
     }]
   },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
+});
+
+new Chart(chartMeetingsByRoom, {
+  type: 'pie',
+  data: {
+    labels: roomList,
+    datasets: [{
+      label: 'Meetings',
+      data: countByRoom,
+    }]
+  },
 });

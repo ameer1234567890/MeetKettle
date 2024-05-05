@@ -13,10 +13,18 @@ block content
     .container
       .row.row-cols-1.row-cols-lg-2
         .col
-          h4 Meetings per day:
-          canvas#chart-meetings-per-day
+          h4 Meetings by Type:
+          canvas#chart-meetings-by-type
+        .col
+          h4 Meetings by Room:
+          canvas#chart-meetings-by-room
 
     script(src='https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js')
+    script.
+      const serviceList = JSON.parse('!{JSON.stringify(serviceList)}');
+      const countByService = JSON.parse('!{JSON.stringify(countByService)}');
+      const roomList = JSON.parse('!{JSON.stringify(roomList)}');
+      const countByRoom = JSON.parse('!{JSON.stringify(countByRoom)}');
     script(src='/public/js/stats.js')
 
     br

@@ -479,25 +479,48 @@ app.get('/', (req, res) => {
 app.get('/stats', (req, res) => {
   if (!checkPermissions('permView', req, res)) { return false; }
   let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
-  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) return logger.error(new Error(err.message));
-    let meeting;
-    let meetingList = [];
-    for (let i = 0; i < rows.length; i++) {
-      meeting = {
-        'id':rows[i].id,
-        'datetime':rows[i].datetime,
-        'duration':rows[i].duration,
-        'description':rows[i].description,
-        'roomid':rows[i].roomid,
-        'remarks':rows[i].remarks,
-        'link':rows[i].link,
-        'service':rows[i].service,
-      };
-      meetingList.push(meeting);
-    }
+  let serviceListHumanReadable = [];
+  let countByService = [];
+  let roomListHumanReadable = [];
+  let countByRoom = [];
+  let query = 'SELECT service';
+  serviceList.forEach(service => {
+    serviceListHumanReadable.push(service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' '));
+    query = query + ', SUM(CASE WHEN service=\'' + service + '\' THEN 1 ELSE 0 END) AS ' + service + '_count';
   });
-  db.close((err) => { if (err) return logger.error(new Error(err.message)); });
+  query = query + ' FROM meetings';
+  db.all(query, [], (err, rows) => {
+    if (err) return logger.error(new Error(err.message));
+    serviceList.forEach(service => {
+      let objProperty = service + '_count';
+      countByService.push(rows[0][objProperty]);
+    });
+  });
+  query = 'SELECT roomid';
+  const roomList = getRoomList();
+  roomList.forEach(room => {
+    roomListHumanReadable.push(room.name.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' '));
+    query = query + ', SUM(CASE WHEN roomid=\'' + room.id + '\' THEN 1 ELSE 0 END) AS id' + room.id + '_count';
+  });
+  query = query + ' FROM meetings';
+  db.all(query, [], (err, rows) => {
+    if (err) return logger.error(new Error(err.message));
+    roomList.forEach(room => {
+      let objProperty = 'id' + room.id + '_count';
+      countByRoom.push(rows[0][objProperty]);
+    });
+  });
+  db.close((err) => {
+    if (err) return logger.error(new Error(err.message));
+    const payload = {
+      authUser: req.session.userId,
+      serviceList: serviceListHumanReadable,
+      countByService: countByService,
+      roomList: roomListHumanReadable,
+      countByRoom: countByRoom,
+    };
+    res.render('stats', payload);
+  });
 });
 
 
