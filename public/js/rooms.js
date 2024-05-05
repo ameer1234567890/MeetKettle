@@ -66,7 +66,7 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
           let spacerElement = document.createElement('span');
           spanElement.appendChild(document.createTextNode(facilitiesArr[i]));
           spacerElement.appendChild(document.createTextNode(' '));
-          spanElement.classList.add('badge', 'rounded-pill', 'bg-info', 'text-dark');
+          spanElement.classList.add('badge', 'bg-success');
           cellElement.appendChild(spanElement);
           cellElement.appendChild(spacerElement);
         }
