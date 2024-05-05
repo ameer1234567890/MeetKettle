@@ -335,9 +335,9 @@ const getRecurringMeetings = (roomId) => {
   const currentMonthOfYear = new Date().getMonth();
   const currentYear = new Date().getFullYear();
   if (roomId == 'all') {
-    query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 ORDER BY datetime DESC';
+    query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 AND repeat IS NOT \'once\' ORDER BY datetime DESC';
   } else {
-    query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC';
+    query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 AND repeat IS NOT \'once\' AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC';
   }
   sqliteSync.connect(dbFile);
   sqliteSync.run(query, [], (res) => {
