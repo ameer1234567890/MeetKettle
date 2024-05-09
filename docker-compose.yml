@@ -11,4 +11,5 @@ services:
     volumes:
       - ./db:/kettle/db
       - ./cert:/kettle/cert
+      - ./logs:/kettle/logs
     restart: unless-stopped
