@@ -1,4 +1,5 @@
 - Statistics charts:
-  - Number of meetings per day/month (bar chart)
-  - Duration of meetings per day/month (bar chart)
+  - Duration of meetings by day of week (bar chart)
+  - Number of meetings by day of month (bar chart)
+  - Duration of meetings by day of month (bar chart)
   - Meetings across 24 hours (line chart)

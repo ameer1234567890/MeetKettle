@@ -11,13 +11,13 @@ block content
   
   if !errors
     .container
-      .row.row-cols-1.row-cols-lg-2
+      .row.row-cols-2.row-cols-lg-3
         .col
-          h4 Meetings by Type:
           canvas#chart-meetings-by-type
         .col
-          h4 Meetings by Room:
           canvas#chart-meetings-by-room
+        .col
+          canvas#chart-meetings-by-weekday
 
     script(src='https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js')
     script.
@@ -25,6 +25,8 @@ block content
       const countByService = JSON.parse('!{JSON.stringify(countByService)}');
       const roomList = JSON.parse('!{JSON.stringify(roomList)}');
       const countByRoom = JSON.parse('!{JSON.stringify(countByRoom)}');
+      const weekdayList = JSON.parse('!{JSON.stringify(weekdayList)}');
+      const countByWeekday = JSON.parse('!{JSON.stringify(countByWeekday)}');
     script(src='/public/js/stats.js')
 
     br

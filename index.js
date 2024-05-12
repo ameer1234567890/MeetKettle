@@ -510,6 +510,28 @@ app.get('/stats', (req, res) => {
       countByRoom.push(rows[0][objProperty]);
     });
   });
+  const weekdayList = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', ];
+  let countByWeekdayA = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+  };
+  let weekday;
+  let countByWeekday = [];
+  db.all('SELECT * FROM meetings', [], (err, rows) => {
+    if (err) return logger.error(new Error(err.message));
+    rows.forEach(meeting => {
+      weekday = new Date(meeting.datetime * 1000).getDay();
+      countByWeekdayA[weekday] = countByWeekdayA[weekday] + 1;
+    });
+    for (let i = 0; i < Object.keys(countByWeekdayA).length; i++) {
+      countByWeekday.push(countByWeekdayA[i]);
+    }
+  });
   db.close((err) => {
     if (err) return logger.error(new Error(err.message));
     const payload = {
@@ -518,6 +540,8 @@ app.get('/stats', (req, res) => {
       countByService: countByService,
       roomList: roomListHumanReadable,
       countByRoom: countByRoom,
+      weekdayList: weekdayList,
+      countByWeekday: countByWeekday,
     };
     res.render('stats', payload);
   });
