@@ -238,7 +238,7 @@ document.querySelector('#add-service-form').addEventListener('submit', function(
         itemElement.appendChild(textNode);
         itemElement.appendChild(newButtonElement);
         serviceListGroup.insertBefore(itemElement, serviceListGroup.childNodes[serviceListGroup.children.length - 1]);
-        document.querySelector('#add-service-form input').value = '';
+        document.querySelector('#add-service-form input[name=service]').value = '';
         setTimeout(function() {
           submitButtonIcon.classList.remove('fa-check');
           submitButtonIcon.classList.add('fa-plus');

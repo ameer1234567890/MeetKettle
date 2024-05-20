@@ -1527,6 +1527,13 @@ app.post('/admin/services/add',
   body('service')
     .matches(/^[a-z0-9 ]+$/i)
     .withMessage('Service containts invalid characters'),
+  body('service')
+    .custom((value) => {
+      if (value.toLowerCase() == 'offline') {
+        throw new Error('Invalid service name');
+      }
+      return true;
+    }),
   (req, res) => {
     if (!checkPermissionsJson('permSuper', req, res)) { return false; }
     const errors = validationResult(req);

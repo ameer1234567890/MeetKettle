@@ -3,3 +3,5 @@
   - Number of meetings by day of month (bar chart)
   - Duration of meetings by day of month (bar chart)
   - Meetings across 24 hours (line chart)
+- Exclude certain weekdays/weekends in daily recurring meetings
+- Upload svg image while adding meeting services
