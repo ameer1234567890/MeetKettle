@@ -12,12 +12,14 @@ block content
   if !errors
     .container
       .row.row-cols-2.row-cols-lg-3
-        .col
+        .col.mb-5
           canvas#chart-meetings-by-type
-        .col
+        .col.mb-5
           canvas#chart-meetings-by-room
-        .col
+        .col.mb-5
           canvas#chart-meetings-by-weekday
+        .col.mb-5
+          canvas#chart-meetings-by-dayofmonth
 
     script(src='https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js')
     script.
@@ -27,6 +29,7 @@ block content
       const countByRoom = JSON.parse('!{JSON.stringify(countByRoom)}');
       const weekdayList = JSON.parse('!{JSON.stringify(weekdayList)}');
       const countByWeekday = JSON.parse('!{JSON.stringify(countByWeekday)}');
+      const countByDayOfMonth = JSON.parse('!{JSON.stringify(countByDayOfMonth)}');
     script(src='/public/js/stats.js')
 
     br
