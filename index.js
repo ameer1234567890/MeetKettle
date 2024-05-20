@@ -488,7 +488,7 @@ app.get('/stats', (req, res) => {
     serviceListHumanReadable.push(service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' '));
     query = query + ', SUM(CASE WHEN service=\'' + service + '\' THEN 1 ELSE 0 END) AS ' + service + '_count';
   });
-  query = query + ' FROM meetings';
+  query = query + ' FROM meetings WHERE deleted IS NOT 1';
   db.all(query, [], (err, rows) => {
     if (err) return logger.error(new Error(err.message));
     serviceList.forEach(service => {
@@ -502,7 +502,7 @@ app.get('/stats', (req, res) => {
     roomListHumanReadable.push(room.name.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' '));
     query = query + ', SUM(CASE WHEN roomid=\'' + room.id + '\' THEN 1 ELSE 0 END) AS id' + room.id + '_count';
   });
-  query = query + ' FROM meetings';
+  query = query + ' FROM meetings WHERE deleted IS NOT 1';
   db.all(query, [], (err, rows) => {
     if (err) return logger.error(new Error(err.message));
     roomList.forEach(room => {
@@ -522,7 +522,7 @@ app.get('/stats', (req, res) => {
   };
   let weekday;
   let countByWeekday = [];
-  db.all('SELECT * FROM meetings', [], (err, rows) => {
+  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
     if (err) return logger.error(new Error(err.message));
     rows.forEach(meeting => {
       weekday = new Date(meeting.datetime * 1000).getDay();
