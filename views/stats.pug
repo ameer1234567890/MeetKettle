@@ -20,6 +20,10 @@ block content
           canvas#chart-meetings-by-weekday
         .col.mb-5
           canvas#chart-meetings-by-dayofmonth
+        .col.mb-5
+          canvas#chart-duration-by-weekday
+        .col.mb-5
+          canvas#chart-duration-by-dayofmonth
 
     script(src='https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js')
     script.
@@ -30,6 +34,8 @@ block content
       const weekdayList = JSON.parse('!{JSON.stringify(weekdayList)}');
       const countByWeekday = JSON.parse('!{JSON.stringify(countByWeekday)}');
       const countByDayOfMonth = JSON.parse('!{JSON.stringify(countByDayOfMonth)}');
+      const durationByWeekday = JSON.parse('!{JSON.stringify(durationByWeekday)}');
+      const durationByDayOfMonth = JSON.parse('!{JSON.stringify(durationByDayOfMonth)}');
     script(src='/public/js/stats.js')
 
     br
