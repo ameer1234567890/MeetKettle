@@ -1972,15 +1972,16 @@ app.post('/admin/users/edit',
           if (err) return logger.error(new Error(err.message));
           if (!row) {
             return errorList.push({ msg: 'This action is not allowed since there are no Super-Admin users left!', });
+          } else {
+            db.run('UPDATE users SET role=? WHERE user = \'' + user + '\'', [role,], (err) => {
+              if (err) {
+                errorList.push({ code: err.errno, msg: err.message, });
+                return logger.error(new Error(err.message));
+              }
+            });      
           }
         });
       }
-      db.run('UPDATE users SET role=? WHERE user = \'' + user + '\'', [role,], (err) => {
-        if (err) {
-          errorList.push({ code: err.errno, msg: err.message, });
-          return logger.error(new Error(err.message));
-        }
-      });
       db.close((err) => {
         if (err) return logger.error(new Error(err.message));
         if (errorList.length === 0) {
