@@ -1,4 +1,2 @@
-- Statistics charts:
-  - Meetings across 24 hours (line chart)
 - Exclude certain weekdays/weekends in daily recurring meetings
 - Upload svg image while adding meeting services

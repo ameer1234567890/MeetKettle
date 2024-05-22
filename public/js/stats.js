@@ -9,6 +9,7 @@
   countByDayOfMonth,
   durationByWeekday,
   durationByDayOfMonth,
+  countByHourOfDay,
   */
 
 const chartMeetingsByType = document.getElementById('chart-meetings-by-type');
@@ -17,6 +18,7 @@ const chartMeetingsByWeekday = document.getElementById('chart-meetings-by-weekda
 const chartMeetingsByDayOfMonth = document.getElementById('chart-meetings-by-dayofmonth');
 const chartDurationByWeekday = document.getElementById('chart-duration-by-weekday');
 const chartDurationByDayOfMonth = document.getElementById('chart-duration-by-dayofmonth');
+const chartCountByHourOfDay = document.getElementById('chart-count-by-hourofday');
 
 new Chart(chartMeetingsByType, {
   type: 'pie',
@@ -129,6 +131,30 @@ new Chart(chartDurationByDayOfMonth, {
         display: true,
         text: 'Duration by Day of Month (in minutes)'
       },
+    },
+    maintainAspectRatio: false,
+  },
+});
+
+new Chart(chartCountByHourOfDay, {
+  type: 'line',
+  data: {
+    datasets: [{
+      label: 'Meetings',
+      data: countByHourOfDay,
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Meetings by Hour of Day'
+      },
+    },
+    elements: {
+      line: {
+        tension: 0.3
+      }
     },
     maintainAspectRatio: false,
   },

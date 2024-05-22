@@ -522,16 +522,6 @@ app.get('/stats', (req, res) => {
   };
   let weekday;
   let countByWeekday = [];
-  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) return logger.error(new Error(err.message));
-    rows.forEach(meeting => {
-      weekday = new Date(meeting.datetime * 1000).getDay();
-      countByWeekdayA[weekday] = countByWeekdayA[weekday] + 1;
-    });
-    for (let i = 0; i < Object.keys(countByWeekdayA).length; i++) {
-      countByWeekday.push(countByWeekdayA[i]);
-    }
-  });
   let countByDayOfMonth = {
     1: 0,
     2: 0,
@@ -566,17 +556,6 @@ app.get('/stats', (req, res) => {
     31: 0,
   };
   let dayOfMonth;
-  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) return logger.error(new Error(err.message));
-    rows.forEach(meeting => {
-      dayOfMonth = new Date(meeting.datetime * 1000).getDate();
-      if (countByDayOfMonth[dayOfMonth]) {
-        countByDayOfMonth[dayOfMonth] = countByDayOfMonth[dayOfMonth] + 1;
-      } else {
-        countByDayOfMonth[dayOfMonth] = 1;
-      }
-    });
-  });
   let durationByWeekdayA = {
     0: 0,
     1: 0,
@@ -587,16 +566,6 @@ app.get('/stats', (req, res) => {
     6: 0,
   };
   let durationByWeekday = [];
-  db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
-    if (err) return logger.error(new Error(err.message));
-    rows.forEach(meeting => {
-      weekday = new Date(meeting.datetime * 1000).getDay();
-      durationByWeekdayA[weekday] = durationByWeekdayA[weekday] + meeting.duration;
-    });
-    for (let i = 0; i < Object.keys(durationByWeekdayA).length; i++) {
-      durationByWeekday.push(durationByWeekdayA[i]);
-    }
-  });
   let durationByDayOfMonth = {
     1: 0,
     2: 0,
@@ -630,16 +599,65 @@ app.get('/stats', (req, res) => {
     30: 0,
     31: 0,
   };
+  let countByHourOfDay = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+    7: 0,
+    8: 0,
+    9: 0,
+    10: 0,
+    11: 0,
+    12: 0,
+    13: 0,
+    14: 0,
+    15: 0,
+    16: 0,
+    17: 0,
+    18: 0,
+    19: 0,
+    20: 0,
+    21: 0,
+    22: 0,
+    23: 0,
+  };
+  let hourOfDay;
   db.all('SELECT * FROM meetings WHERE deleted IS NOT 1', [], (err, rows) => {
     if (err) return logger.error(new Error(err.message));
     rows.forEach(meeting => {
+      weekday = new Date(meeting.datetime * 1000).getDay();
+      countByWeekdayA[weekday] = countByWeekdayA[weekday] + 1;
+      dayOfMonth = new Date(meeting.datetime * 1000).getDate();
+      if (countByDayOfMonth[dayOfMonth]) {
+        countByDayOfMonth[dayOfMonth] = countByDayOfMonth[dayOfMonth] + 1;
+      } else {
+        countByDayOfMonth[dayOfMonth] = 1;
+      }
+      weekday = new Date(meeting.datetime * 1000).getDay();
+      durationByWeekdayA[weekday] = durationByWeekdayA[weekday] + meeting.duration;
       dayOfMonth = new Date(meeting.datetime * 1000).getDate();
       if (durationByDayOfMonth[dayOfMonth]) {
         durationByDayOfMonth[dayOfMonth] = durationByDayOfMonth[dayOfMonth] + meeting.duration;
       } else {
         durationByDayOfMonth[dayOfMonth] = meeting.duration;
       }
+      hourOfDay = new Date(meeting.datetime * 1000).getHours();
+      if (countByHourOfDay[hourOfDay]) {
+        countByHourOfDay[hourOfDay] = countByHourOfDay[hourOfDay] + 1;
+      } else {
+        countByHourOfDay[hourOfDay] = 1;
+      }
     });
+    for (let i = 0; i < Object.keys(countByWeekdayA).length; i++) {
+      countByWeekday.push(countByWeekdayA[i]);
+    }
+    for (let i = 0; i < Object.keys(durationByWeekdayA).length; i++) {
+      durationByWeekday.push(durationByWeekdayA[i]);
+    }
   });
   db.close((err) => {
     if (err) return logger.error(new Error(err.message));
@@ -654,6 +672,7 @@ app.get('/stats', (req, res) => {
       countByDayOfMonth: countByDayOfMonth,
       durationByWeekday: durationByWeekday,
       durationByDayOfMonth: durationByDayOfMonth,
+      countByHourOfDay: countByHourOfDay,
     };
     res.render('stats', payload);
   });
