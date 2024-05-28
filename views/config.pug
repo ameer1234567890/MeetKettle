@@ -69,6 +69,8 @@ block content
           - var servicesArr = serviceList.toString().trim().split(',');
           for service in servicesArr
             .list-group-item.list-group-item-action #{service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
+              span.float-start.me-3
+                img(src='/public/images/' + service + '.svg' data-service=`${service}`)
               button.float-end.btn-close(data-bs-toggle='modal' data-bs-target='#modal-service-delete' data-service=service)
           .list-group-item.list-group-item-input
             form#add-service-form(method='POST' action='/admin/services/add')

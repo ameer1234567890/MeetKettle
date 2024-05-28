@@ -20,6 +20,7 @@ const { version } = require('./package.json');
 const kettleCache = new NodeCache();
 const winston = require('winston');
 require('winston-daily-rotate-file');
+const busboy = require('busboy');
 
 
 const printMessage = (message, stack) => {
@@ -1459,6 +1460,49 @@ app.get('/admin/config', (req, res) => {
     recordsPerPage: recordsPerPage,
   };
   res.render('config', payload);
+});
+
+
+app.post('/admin/services/upload', (req, res) => {
+  if (!checkPermissionsJson('permSuper', req, res)) { return false; }
+  const bb = busboy({ headers: req.headers, limits: { fileSize: 2  * 1024 * 1024 , files: 1 } });
+  const service = req.headers['x-service'];
+  const saveTo = './public/images/' + service + '.svg';
+  let payload = {
+    status: 'success',
+    msg: 'Upload complete',
+  };
+  bb.on('file', (name, stream, filename) => {
+    if (filename.mimeType !== 'image/svg+xml') {
+      let errors = [
+        {
+          msg: 'Only SVG files are allowed',
+        },
+      ];
+      payload = {
+        status: 'error',
+        errors: errors,
+      };
+    }
+    stream.pipe(fs.createWriteStream(saveTo));
+    stream.on('limit', () => {
+      let errors = [
+        {
+          msg: 'Maximum file size of 2MB allowed',
+        },
+      ];
+      payload = {
+        status: 'error',
+        errors: errors,
+      };
+    });
+  });
+  bb.on('close', () => {
+    if (payload.status === 'error') fs.unlinkSync(saveTo);
+    res.writeHead(200, { 'Connection': 'close' });
+    res.end(JSON.stringify(payload));
+  });
+  req.pipe(bb);
 });
 
 

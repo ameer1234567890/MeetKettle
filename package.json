@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ameer1234567890/MeetKettle",
   "dependencies": {
+    "busboy": "^1.6.0",
     "compression": "^1.7.4",
     "connect-sqlite3": "^0.9.15",
     "cookie-parser": "^1.4.6",

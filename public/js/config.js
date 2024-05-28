@@ -1,5 +1,68 @@
 /* global bootstrap */
 
+// Show upload button if service image does not exist
+const serviceImageElements = document.querySelectorAll('#service-list img');
+serviceImageElements.forEach(element => {
+  if (element.naturalWidth === 0) {
+    const service = element.getAttribute('data-service');
+    let formElement = document.createElement('form');
+    formElement.setAttribute('enctype', 'multipart/form-data');
+    formElement.setAttribute('action', '/admin/services/upload');
+    formElement.setAttribute('method', 'post');
+    let fileElement = document.createElement('input');
+    fileElement.setAttribute('type', 'file');
+    fileElement.setAttribute('id', 'upload');
+    fileElement.setAttribute('name', 'upload');
+    fileElement.setAttribute('accept', '.svg');
+    let buttonElement = document.createElement('button');
+    buttonElement.classList.add('btn', 'btn-link', 'btn-sm');
+    let uploadButtonText = document.createElement('i');
+    uploadButtonText.classList.add('fa', 'fa-upload', 'fa-fw');
+    buttonElement.appendChild(uploadButtonText);
+    buttonElement.addEventListener('click', (event) => {
+      event.preventDefault();
+      fileElement.click();
+    });
+    formElement.appendChild(buttonElement);
+    formElement.appendChild(fileElement);
+    formElement.addEventListener('change', () => {
+      let statusElement = document.createElement('i');
+      statusElement.classList.add('fa', 'fa-spinner', 'fa-pulse');
+      formElement.appendChild(statusElement);
+      buttonElement.classList.add('d-none');
+      let data = new FormData(formElement);
+      fetch('/admin/services/upload', {
+        method: 'POST',
+        headers: {
+          'X-Service': service,
+        },
+        body: data,
+      })
+      .then(response => response.json())
+      .then((data) => {
+        if (data.status == 'success') {
+          let imageElement = document.createElement('img');
+          imageElement.setAttribute('src', '/public/images/' + service + '.svg');
+          formElement.appendChild(imageElement);
+          statusElement.classList.add('d-none');
+        } else if (data.status == 'error') {
+          buttonElement.classList.remove('d-none');
+          statusElement.classList.add('d-none');
+          let errorsElement = document.querySelector('#services-errors');
+          errorsElement.innerHTML = '';
+          for (let i = 0; i < data.errors.length; i++) {
+            let newLiElement = document.createElement('li');
+            let newTextNode = document.createTextNode(data.errors[i].msg);
+            newLiElement.appendChild(newTextNode);
+            errorsElement.appendChild(newLiElement);
+          }
+        }
+      });
+    });
+    element.replaceWith(formElement);
+  }
+});
+
 // Set recordsPerPage form
 document.querySelector('#set-rpp-form').addEventListener('submit', function(event) {
   let errorsElement = document.querySelector('#rpp-errors');

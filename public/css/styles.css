@@ -86,6 +86,26 @@ html,body { height: 100%; margin: 0; padding: 0; }
   padding: 0;
 }
 
+#service-list span img {
+  width: 1.5rem;
+  margin-top: -0.2rem;
+}
+
+#service-list span > form > button {
+  height: 1.3rem;
+  width: 1.3rem;
+  padding: 0;
+  margin-top: -0.5rem;
+}
+
+#service-list span > form > button > i {
+  font-size: small;
+}
+
+#service-list span > form > input[type=file] {
+  display: none;
+}
+
 /* Stats page specific styles */
 .container > .row > .col {
   height: 15rem;

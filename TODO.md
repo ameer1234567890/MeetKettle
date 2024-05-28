@@ -1,2 +1,1 @@
 - Exclude certain weekdays/weekends in daily recurring meetings
-- Upload svg image while adding meeting services
