@@ -1,7 +1,7 @@
 /* global bootstrap */
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelector('#passwordBox a').addEventListener('click', function(event) {
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('#passwordBox a').addEventListener('click', (event) => {
     event.preventDefault();
     const inputElement = document.querySelector('#passwordBox input');
     const iconElement = document.querySelector('#passwordBox i');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
       iconElement.classList.add( 'fa-eye' );
     }
   });
-  document.querySelector('#passwordBox2 a').addEventListener('click', function(event) {
+  document.querySelector('#passwordBox2 a').addEventListener('click', (event) => {
     event.preventDefault();
     const inputElement = document.querySelector('#passwordBox2 input');
     const iconElement = document.querySelector('#passwordBox2 i');
@@ -36,14 +36,14 @@ document.addEventListener('DOMContentLoaded', function() {
 let resetButton;
 let resetModal = document.getElementById('modal-reset');
 let resetErrorsElement = document.querySelector('#reset-errors');
-resetModal.addEventListener('show.bs.modal', function (event) {
+resetModal.addEventListener('show.bs.modal', (event) => {
   resetErrorsElement.innerHTML = '';
   resetButton = event.relatedTarget;
   let resetRow = resetButton.parentElement.parentElement.parentElement;
   resetModal.querySelector('#reset-id').value = resetButton.getAttribute('data-id');
   resetModal.querySelector('#user-name-in-reset-modal').innerText = resetRow.childNodes[0].innerText;
 });
-document.querySelector('#reset-form').addEventListener('submit', function(event) {
+document.querySelector('#reset-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-reset .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-reset .btn-primary > i');
@@ -57,9 +57,9 @@ document.querySelector('#reset-form').addEventListener('submit', function(event)
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
@@ -69,7 +69,7 @@ document.querySelector('#reset-form').addEventListener('submit', function(event)
         let updatedRow = resetButton.parentElement.parentElement.parentElement;
         updatedRow.childNodes[3].innerText = 'None';
         updatedRow.childNodes[3].classList.remove('bg-danger', 'text-white');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(resetModal);
           modal.hide();
           updatedRow.classList.add('fade-transition');
@@ -78,7 +78,7 @@ document.querySelector('#reset-form').addEventListener('submit', function(event)
           submitButtonIcon.classList.add('fa-save');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             updatedRow.classList.remove('bg-warning');
           }, 1000);
         }, 1000);
@@ -97,7 +97,7 @@ document.querySelector('#reset-form').addEventListener('submit', function(event)
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-save');
         submitButton.classList.remove('btn-danger');
@@ -112,7 +112,7 @@ document.querySelector('#reset-form').addEventListener('submit', function(event)
 let editButton;
 let editModal = document.getElementById('modal-edit');
 let editErrorsElement = document.querySelector('#edit-errors');
-editModal.addEventListener('show.bs.modal', function (event) {
+editModal.addEventListener('show.bs.modal', (event) => {
   editErrorsElement.innerHTML = '';
   editButton = event.relatedTarget;
   let editRow = editButton.parentElement.parentElement.parentElement;
@@ -120,7 +120,7 @@ editModal.addEventListener('show.bs.modal', function (event) {
   editModal.querySelector('#edit-id').value = editButton.getAttribute('data-id');
   editModal.querySelector('#user-name-in-change-modal').innerText = editRow.childNodes[0].innerText;
 });
-document.querySelector('#edit-form').addEventListener('submit', function(event) {
+document.querySelector('#edit-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-edit .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-edit .btn-primary > i');
@@ -134,9 +134,9 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
@@ -145,7 +145,7 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
         submitButton.classList.add('btn-success');
         let updatedRow = editButton.parentElement.parentElement.parentElement;
         updatedRow.childNodes[1].innerText = data.role;
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(editModal);
           modal.hide();
           updatedRow.classList.add('fade-transition');
@@ -154,7 +154,7 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
           submitButtonIcon.classList.add('fa-save');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             updatedRow.classList.remove('bg-warning');
           }, 1000);
         }, 1000);
@@ -173,7 +173,7 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-save');
         submitButton.classList.remove('btn-danger');
@@ -188,14 +188,14 @@ document.querySelector('#edit-form').addEventListener('submit', function(event) 
 let deactivateButton;
 let deactivateModal = document.getElementById('modal-deactivate');
 let deactivateErrorsElement = document.querySelector('#deactivate-errors');
-deactivateModal.addEventListener('show.bs.modal', function (event) {
+deactivateModal.addEventListener('show.bs.modal', (event) => {
   deactivateErrorsElement.innerHTML = '';
   deactivateButton = event.relatedTarget;
   let deactivateRow = deactivateButton.parentElement.parentElement.parentElement;
   deactivateModal.querySelector('#user-name-in-deactivate-modal').innerHTML = deactivateRow.childNodes[0].innerText;
   deactivateModal.querySelector('#deactivate-user').value = deactivateButton.getAttribute('data-id');
 });
-document.querySelector('#deactivate-form').addEventListener('submit', function(event) {
+document.querySelector('#deactivate-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-deactivate .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-deactivate .btn-primary > i');
@@ -209,16 +209,16 @@ document.querySelector('#deactivate-form').addEventListener('submit', function(e
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(deactivateModal);
           modal.hide();
           let deactivatedRow = deactivateButton.parentElement.parentElement.parentElement;
@@ -226,7 +226,7 @@ document.querySelector('#deactivate-form').addEventListener('submit', function(e
           deactivatedRow.classList.add('bg-danger');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             deactivatedRow.classList.remove('bg-danger');
             deactivatedRow.childNodes[2].classList.add('bg-secondary', 'text-white');
             deactivatedRow.childNodes[2].innerText = 'Inactive';
@@ -252,7 +252,7 @@ document.querySelector('#deactivate-form').addEventListener('submit', function(e
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
@@ -267,14 +267,14 @@ document.querySelector('#deactivate-form').addEventListener('submit', function(e
 let activateButton;
 let activateModal = document.getElementById('modal-activate');
 let activateErrorsElement = document.querySelector('#activate-errors');
-activateModal.addEventListener('show.bs.modal', function (event) {
+activateModal.addEventListener('show.bs.modal', (event) => {
   activateErrorsElement.innerHTML = '';
   activateButton = event.relatedTarget;
   let activateRow = activateButton.parentElement.parentElement.parentElement;
   activateModal.querySelector('#user-name-in-activate-modal').innerHTML = activateRow.childNodes[0].innerText;
   activateModal.querySelector('#activate-user').value = activateButton.getAttribute('data-id');
 });
-document.querySelector('#activate-form').addEventListener('submit', function(event) {
+document.querySelector('#activate-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-activate .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-activate .btn-primary > i');
@@ -288,16 +288,16 @@ document.querySelector('#activate-form').addEventListener('submit', function(eve
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(activateModal);
           modal.hide();
           let activatedRow = activateButton.parentElement.parentElement.parentElement;
@@ -305,7 +305,7 @@ document.querySelector('#activate-form').addEventListener('submit', function(eve
           activatedRow.classList.add('bg-danger');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             activatedRow.classList.remove('bg-danger');
             activatedRow.childNodes[2].classList.remove('bg-secondary', 'text-white');
             activatedRow.childNodes[2].innerText = 'Active';
@@ -331,7 +331,7 @@ document.querySelector('#activate-form').addEventListener('submit', function(eve
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');

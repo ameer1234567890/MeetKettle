@@ -1,5 +1,5 @@
 // Set recordsPerPage form
-document.querySelector('#dbupgrade').addEventListener('click', function(event) {
+document.querySelector('#dbupgrade').addEventListener('click', (event) => {
   let resultElement = document.querySelector('#result');
   resultElement.innerHTML = '';
   resultElement.classList.remove('text-danger');
@@ -14,16 +14,16 @@ document.querySelector('#dbupgrade').addEventListener('click', function(event) {
       method: 'POST',
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
       if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         //   submitButton.disabled = false;
           submitButtonIcon.classList.remove('fa-pulse');
           submitButtonIcon.classList.remove('fa-spinner');
           submitButtonIcon.classList.add('fa-check');
           submitButton.classList.remove('btn-primary');
           submitButton.classList.add('btn-success');
-          setTimeout(function() {
+          setTimeout(() => {
           submitButtonIcon.classList.remove('fa-check');
           submitButtonIcon.classList.add('fa-database');
           submitButton.classList.remove('btn-success');
@@ -46,7 +46,7 @@ document.querySelector('#dbupgrade').addEventListener('click', function(event) {
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
           submitButtonIcon.classList.remove('fa-times');
           submitButtonIcon.classList.add('fa-database');
           submitButton.classList.remove('btn-danger');

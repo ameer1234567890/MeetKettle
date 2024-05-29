@@ -1,21 +1,21 @@
 /* global bootstrap, Intl */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
   activateTooltips();
   getWakeLock();
   setTimeout(updateTime, 1000);
 });
 
 
-function activateTooltips() {
+const activateTooltips = async () => {
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.map(function (tooltipTriggerEl) {
+  tooltipTriggerList.map((tooltipTriggerEl) => {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 }
 
 
-async function getWakeLock() {
+const getWakeLock = async () => {
   try {
     await navigator.wakeLock.request('screen');
     console.log('Wake Lock is active!');
@@ -25,7 +25,7 @@ async function getWakeLock() {
 }
 
 
-function updateTime() {
+const updateTime = () => {
   // A single if statement with the || (OR) operator does not work (hack)
   if (document.getElementById('modal-end').style.display != 'block') {
     if (document.getElementById('modal-extend').style.display != 'block') {
@@ -43,7 +43,7 @@ function updateTime() {
 let extendButton;
 let extendModal = document.getElementById('modal-extend');
 let extendErrorsElement = document.querySelector('#extend-errors');
-extendModal.addEventListener('show.bs.modal', function (event) {
+extendModal.addEventListener('show.bs.modal', (event) => {
   extendErrorsElement.innerHTML = '';
   extendButton = event.relatedTarget;
   extendModal.querySelector('#extend-id').value = extendButton.getAttribute('data-id');
@@ -51,7 +51,7 @@ extendModal.addEventListener('show.bs.modal', function (event) {
   extendModal.querySelector('#extend-datetime').value = extendButton.getAttribute('data-datetime');
   extendModal.querySelector('#extend-duration').value = extendButton.getAttribute('data-duration');
 });
-document.querySelector('#extend-form').addEventListener('submit', function(event) {
+document.querySelector('#extend-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-extend .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-extend .btn-primary > i');
@@ -65,16 +65,16 @@ document.querySelector('#extend-form').addEventListener('submit', function(event
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(extendModal);
           modal.hide();
           let timeElement = document.querySelector("#until > span");
@@ -82,7 +82,7 @@ document.querySelector('#extend-form').addEventListener('submit', function(event
           timeElement.classList.add('bg-warning');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             const timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, };
             let newEndTime = new Date(data.endtime * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase();
             timeElement.innerHTML = newEndTime;
@@ -106,7 +106,7 @@ document.querySelector('#extend-form').addEventListener('submit', function(event
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
@@ -121,7 +121,7 @@ document.querySelector('#extend-form').addEventListener('submit', function(event
 let endButton;
 let endModal = document.getElementById('modal-end');
 let endErrorsElement = document.querySelector('#end-errors');
-endModal.addEventListener('show.bs.modal', function (event) {
+endModal.addEventListener('show.bs.modal', (event) => {
   endErrorsElement.innerHTML = '';
   endButton = event.relatedTarget;
   endModal.querySelector('#end-id').value = endButton.getAttribute('data-id');
@@ -129,7 +129,7 @@ endModal.addEventListener('show.bs.modal', function (event) {
   endModal.querySelector('#end-datetime').value = endButton.getAttribute('data-datetime');
   endModal.querySelector('#end-duration').value = endButton.getAttribute('data-duration');
 });
-document.querySelector('#end-form').addEventListener('submit', function(event) {
+document.querySelector('#end-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-end .btn-danger');
   let submitButtonIcon = document.querySelector('#modal-end .btn-danger > i');
@@ -143,16 +143,16 @@ document.querySelector('#end-form').addEventListener('submit', function(event) {
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(endModal);
           modal.hide();
           let timeElement = document.querySelector("#until > span");
@@ -160,7 +160,7 @@ document.querySelector('#end-form').addEventListener('submit', function(event) {
           timeElement.classList.add('bg-warning');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-danger');
-          setTimeout(function() {
+          setTimeout(() => {
             const timeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: true, };
             let newEndTime = new Date(data.endtime * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase();
             timeElement.innerHTML = newEndTime;
@@ -185,7 +185,7 @@ document.querySelector('#end-form').addEventListener('submit', function(event) {
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-danger');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');

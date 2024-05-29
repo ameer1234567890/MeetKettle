@@ -30,14 +30,14 @@ html(lang='en-US')
           document.querySelector('#nav-#{navPage}>a').classList.add('active');
         }
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        var tooltipList = tooltipTriggerList.map((tooltipTriggerEl) => {
           return new bootstrap.Tooltip(tooltipTriggerEl);
         });
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('/sw.js');
         }
         document.querySelector('#toploader').classList.add('invisible');
-        document.querySelectorAll('.navigate').forEach(function (element) {
+        document.querySelectorAll('.navigate').forEach((element) => {
           element.addEventListener('click', () => {
             document.querySelector('#toploader').classList.remove('invisible');
           });

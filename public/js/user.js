@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelector('#passwordBox a').addEventListener('click', function(event) {
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('#passwordBox a').addEventListener('click', (event) => {
     event.preventDefault();
     const inputElement = document.querySelector('#passwordBox input');
     const iconElement = document.querySelector('#passwordBox i');
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
       iconElement.classList.add( 'fa-eye' );
     }
   });
-  document.querySelector('#passwordBox2 a').addEventListener('click', function(event) {
+  document.querySelector('#passwordBox2 a').addEventListener('click', (event) => {
     event.preventDefault();
     const inputElement = document.querySelector('#passwordBox2 input');
     const iconElement = document.querySelector('#passwordBox2 i');

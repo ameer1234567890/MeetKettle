@@ -1,11 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
   validateMeetingTime();
   getWakeLock();
   setTimeout(updateTime, 1000);
 });
 const timeBoxes = document.querySelectorAll('[type="radio"][name="time"]');
 const timeCustom = document.getElementById('timeCustom');
-document.getElementById('timeCustom').addEventListener('click', function() {
+document.getElementById('timeCustom').addEventListener('click', () => {
   timeCustom.required = true;
   for (var i = 0; i < timeBoxes.length; i++) {
     timeBoxes[i].required = false;
@@ -15,7 +15,7 @@ document.getElementById('timeCustom').addEventListener('click', function() {
   }
 });
 for (var i = 0; i < timeBoxes.length; i++) {
-  timeBoxes[i].addEventListener('click', function() {
+  timeBoxes[i].addEventListener('click', () => {
     timeCustom.required = false;
     timeCustom.value = '';
     for (var i = 0; i < timeBoxes.length; i++) {
@@ -23,7 +23,7 @@ for (var i = 0; i < timeBoxes.length; i++) {
     }
   });
   }
-document.getElementById('addMeetingForm').addEventListener("submit", function(event) {
+document.getElementById('addMeetingForm').addEventListener("submit", (event) => {
   event.preventDefault();
   var dateString = new Date().getFullYear() + '/' + (new Date().getMonth()+1) + '/' + new Date().getDate();
   var timeString;
@@ -35,7 +35,7 @@ document.getElementById('addMeetingForm').addEventListener("submit", function(ev
   document.getElementById('datetime').value = new Date(dateString + ' ' + timeString);
   document.getElementById('addMeetingForm').submit();
 });
-function validateMeetingTime() {
+const validateMeetingTime = () => {
   const inputs = Array.from(
     document.querySelectorAll('input[name=time]')
   );
@@ -46,7 +46,7 @@ function validateMeetingTime() {
   };
   inputs.forEach(i => i.addEventListener('input', inputListener));
 }
-async function getWakeLock() {
+const getWakeLock = async () => {
   try {
     await navigator.wakeLock.request('screen');
     console.log('Wake Lock is active!');
@@ -54,7 +54,7 @@ async function getWakeLock() {
     console.log(`${err.name}, ${err.message}`);
   }
 }
-function updateTime() {
+const updateTime = () => {
   const timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, };
   const now = new Date().toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase();
   document.getElementById('clock').innerHTML =  now;

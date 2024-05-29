@@ -64,7 +64,7 @@ serviceImageElements.forEach(element => {
 });
 
 // Set recordsPerPage form
-document.querySelector('#set-rpp-form').addEventListener('submit', function(event) {
+document.querySelector('#set-rpp-form').addEventListener('submit', (event) => {
   let errorsElement = document.querySelector('#rpp-errors');
   errorsElement.innerHTML = '';
   event.preventDefault();
@@ -80,16 +80,16 @@ document.querySelector('#set-rpp-form').addEventListener('submit', function(even
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           submitButtonIcon.classList.remove('fa-check');
           submitButtonIcon.classList.add('fa-save');
           submitButton.classList.remove('btn-success');
@@ -110,7 +110,7 @@ document.querySelector('#set-rpp-form').addEventListener('submit', function(even
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-save');
         submitButton.classList.remove('btn-danger');
@@ -122,7 +122,7 @@ document.querySelector('#set-rpp-form').addEventListener('submit', function(even
 
 
 // Add facility form
-document.querySelector('#add-facility-form').addEventListener('submit', function(event) {
+document.querySelector('#add-facility-form').addEventListener('submit', (event) => {
   let errorsElement = document.querySelector('#facilities-errors');
   errorsElement.innerHTML = '';
   event.preventDefault();
@@ -138,9 +138,9 @@ document.querySelector('#add-facility-form').addEventListener('submit', function
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
@@ -160,7 +160,7 @@ document.querySelector('#add-facility-form').addEventListener('submit', function
         itemElement.appendChild(newButtonElement);
         facilityListGroup.insertBefore(itemElement, facilityListGroup.childNodes[facilityListGroup.children.length - 1]);
         document.querySelector('#add-facility-form input').value = '';
-        setTimeout(function() {
+        setTimeout(() => {
           submitButtonIcon.classList.remove('fa-check');
           submitButtonIcon.classList.add('fa-plus');
           submitButton.classList.remove('btn-success');
@@ -181,7 +181,7 @@ document.querySelector('#add-facility-form').addEventListener('submit', function
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-plus');
         submitButton.classList.remove('btn-danger');
@@ -196,13 +196,13 @@ document.querySelector('#add-facility-form').addEventListener('submit', function
 let deleteFacilityButton;
 let deleteFacilityModal = document.getElementById('modal-facility-delete');
 let deleteFacilityErrorsElement = document.querySelector('#delete-facility-errors');
-deleteFacilityModal.addEventListener('show.bs.modal', function (event) {
+deleteFacilityModal.addEventListener('show.bs.modal', (event) => {
   deleteFacilityErrorsElement.innerHTML = '';
   deleteFacilityButton = event.relatedTarget;
   deleteFacilityModal.querySelector('#facility-in-modal').innerHTML = deleteFacilityButton.getAttribute('data-facility').split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
   deleteFacilityModal.querySelector('#delete-facility').value = deleteFacilityButton.getAttribute('data-facility');
 });
-document.querySelector('#delete-facility-form').addEventListener('submit', function(event) {
+document.querySelector('#delete-facility-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-facility-delete .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-facility-delete .btn-primary > i');
@@ -216,16 +216,16 @@ document.querySelector('#delete-facility-form').addEventListener('submit', funct
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(deleteFacilityModal);
           modal.hide();
           let deletedRow = deleteFacilityButton.parentElement;
@@ -233,7 +233,7 @@ document.querySelector('#delete-facility-form').addEventListener('submit', funct
           deletedRow.classList.add('bg-danger');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             deletedRow.remove();
           }, 1000);
         }, 1000);
@@ -252,7 +252,7 @@ document.querySelector('#delete-facility-form').addEventListener('submit', funct
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
@@ -264,7 +264,7 @@ document.querySelector('#delete-facility-form').addEventListener('submit', funct
 
 
 // Add service form
-document.querySelector('#add-service-form').addEventListener('submit', function(event) {
+document.querySelector('#add-service-form').addEventListener('submit', (event) => {
   let errorsElement = document.querySelector('#services-errors');
   errorsElement.innerHTML = '';
   event.preventDefault();
@@ -280,9 +280,9 @@ document.querySelector('#add-service-form').addEventListener('submit', function(
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
@@ -302,7 +302,7 @@ document.querySelector('#add-service-form').addEventListener('submit', function(
         itemElement.appendChild(newButtonElement);
         serviceListGroup.insertBefore(itemElement, serviceListGroup.childNodes[serviceListGroup.children.length - 1]);
         document.querySelector('#add-service-form input[name=service]').value = '';
-        setTimeout(function() {
+        setTimeout(() => {
           submitButtonIcon.classList.remove('fa-check');
           submitButtonIcon.classList.add('fa-plus');
           submitButton.classList.remove('btn-success');
@@ -323,7 +323,7 @@ document.querySelector('#add-service-form').addEventListener('submit', function(
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-plus');
         submitButton.classList.remove('btn-danger');
@@ -338,13 +338,13 @@ document.querySelector('#add-service-form').addEventListener('submit', function(
 let deleteServiceButton;
 let deleteServiceModal = document.getElementById('modal-service-delete');
 let deleteServiceErrorsElement = document.querySelector('#delete-service-errors');
-deleteServiceModal.addEventListener('show.bs.modal', function (event) {
+deleteServiceModal.addEventListener('show.bs.modal', (event) => {
   deleteServiceErrorsElement.innerHTML = '';
   deleteServiceButton = event.relatedTarget;
   deleteServiceModal.querySelector('#service-in-modal').innerHTML = deleteServiceButton.getAttribute('data-service').split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ');
   deleteServiceModal.querySelector('#delete-service').value = deleteServiceButton.getAttribute('data-service');
 });
-document.querySelector('#delete-service-form').addEventListener('submit', function(event) {
+document.querySelector('#delete-service-form').addEventListener('submit', (event) => {
   event.preventDefault();
   let submitButton = document.querySelector('#modal-service-delete .btn-primary');
   let submitButtonIcon = document.querySelector('#modal-service-delete .btn-primary > i');
@@ -358,16 +358,16 @@ document.querySelector('#delete-service-form').addEventListener('submit', functi
     body: data,
   })
   .then(response => response.json())
-  .then(function(data) {
+  .then((data) => {
     if (data.status === 'success') {
-      setTimeout(function() {
+      setTimeout(() => {
         submitButton.disabled = false;
         submitButtonIcon.classList.remove('fa-pulse');
         submitButtonIcon.classList.remove('fa-spinner');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-success');
-        setTimeout(function() {
+        setTimeout(() => {
           let modal = bootstrap.Modal.getInstance(deleteServiceModal);
           modal.hide();
           let deletedRow = deleteServiceButton.parentElement;
@@ -375,7 +375,7 @@ document.querySelector('#delete-service-form').addEventListener('submit', functi
           deletedRow.classList.add('bg-danger');
           submitButton.classList.remove('btn-success');
           submitButton.classList.add('btn-primary');
-          setTimeout(function() {
+          setTimeout(() => {
             deletedRow.remove();
           }, 1000);
         }, 1000);
@@ -394,7 +394,7 @@ document.querySelector('#delete-service-form').addEventListener('submit', functi
       submitButtonIcon.classList.add('fa-times');
       submitButton.classList.remove('btn-primary');
       submitButton.classList.add('btn-danger');
-      setTimeout(function() {
+      setTimeout(() => {
         submitButtonIcon.classList.remove('fa-times');
         submitButtonIcon.classList.add('fa-check');
         submitButton.classList.remove('btn-danger');
