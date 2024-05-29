@@ -366,10 +366,11 @@ const getRecurringMeetings = (roomId) => {
       }
       if (isRecurringMeeting) {
         storedMeetingTime = new Date(res[i].datetime * 1000).getHours() + ':' + new Date(res[i].datetime * 1000).getMinutes() + ':' + new Date(res[i].datetime * 1000).getSeconds();
-        storedMeetingTimeStampToday = new Date(storedMeetingTimeStampToday = new Date().getFullYear() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getDate() + ' ' + storedMeetingTime).getTime() / 1000;
+        storedMeetingTimeStampToday = new Date(new Date().getFullYear() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getDate() + ' ' + storedMeetingTime).getTime() / 1000;
         meeting = {
           'id':res[i].id,
           'datetime':storedMeetingTimeStampToday,
+          'originaldatetime':res[i].datetime,
           'duration':res[i].duration,
           'repeat':res[i].repeat,
           'description':res[i].description,
