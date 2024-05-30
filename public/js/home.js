@@ -1,4 +1,4 @@
-/* global bootstrap, Intl, roomList */
+/* global bootstrap, roomList */
 
 // View modal
 let viewButton;

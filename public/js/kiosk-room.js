@@ -1,4 +1,4 @@
-/* global bootstrap, Intl */
+/* global bootstrap */
 
 document.addEventListener('DOMContentLoaded', () => {
   activateTooltips();
