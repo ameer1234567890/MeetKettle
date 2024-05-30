@@ -1802,6 +1802,8 @@ app.post('/admin/services/delete',
             if (err) {
               errorList.push({ code: err.errno, msg: err.message, });
               return logger.error(new Error(err.message));
+            } else {
+              fs.unlinkSync('./public/images/' + service + '.svg');
             }
           });
           db2.close((err) => {
