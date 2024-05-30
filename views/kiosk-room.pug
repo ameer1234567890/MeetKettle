@@ -59,7 +59,7 @@ html(lang='en-US')
             - var endTime = new Date(currentMeeting.datetime * 1000 + currentMeeting.duration * 1000).toLocaleTimeString('en-GB', timeFormatOptions).toUpperCase()
             #until.text-center.text-dark.fw-bold.fs-4 UNTIL 
               span #{endTime}
-              button.btn.btn-outline-danger.ms-2.align-top(data-bs-toggle='modal' data-bs-target='#modal-end' data-id=currentMeeting.id data-datetime=currentMeeting.datetime data-duration=currentMeeting.duration data-roomid=room) END
+              button.btn.btn-outline-danger.ms-2.align-top(data-bs-toggle='modal' data-bs-target='#modal-end' data-id=currentMeeting.id data-datetime=currentMeeting.datetime data-duration=currentMeeting.duration data-roomid=room data-repeat=currentMeeting.repeat) END
               button.btn.btn-outline-primary.ms-2.align-top(data-bs-toggle='modal' data-bs-target='#modal-extend' data-id=currentMeeting.id data-datetime=currentMeeting.datetime data-duration=currentMeeting.duration data-roomid=room) EXTEND
             #meetingCurrent.text-center.text-dark.fs-5 #{currentMeeting.description} | #{startTime} | #{currentMeeting.service.split('_').map( w =>  w.substring(0,1).toUpperCase()+ w.substring(1)).join(' ')}
           else
@@ -134,6 +134,7 @@ html(lang='en-US')
               input#end-roomid(type='hidden' name='roomid')
               input#end-datetime(type='hidden' name='datetime')
               input#end-duration(type='hidden' name='duration')
+              input#end-repeat(type='hidden' name='repeat')
             p Are you sure you want to end the current meeting?
             ul#end-errors.text-danger
           .modal-footer

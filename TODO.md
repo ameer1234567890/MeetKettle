@@ -1,2 +1,1 @@
 - Exclude certain weekdays/weekends in daily recurring meetings
-- If a meeting is ended from the kiosk and it is a recurring meeting, set a flag instead of changing meeting duration

@@ -795,6 +795,14 @@ app.get('/kiosk/room',
       });
       db.close((err) => {
         if (err) return logger.error(new Error(err.message));
+        if (kettleCache.get('endedRecurringMeeting')) {
+          const endedRecurringMeeting = JSON.parse(kettleCache.get('endedRecurringMeeting'));
+          for (let meeting of meetingList) {
+            if (endedRecurringMeeting.id === meeting.id) {
+              meeting.duration = endedRecurringMeeting.duration;
+            }
+          }
+        }
         const payload = {
           authUser: req.session.userId,
           meetings: meetingList,
@@ -3165,8 +3173,8 @@ app.post('/meetings/end',
     .notEmpty()
     .withMessage('Date and time must not be empty'),
   body('duration')
-      .notEmpty()
-      .withMessage('Duration must not be empty'),
+    .notEmpty()
+    .withMessage('Duration must not be empty'),
   body('id')
     .notEmpty()
     .withMessage('ID must not be empty'),
@@ -3181,6 +3189,11 @@ app.post('/meetings/end',
     const meetingStart = timeStamp;
     const meetingEnd = (new Date().getTime() / 1000) - (1 * 60);
     const meetingId = req.body.id;
+    const repeat = req.body.repeat;
+    const id = req.body.id;
+    const duration = req.body.duration;
+    const newDuration = Math.floor((meetingEnd - meetingStart) / 60) * 60;
+    const newEndTime = new Date((parseInt(req.body.datetime) + parseInt(newDuration)) * 1000).getTime() / 1000;
     let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
     const overlapMeeting = getOverlapMeeting(meetingStart, meetingEnd, roomId, meetingId);
     if (overlapMeeting) {
@@ -3211,38 +3224,51 @@ app.post('/meetings/end',
             errors: errors.array(),
           };
           res.status(400).json(payload);
-      } else {
-          let errorList = [];
-          let id = req.body.id;
-          let newDuration = Math.floor((meetingEnd - meetingStart) / 60) * 60;
-          let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
-          db.run('UPDATE meetings SET duration=? WHERE id = \'' + id + '\'', [newDuration,], (err) => {
-            if (err) {
-              errorList.push({ code: err.errno, msg: err.message, });
-              return logger.error(new Error(err.message));
+        } else {
+          if (repeat === 'once') {
+            let errorList = [];
+            let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
+            db.run('UPDATE meetings SET duration=? WHERE id = \'' + id + '\'', [newDuration,], (err) => {
+              if (err) {
+                errorList.push({ code: err.errno, msg: err.message, });
+                return logger.error(new Error(err.message));
+              }
+            });
+            db.close((err) => {
+              if (err) return logger.error(new Error(err.message));
+              if (errorList.length === 0) {
+                const payload = {
+                  status: 'success',
+                  datetime: timeStamp,
+                  duration: newDuration,
+                  endtime: newEndTime,
+                  room: req.body.roomid,
+                };
+                res.json(payload);
+                addUserLogEntry('edit_meeting', req.session.userId, null, req.body.room, id, null);
+              } else {
+                const payload = {
+                  status: 'error',
+                  errors: errorList,
+                };
+                res.status(400).json(payload);
+              }
+            });
+          } else {
+            const endedRecurringMeeting = {
+              id: id,
+              duration: newDuration,
             }
-          });
-          db.close((err) => {
-            if (err) return logger.error(new Error(err.message));
-            if (errorList.length === 0) {
-              let newEndTime = new Date((parseInt(req.body.datetime) + parseInt(newDuration)) * 1000).getTime() / 1000;
-              const payload = {
-                status: 'success',
-                datetime: timeStamp,
-                duration: newDuration,
-                endtime: newEndTime,
-                room: req.body.roomid,
-              };
-              res.json(payload);
-              addUserLogEntry('edit_meeting', req.session.userId, null, req.body.room, id, null);
-            } else {
-              const payload = {
-                status: 'error',
-                errors: errorList,
-              };
-              res.status(400).json(payload);
-            }
-          });
+            kettleCache.set('endedRecurringMeeting', JSON.stringify(endedRecurringMeeting), duration);
+            const payload = {
+              status: 'success',
+              datetime: timeStamp,
+              duration: newDuration,
+              endtime: newEndTime,
+              room: req.body.roomid,
+            };
+            res.json(payload);
+          }
         }
       });
     }

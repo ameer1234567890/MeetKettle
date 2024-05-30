@@ -128,6 +128,7 @@ endModal.addEventListener('show.bs.modal', (event) => {
   endModal.querySelector('#end-roomid').value = endButton.getAttribute('data-roomid');
   endModal.querySelector('#end-datetime').value = endButton.getAttribute('data-datetime');
   endModal.querySelector('#end-duration').value = endButton.getAttribute('data-duration');
+  endModal.querySelector('#end-repeat').value = endButton.getAttribute('data-repeat');
 });
 document.querySelector('#end-form').addEventListener('submit', (event) => {
   event.preventDefault();
