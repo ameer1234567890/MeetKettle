@@ -38,11 +38,11 @@ block content
                   i.fa.fa-edit.fa-lg
               if user.deleted
                 span.action-activate-deactivate(data-bs-toggle='tooltip' data-bs-placement='top' title='Activate')
-                  a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-activate' data-id=user.id)
+                  a.btn-sm.btn-outline-success.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-activate' data-id=user.id)
                     i.fa.fa-unlock.fa-lg
               else
                 span.action-activate-deactivate(data-bs-toggle='tooltip' data-bs-placement='top' title='Deactivate')
-                  a.btn-sm.btn-outline-primary.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-deactivate' data-id=user.id)
+                  a.btn-sm.btn-outline-danger.mx-1(href='#' data-bs-toggle='modal' data-bs-target='#modal-deactivate' data-id=user.id)
                     i.fa.fa-lock.fa-lg
     br
 
