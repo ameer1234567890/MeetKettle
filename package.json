@@ -20,18 +20,18 @@
   "homepage": "https://github.com/ameer1234567890/MeetKettle",
   "dependencies": {
     "busboy": "^1.6.0",
-    "compression": "^1.7.4",
-    "connect-sqlite3": "^0.9.15",
-    "cookie-parser": "^1.4.6",
-    "express": "^4.19.2",
-    "express-session": "^1.18.0",
-    "express-validator": "^7.1.0",
+    "compression": "^1.8.1",
+    "connect-sqlite3": "^0.9.16",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "express-validator": "^7.2.1",
     "node-cache": "^5.1.2",
-    "node-cron": "^3.0.3",
+    "node-cron": "^4.2.1",
     "pug": "^3.0.3",
     "sqlite-sync": "^0.3.9",
     "sqlite3": "^5.1.7",
-    "winston": "^3.13.0",
+    "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
   "nodemonConfig": {
@@ -40,9 +40,9 @@
     ]
   },
   "devDependencies": {
-    "@eslint/js": "^9.5.0",
-    "eslint": "^9.5.0",
-    "globals": "^15.6.0",
-    "nodemon": "^3.1.4"
+    "@eslint/js": "^9.34.0",
+    "eslint": "^9.34.0",
+    "globals": "^16.3.0",
+    "nodemon": "^3.1.10"
   }
 }
