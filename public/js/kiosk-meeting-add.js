@@ -60,3 +60,5 @@ const updateTime = () => {
   document.getElementById('clock').innerHTML =  now;
   setTimeout(updateTime, 1000);
 }
+
+document.querySelector("#kiosk-panel-left").style.height = document.querySelector("#kiosk-panel-right").scrollHeight + 'px';

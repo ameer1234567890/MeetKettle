@@ -15,10 +15,10 @@ html(lang='en-US')
 
   if !errors
     .row.g-0.full-height
-      .col-md-3
+      #kiosk-panel-left.col-md-3
         .row.h-100.g-0
           .bg-primary.m-0.full-height
-      .col-md-9.full-height
+      #kiosk-panel-right.col-md-9.full-height
         .row.g-0.mx-4
           h2.fw-normal.my-4 #{roomName.toUpperCase()}
             - var timeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, }

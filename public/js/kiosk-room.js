@@ -228,3 +228,5 @@ for (let i = 0; i < cards.length; i++) {
   timeStamp = datetimeElement.getAttribute('data-timestamp');
   datetimeElement.innerText = getRelativeTime(+new Date(timeStamp * 1000));
 }
+
+document.querySelector("#kiosk-panel-left").style.height = document.querySelector("#kiosk-panel-right").scrollHeight + 'px';

@@ -48,3 +48,5 @@ for (let i = 0; i < items.length; i++) {
   timeStamp = datetimeElement.getAttribute('data-timestamp');
   datetimeElement.innerText = getRelativeDay(new Date(timeStamp * 1000)) + ' ' + datetimeElement.innerText;
 }
+
+document.querySelector("#kiosk-panel-left").style.height = document.querySelector("#kiosk-panel-right").scrollHeight + 'px';
