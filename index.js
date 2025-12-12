@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const cron = require('node-cron');
 const express = require('express');
 const sqlite3 = require('sqlite3');
-const sqliteSync = require('sqlite-sync');
+const sqliteDatabase = require('better-sqlite3');
 const compression = require('compression');
 const sessions = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -94,12 +94,11 @@ if (!fs.existsSync(dbFile)) {
   });
   db.close((err) => { if (err) return logger.error(new Error(err.message)); });
 } else {
-  sqliteSync.connect(dbFile);
-  sqliteSync.run('SELECT * FROM config WHERE key=?', ['sessionSecret',], (res) => {
-    if (res.error) return logger.error(new Error(res.err));
-    config.sessionSecret = res[0].value;
-  });
-  let db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
+  let db = new sqliteDatabase(dbFile);
+  const res = db.prepare('SELECT * FROM config WHERE key=\'sessionSecret\'').all();
+  if (res.error) return logger.error(new Error(res.err));
+  config.sessionSecret = res[0].value;  // });
+  db = new sqlite3.Database(dbFile, (err) => { if (err) return logger.error(new Error(err.message)); });
   db.get('SELECT * FROM config WHERE key=?', ['facilityList',], (err, row) => {
     if (err) return logger.error(new Error(err.message));
     facilityList = row.value.split(',');
@@ -276,18 +275,17 @@ cron.schedule('30 17 * * *', () => {
 
 const getRoomList = () => {
   let roomList = [];
-  sqliteSync.connect(dbFile);
-  sqliteSync.run('SELECT * FROM rooms WHERE deleted IS NOT 1', [], (res) => {
-    if (res.error) return logger.error(new Error(res.err));
-    let room;
-    for (let i = 0; i < res.length; i++) {
-      room = {
-        'id':res[i].id,
-        'name':res[i].name,
-      };
-      roomList.push(room);
-    }
-  });
+  const db = new sqliteDatabase(dbFile);
+  const res = db.prepare('SELECT * FROM rooms WHERE deleted IS NOT 1').all();
+  if (res.error) return logger.error(new Error(res.err));
+  let room;
+  for (let i = 0; i < res.length; i++) {
+    room = {
+      'id':res[i].id,
+      'name':res[i].name,
+    };
+    roomList.push(room);
+  }
   return roomList;
 };
 
@@ -296,25 +294,24 @@ const getOverlapMeeting = (meetingStart, meetingEnd, roomId, meetingId = 0) => {
   let overlapMeeting;
   const meetingStartMinusOneDay = (new Date(meetingStart * 1000).getTime() / 1000) - (3600 * 24);
   const meetingStartPlusOneDay = (new Date(meetingStart * 1000).getTime() / 1000) + (3600 * 24);
-  sqliteSync.connect(dbFile);
-  sqliteSync.run('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + meetingStartMinusOneDay + '\' AND datetime < \'' + meetingStartPlusOneDay + '\' ORDER BY datetime DESC', [], (res) => {
-    if (res.error) return logger.error(new Error(res.err));
-    let storedMeetingStart;
-    let storedMeetingEnd;
-    for (let i = 0; i < res.length; i++) {
-      if (res[i].id == meetingId) {
-        continue;
-      } else {
-        storedMeetingStart = res[i].datetime;
-        storedMeetingEnd = res[i].datetime + res[i].duration;
-        // Excellent logic from: https://stackoverflow.com/a/31328290
-        if (storedMeetingStart < meetingEnd && meetingStart < storedMeetingEnd) {
-          overlapMeeting = res[i];
-          break;
-        }
+  const db = new sqliteDatabase(dbFile);
+  const res = db.prepare('SELECT * FROM meetings WHERE deleted IS NOT 1 AND roomid IS \'' + roomId + '\' AND datetime > \'' + meetingStartMinusOneDay + '\' AND datetime < \'' + meetingStartPlusOneDay + '\' ORDER BY datetime DESC').all();
+  if (res.error) return logger.error(new Error(res.err));
+  let storedMeetingStart;
+  let storedMeetingEnd;
+  for (let i = 0; i < res.length; i++) {
+    if (res[i].id == meetingId) {
+      continue;
+    } else {
+      storedMeetingStart = res[i].datetime;
+      storedMeetingEnd = res[i].datetime + res[i].duration;
+      // Excellent logic from: https://stackoverflow.com/a/31328290
+      if (storedMeetingStart < meetingEnd && meetingStart < storedMeetingEnd) {
+        overlapMeeting = res[i];
+        break;
       }
     }
-  });
+  }
   return overlapMeeting;
 };
 
@@ -340,49 +337,48 @@ const getRecurringMeetings = (roomId) => {
   } else {
     query = 'SELECT * FROM meetings WHERE deleted IS NOT 1 AND repeat IS NOT \'once\' AND roomid IS \'' + roomId + '\' ORDER BY datetime DESC';
   }
-  sqliteSync.connect(dbFile);
-  sqliteSync.run(query, [], (res) => {
-    if (res.error) {
-      return logger.error(new Error(res.err));
+  const db = new sqliteDatabase(dbFile);
+  const res = db.prepare(query).all();
+  if (res.error) {
+    return logger.error(new Error(res.err));
+  }
+  for (let i = 0; i < res.length; i++) {
+    isRecurringMeeting = false;
+    storedMeetingRepeat = res[i].repeat;
+    storedMeetingWeekday = new Date(res[i].datetime * 1000).getDay();
+    storedMeetingDayOfMonth = new Date(res[i].datetime * 1000).getDate();
+    storedMeetingMonthOfYear = new Date(res[i].datetime * 1000).getMonth();
+    storedMeetingYear = new Date(res[i].datetime * 1000).getFullYear();
+    let currentDateString = currentYear + '/' + currentMonthOfYear + '/' + currentDayOfMonth;
+    let storedMeetingDateString = storedMeetingYear + '/' + storedMeetingMonthOfYear + '/' + storedMeetingDayOfMonth;
+    if (currentDateString == storedMeetingDateString) continue;
+    if (storedMeetingRepeat == 'daily') {
+      isRecurringMeeting = true;
+    } else if (storedMeetingRepeat == 'weekly' && storedMeetingWeekday == currentWeekday) {
+      isRecurringMeeting = true;
+    } else if (storedMeetingRepeat == 'monthly' && storedMeetingDayOfMonth == currentDayOfMonth) {
+      isRecurringMeeting = true;
+    } else if (storedMeetingRepeat == 'yearly' && storedMeetingMonthOfYear == currentMonthOfYear) {
+      isRecurringMeeting = true;
     }
-    for (let i = 0; i < res.length; i++) {
-      isRecurringMeeting = false;
-      storedMeetingRepeat = res[i].repeat;
-      storedMeetingWeekday = new Date(res[i].datetime * 1000).getDay();
-      storedMeetingDayOfMonth = new Date(res[i].datetime * 1000).getDate();
-      storedMeetingMonthOfYear = new Date(res[i].datetime * 1000).getMonth();
-      storedMeetingYear = new Date(res[i].datetime * 1000).getFullYear();
-      let currentDateString = currentYear + '/' + currentMonthOfYear + '/' + currentDayOfMonth;
-      let storedMeetingDateString = storedMeetingYear + '/' + storedMeetingMonthOfYear + '/' + storedMeetingDayOfMonth;
-      if (currentDateString == storedMeetingDateString) continue;
-      if (storedMeetingRepeat == 'daily') {
-        isRecurringMeeting = true;
-      } else if (storedMeetingRepeat == 'weekly' && storedMeetingWeekday == currentWeekday) {
-        isRecurringMeeting = true;
-      } else if (storedMeetingRepeat == 'monthly' && storedMeetingDayOfMonth == currentDayOfMonth) {
-        isRecurringMeeting = true;
-      } else if (storedMeetingRepeat == 'yearly' && storedMeetingMonthOfYear == currentMonthOfYear) {
-        isRecurringMeeting = true;
-      }
-      if (isRecurringMeeting) {
-        storedMeetingTime = new Date(res[i].datetime * 1000).getHours() + ':' + new Date(res[i].datetime * 1000).getMinutes() + ':' + new Date(res[i].datetime * 1000).getSeconds();
-        storedMeetingTimeStampToday = new Date(new Date().getFullYear() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getDate() + ' ' + storedMeetingTime).getTime() / 1000;
-        meeting = {
-          'id':res[i].id,
-          'datetime':storedMeetingTimeStampToday,
-          'originaldatetime':res[i].datetime,
-          'duration':res[i].duration,
-          'repeat':res[i].repeat,
-          'description':res[i].description,
-          'roomid':res[i].roomid,
-          'remarks':res[i].remarks,
-          'link':res[i].link,
-          'service':res[i].service,
-        };
-        meetings.push(meeting);
-      }
+    if (isRecurringMeeting) {
+      storedMeetingTime = new Date(res[i].datetime * 1000).getHours() + ':' + new Date(res[i].datetime * 1000).getMinutes() + ':' + new Date(res[i].datetime * 1000).getSeconds();
+      storedMeetingTimeStampToday = new Date(new Date().getFullYear() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getDate() + ' ' + storedMeetingTime).getTime() / 1000;
+      meeting = {
+        'id':res[i].id,
+        'datetime':storedMeetingTimeStampToday,
+        'originaldatetime':res[i].datetime,
+        'duration':res[i].duration,
+        'repeat':res[i].repeat,
+        'description':res[i].description,
+        'roomid':res[i].roomid,
+        'remarks':res[i].remarks,
+        'link':res[i].link,
+        'service':res[i].service,
+      };
+      meetings.push(meeting);
     }
-  });
+  }
   return meetings;
 };
 

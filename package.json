@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/ameer1234567890/MeetKettle",
   "dependencies": {
+    "@photostructure/sqlite": "^0.2.1",
+    "better-sqlite3": "^12.5.0",
     "busboy": "^1.6.0",
     "compression": "^1.8.1",
     "connect-sqlite3": "^0.9.16",
@@ -29,7 +31,6 @@
     "node-cache": "^5.1.2",
     "node-cron": "^4.2.1",
     "pug": "^3.0.3",
-    "sqlite-sync": "^0.3.9",
     "sqlite3": "^5.1.7",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"
