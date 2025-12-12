@@ -1,5 +1,7 @@
 # MeetKettle
-A meeting room booking web app
+An app which can be used for meeting room reservations and management. People using specific meeting rooms can make reservations in the app and everyone can see if the meeting room is busy or not at specific times. A kiosk can be placed at the door of meeting rooms, which would display ongoing and next meeting details.
+
+_Note: This is the Capstone Project for my Bachelor of IT programme at Maldives Business School. I am greatly thankful to my supervisor, Dr. Saurabh Singhal._
 
 #### Screenshots
 ![Home Page](https://github.com/ameer1234567890/MeetKettle/blob/master/screenshots/home.png?raw=true)
