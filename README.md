@@ -16,7 +16,7 @@ _Note: This is the Capstone Project for my Bachelor of IT programme at Maldives 
 * [pug](href='https://pugjs.org/') - A high-performance template engine heavily influenced by Haml and implemented with JavaScript for Node.js and browsers.
 * [Express Validator](href='https://express-validator.github.io/') - A set of express.js middlewares that wraps validator.js validator and sanitizer functions.
 * [sqlite3](href='https://npmjs.com/package/sqlite3') - Asynchronous, non-blocking SQLite3 bindings for Node.js.
-* [better-sqlite3](href='https://npmjs.com/package/better-sqlite3') - Synchronous sqlite3 for Node.js.
+* [better-sqlite3](href='https://npmjs.com/package/better-sqlite3') - The fastest and simplest library for SQLite in Node.js.
 * [express-session](href='https://npmjs.com/package/express-session') - Simple session middleware for Express.
 
 #### Roadmap
