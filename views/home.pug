@@ -44,9 +44,14 @@ block content
                   for mroom in roomList
                     if mroom.id == meeting.roomid
                       - meetingRoom = mroom.name
-                  a.card-button-edit.btn.btn-secondary(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.originaldatetime data-duration=meeting.duration/60 data-repeat=meeting.repeat data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
-                    i.fa.fa-edit.pe-1
-                    span Edit
+                  if meeting.originaldatetime
+                    a.card-button-edit.btn.btn-secondary(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.originaldatetime data-duration=meeting.duration/60 data-repeat=meeting.repeat data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                      i.fa.fa-edit.pe-1
+                      span Edit
+                  else
+                    a.card-button-edit.btn.btn-secondary(href='#' alt='Edit Meeting' data-bs-toggle='modal' data-bs-target='#modal-edit' data-id=meeting.id data-room=meeting.roomid data-datetime=meeting.datetime data-duration=meeting.duration/60 data-repeat=meeting.repeat data-service=meeting.service data-remarks=meeting.remarks data-link=meeting.link)
+                      i.fa.fa-edit.pe-1
+                      span Edit
                   a.card-button-delete.btn.btn-secondary(href='#' alt='Delete Meeting' data-bs-toggle='modal' data-bs-target='#modal-delete' data-description=meeting.description data-id=meeting.id)
                     i.fa.fa-trash.pe-1
                     span Delete
