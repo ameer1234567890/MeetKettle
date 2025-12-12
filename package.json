@@ -23,15 +23,15 @@
     "compression": "^1.8.1",
     "connect-sqlite3": "^0.9.16",
     "cookie-parser": "^1.4.7",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "express-session": "^1.18.2",
-    "express-validator": "^7.2.1",
+    "express-validator": "^7.3.1",
     "node-cache": "^5.1.2",
     "node-cron": "^4.2.1",
     "pug": "^3.0.3",
     "sqlite-sync": "^0.3.9",
     "sqlite3": "^5.1.7",
-    "winston": "^3.17.0",
+    "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
   "nodemonConfig": {
@@ -40,9 +40,9 @@
     ]
   },
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
-    "eslint": "^9.34.0",
-    "globals": "^16.3.0",
-    "nodemon": "^3.1.10"
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "nodemon": "^3.1.11"
   }
 }
