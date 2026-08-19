@@ -10,6 +10,10 @@ on:
         description: 'Docker Tag'
         required: true
         default: 'latest'
+
+env:
+  BUILD_PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
+
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -40,6 +44,6 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.BUILD_PLATFORMS }}
           push: true
           tags: ${{ github.event.inputs.tags || steps.meta.outputs.tags }}
